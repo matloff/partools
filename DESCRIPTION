@@ -1,0 +1,17 @@
+Package: partools
+Version: 1.0.3
+Author: Norm Matloff <normmatloff@gmail.com>, Alex Rumbaugh <aprumbaugh@ucdavis.edu>
+Maintainer: Norm Matloff <normmatloff@gmail.com>
+Date: 1/21/2015
+Title: Tools for the 'Parallel' Package
+Description: Miscellaneous utilities for the 'parallel' package, 
+   cluster-oriented section.  Includes a debugging aid.
+Depends: parallel
+OS_type: Linux/Mac/Unix needed for the dbs() debugging tool
+LazyLoad: no
+ByteCompile: yes
+NeedsCompilation: no
+License: GPL (>= 2)
+Repository: CRAN
+Packaged: 2015-01-03 00:41:47 UTC; normanmatloff
+Date/Publication: 2015-01-03 07:03:08
