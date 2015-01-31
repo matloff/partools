@@ -27,7 +27,8 @@ filesort <- function(cls,basename,ndigs,colnum,
 {
    clusterEvalQ(cls,library(partools))
    setclsinfo(cls)
-   samps <- clusterCall(cls,getsample,basename,ndigs,colnum,nsamp)
+   samps <- clusterCall(cls,getsample,basename,ndigs,colnum,
+      header=header,sep=sep,nsamp) 
    samp <- Reduce(c,samps)
    bds <- getbounds(samp,length(cls))
    clusterApply(cls,bds,mysortedchunk,
@@ -35,9 +36,11 @@ filesort <- function(cls,basename,ndigs,colnum,
    0
 }
 
-getsample <- function(basename,ndigs,colnum,nsamp) {
+getsample <- function(basename,ndigs,colnum,
+      header=FALSE,sep="",nsamp) 
+{
    fname <- filechunkname(basename,ndigs)
-   read.table(fname,nrows=nsamp)[,colnum]
+   read.table(fname,nrows=nsamp,header=header,sep=sep)[,colnum]
 }
 
 getbounds <- function(samp,numnodes) {
