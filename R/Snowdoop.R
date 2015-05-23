@@ -102,3 +102,22 @@ filesplit <- function(cls,basename,header=FALSE) {
       close(conout)
    }
 }
+
+filecat <- function (cls, basename, header = FALSE)  {
+    lcls <- length(cls)
+    ndigs <- ceiling(log10(lcls))
+    if (file.exists(basename)) file.remove(basename)
+    conout <- file(basename, open = "w")
+    for (i in 1:lcls) {
+       # read in the entire file chunk
+       fn <- filechunkname(basename, ndigs, i)
+       conin <- file(fn, open = "r")
+       lines <- readLines(conin,-1)
+       if (header && i > 1) {
+          lines <- lines[-1]
+       }
+       writeLines(lines, conout)
+    }
+    close(conout)
+}
+
