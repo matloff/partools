@@ -1,4 +1,7 @@
 
+# general "Snow" (the part of 'parallel' adapted from the old Snow)
+# utilities, some used in Snowdoop but generally applicable
+
 # form chunks of rows of m, corresponding to the number of worker nodes
 # in the cluster cls; places the chunk named mchunkname in the global
 # space of the worker
@@ -52,3 +55,18 @@ exportlibpaths <- function(cls) {
    clusterCall(cls,function(p) .libPaths(p),lp)
 }
 
+# split a data frame specified in the quoted dfname to approximately
+# equal-sized subsets acroos the nodes of cluster cls
+dfsplit <- function(cls,dfname) {
+   df <- get(dfname,envir=environment()
+   formrowchunks(cls,df,dfname)
+}
+
+# collects a distributed data frame specified by dfname at manager
+# (i.e. caller), again with the name dfname, in global space of the
+# latter
+dfcat <- function(cls,dfname) {
+   toexec <- paste("clusterEvalQ(cls,",dfname,")")
+   tmp <- eval(parse(text=toexec))
+   assign(dfname,Reduce(rbind,tmp),pos=.GlobalEnv)
+}
