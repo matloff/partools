@@ -15,7 +15,6 @@ filechunkname <- function (basename, ndigs,nodenum=NULL)
     paste(basename, ".", zerostring, nodenum, sep = "") 
 }
 
-
 # distributed file sort on cls, based on column number colnum of input;
 # file name from basename, ndigs; bucket sort, with categories
 # determined by first sampling nsamp from each chunk; each node's output
@@ -78,9 +77,12 @@ mysortedchunk <- function(mybds,basename,ndigs,colnum,outname,header,sep) {
    assign(outname,sortedmchunk,envir=.GlobalEnv)
 }
 
-# split a file into chunks, one per cluster node
-
-filesplit <- function(cls,basename,header=FALSE) {
+# split a file basename into nch chunks, with suffix being chunk number;
+# e.g. if nch = 16, then basename.01, basename.02,..., basename.16;
+# header, if any, is retained in the chunks; optionally, each output
+# line can be preceded by a sequence number, in order to preserve the
+# original ordering
+filesplit <- function(nch,basename,header=FALSE,seqnums=FALSE) {
    cmdout <- system(paste("wc -l",basename),intern=TRUE)
    tmp <- strsplit(cmdout[[1]][1], " ")[[1]]
    nlines <- as.integer(tmp[length(tmp) - 1])
@@ -89,15 +91,22 @@ filesplit <- function(cls,basename,header=FALSE) {
       hdr <- readLines(con,1)
       nlines <- nlines - 1
    }
-   lcls <- length(cls)
-   ndigs <- ceiling(log10(lcls))
-   chunks <- clusterSplit(cls,1:nlines)
+   ndigs <- ceiling(log10(nch))
+   chunks <- splitIndices(nlines,nch)
    chunksizes <- sapply(chunks,length)
-   for (i in 1:lcls) {
+   if (seqnums) cumulsizes <- cumsum(chunksizes)
+   for (i in 1:nch) {
       chunk <- readLines(con,chunksizes[i])
       fn <- filechunkname(basename,ndigs,i)
       conout <- file(fn,open="w")
       if (header) writeLines(hdr,conout)
+      if (seqnums) {
+         if (i == 1) {
+            seqrange <- 1:chunksizes[1]
+         } else 
+            seqrange <- (cumulsizes[i-1]+1):cumulsizes[i]
+         chunk <- paste(seqrange,chunk)
+      }
       writeLines(chunk,conout)
       close(conout)
    }
