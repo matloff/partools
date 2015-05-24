@@ -58,7 +58,7 @@ exportlibpaths <- function(cls) {
 # split a data frame specified in the quoted dfname to approximately
 # equal-sized subsets acroos the nodes of cluster cls
 dfsplit <- function(cls,dfname) {
-   df <- get(dfname,envir=environment()
+   df <- get(dfname,envir=environment())
    formrowchunks(cls,df,dfname)
 }
 

@@ -15,11 +15,12 @@ Snowdoop operations.
 \usage{
 filechunkname(basename,ndigs,nodenum=NULL)
 filesort(cls,basename,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep = "") 
-filesplit(cls,basename,header=FALSE)
+filesplit(nch,basename,header=FALSE,seqnums=FALSE)
 }
 
 \arguments{
   \item{cls}{A cluster for the \pkg{parallel} package.}
+  \item{nch}{Number of chunks for the file split.}
   \item{basename}{A chunked file name.}
   \item{ndigs}{Number of digits in the chunked file name suffix.}
   \item{nodenum}{If non-NULL, get the name of the chunk at cluster node
@@ -30,6 +31,7 @@ filesplit(cls,basename,header=FALSE)
   \item{nsamp}{Number of records to sample in each file chunk to
      determine bins for the bucket sort.}
   \item{header}{TRUE if the file chunks have headers.}
+  \item{seqnums}{TRUE if the file chunks will have sequence numbers.}
   \item{sep}{Argument used in \code{read.table}.}
 }
 
@@ -46,9 +48,10 @@ then reads all the file chunks, retaining the records in its assigned
 range, and sorts them.  This results in the input file being sorted, 
 in a distributed manner across nodes.
 
-Use \code{filesplit} to convert a file into chunked form, one chunk per
-cluster node.  The file header, if present, will be retained in the
-chunks.
+Use \code{filesplit} to convert a file into chunked form, with
+\code{nch} chunks.  The file header, if present, will be retained in the
+chunks. If \code{seqnums} is TRUE, each line in a chunk will be preceded
+by the line number it had in the original file. 
 }
 
 \examples{
@@ -64,6 +67,15 @@ write.table(m2,"m.2")
 # sort and check result
 filesort(cls,"m",1,2,"msort",nsamp=3,header=TRUE)
 clusterEvalQ(cls,msort)  # data should be sorted on V2
+
+# file m is rbind(1:2,3:4,5:6)
+scan(file="m",what="",sep="\n")
+filesplit(2,"m",seqnums=T)
+# file m.1 and m.2 created, with contents c(1,1,2) and
+# rbind(c(2,3,4),c(3,5,6)), respectively
+scan(file="m.1",what="",sep="\n")
+scan(file="m.2",what="",sep="\n")
+
 }
 
 \author{
