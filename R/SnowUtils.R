@@ -55,17 +55,18 @@ exportlibpaths <- function(cls) {
    clusterCall(cls,function(p) .libPaths(p),lp)
 }
 
-# split a data frame specified in the quoted dfname to approximately
-# equal-sized subsets acroos the nodes of cluster cls
-dfsplit <- function(cls,dfname) {
+# split a matrix/data frame specified in the quoted dfname to approximately
+# equal-sized subsets across the nodes of cluster cls; each remote chunk
+# will have the same name as the full object
+distribsplit <- function(cls,dfname) {
    df <- get(dfname,envir=environment())
    formrowchunks(cls,df,dfname)
 }
 
-# collects a distributed data frame specified by dfname at manager
-# (i.e. caller), again with the name dfname, in global space of the
-# latter
-dfcat <- function(cls,dfname) {
+# collects a distributed matrix/data frame specified by dfname at
+# manager (i.e. caller), again with the name dfname, in global space of
+# the latter
+distribcat <- function(cls,dfname) {
    toexec <- paste("clusterEvalQ(cls,",dfname,")")
    tmp <- eval(parse(text=toexec))
    assign(dfname,Reduce(rbind,tmp),pos=.GlobalEnv)
