@@ -3,6 +3,6 @@ import(parallel)
 
 export(dbs,writemgrscreen,writewrkrscreens,killdebug,dbsmsgstart,dbsmsg,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,
-   dfsplit,dfcat,
+   distribsplit,distribcat,
    setclsinfo,filechunkname,ca,exportlibpaths,filesplit)
  
