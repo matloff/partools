@@ -55,12 +55,14 @@ exportlibpaths <- function(cls) {
    clusterCall(cls,function(p) .libPaths(p),lp)
 }
 
-# split a matrix/data frame specified in the quoted dfname to approximately
-# equal-sized subsets across the nodes of cluster cls; each remote chunk
-# will have the same name as the full object
+# split a vector/matrix/data frame specified in the quoted dfname to
+# approximately equal-sized subsets across the nodes of cluster cls;
+# each remote chunk, now a data frame, will have the same name as the
+# full object
 distribsplit <- function(cls,dfname) {
-   df <- get(dfname,envir=environment())
-   formrowchunks(cls,df,dfname)
+   dfr <- get(dfname,envir=environment())
+   dfr <- as.data.frame(dfr)
+   formrowchunks(cls,dfr,dfname)
 }
 
 # collects a distributed matrix/data frame specified by dfname at
@@ -71,3 +73,64 @@ distribcat <- function(cls,dfname) {
    tmp <- eval(parse(text=toexec))
    assign(dfname,Reduce(rbind,tmp),pos=.GlobalEnv)
 }
+
+# distributed version of aggregate()
+
+# arguments:
+
+#    cls: cluster
+#    aggcmd: a quoted string specifying the 'x' and 'by' portions of the
+#            desired aggregate() command
+#    FUN: quoted name of desired aggregation function; must have the
+#         property that FUN(c(x,y)) = FUN(FUN(x),FUN(y)), e.g. max(),
+#         sum()
+#    nby: number of variables specified in the 'by' argument of aggregate()
+
+# e.g. for the call at the nodes
+#
+#    aggregate(x=mtcars,by=list(mtcars$cyl,mtcars$gear),FUN=max)
+#
+# we would call
+#
+#    distribagg("x=mtcars,by=list(mtcars$cyl,mtcars$gear","max",2)
+
+# return value: aggregate()-style data frame, with column of cell counts
+# appended at the end
+
+#    distribagg(cls,"x=d, by=list(d$x,d$y)","max",2)
+
+distribagg <- function(cls,aggcmd,FUN,nby) {
+   # set up aggregate() command to be run on the cluster nodes
+   tmp <- paste("aggregate(",aggcmd,sep="")
+   remotecmd <- paste(tmp,",FUN=",FUN,")",sep="")
+   clusterExport(cls,"remotecmd",envir=environment())
+   # run the command, and combine the returned data frames into one big
+   # data frame
+   aggs <- clusterEvalQ(cls,docmd(remotecmd))
+   agg <- Reduce(rbind,aggs)
+   # typically a given cell will found at more than one cluster node;
+   # they must be combined, using FUN
+   cells <- unique(agg[,1:nby])
+   if (is.vector(cells)) cells <- matrix(cells,ncol=1)
+   fun <- get(FUN)
+   newagg <- NULL
+   for (i in 1:nrow(cells)) {
+      # find the rows with combination 'cell', and apply FUN to the
+      # portion of the data frame other than the 'by' columns
+      cell <- as.vector(cells[i,])
+      agg1nby <- as.matrix(agg[,1:nby,drop=FALSE])
+      thiscell <- apply(agg1nby,1,
+         function(arow) all(as.vector(arow) == cell))
+      tmp <- agg[thiscell,,drop=FALSE]
+      tmp1 <- apply(tmp[,-(1:nby),drop=FALSE],2,fun)
+      tmp2 <- tmp[1,,drop=FALSE]
+      tmp2[,-(1:nby)] <- tmp1
+      newagg <- rbind(newagg,tmp2)
+   }
+   newagg
+}
+
+# execute the contents of a quoted command; main use is with
+# clusterEvalQ()
+docmd <- function(toexec) eval(parse(text=toexec))
+
