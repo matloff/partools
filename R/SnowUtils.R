@@ -110,24 +110,8 @@ distribagg <- function(cls,aggcmd,FUN,nby) {
    agg <- Reduce(rbind,aggs)
    # typically a given cell will found at more than one cluster node;
    # they must be combined, using FUN
-   cells <- unique(agg[,1:nby])
-   if (is.vector(cells)) cells <- matrix(cells,ncol=1)
    fun <- get(FUN)
-   newagg <- NULL
-   for (i in 1:nrow(cells)) {
-      # find the rows with combination 'cell', and apply FUN to the
-      # portion of the data frame other than the 'by' columns
-      cell <- as.vector(cells[i,])
-      agg1nby <- as.matrix(agg[,1:nby,drop=FALSE])
-      thiscell <- apply(agg1nby,1,
-         function(arow) all(as.vector(arow) == cell))
-      tmp <- agg[thiscell,,drop=FALSE]
-      tmp1 <- apply(tmp[,-(1:nby),drop=FALSE],2,fun)
-      tmp2 <- tmp[1,,drop=FALSE]
-      tmp2[,-(1:nby)] <- tmp1
-      newagg <- rbind(newagg,tmp2)
-   }
-   newagg
+   aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN=fun)
 }
 
 # execute the contents of a quoted command; main use is with
