@@ -7,7 +7,7 @@
 \alias{dbsmsgstart}
 
 \title{
-Debugging aid for cluster code.
+Debugging aid for \pkg{parallel} cluster code.
 }
 
 \description{
@@ -29,8 +29,8 @@ dbsmsg(msg)
   \item{xterm}{The string "xterm" or name of compatible terminal.}
   \item{src}{Name of the source file to be debugged.}
   \item{ftn}{Name of the function to be debugged.}
-  \item{cmd}{R command to be written to manager screen.}
-  \item{msg}{A message to write to the debugging record.}
+  \item{cmd}{R command to be executed in manager screen.}
+  \item{msg}{A message to write to the debugging record file.}
 }
 
 \details{Let us discuss the main debugging tool first.
@@ -52,7 +52,7 @@ operation.
 If \code{xterm} is NULL, you will be prompted to create the terminal
 windows by hand (or use existing ones), and run \code{screen} there.
 The xterm terminal type works best in the sense of convenience, but any
-terminal type should be fine.  Terminal works on Macs. 
+terminal type should be fine.  \code{Terminal} works on Macs. 
 
 When finished with the debugging session, run \code{killdebug} from the
 original window (the one from which you invoked \code{dbs}) to quit the
