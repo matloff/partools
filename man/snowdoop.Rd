@@ -21,18 +21,18 @@ filesplit(nch,basename,header=FALSE,seqnums=FALSE)
 \arguments{
   \item{cls}{A cluster for the \pkg{parallel} package.}
   \item{nch}{Number of chunks for the file split.}
-  \item{basename}{A chunked file name.}
+  \item{basename}{A chunked file name, minus suffix.}
   \item{ndigs}{Number of digits in the chunked file name suffix.}
-  \item{nodenum}{If non-NULL, get the name of the chunk at cluster node
+  \item{nodenum}{If non-NULL, get the name of the file chunk of cluster node
      \code{nodenum}; otherwise, get the name for the chunk associated
      with this node.}
-  \item{colnum}{Column number for the sort.}
+  \item{colnum}{Column number on which the sort will be done.}
   \item{outname}{Quoted name for the chunks of sorted output.}
   \item{nsamp}{Number of records to sample in each file chunk to
      determine bins for the bucket sort.}
   \item{header}{TRUE if the file chunks have headers.}
   \item{seqnums}{TRUE if the file chunks will have sequence numbers.}
-  \item{sep}{Argument used in \code{read.table}.}
+  \item{sep}{Field delimiter used in \code{read.table}.}
 }
 
 \details{
@@ -40,13 +40,14 @@ See further documentation in "Snowdoop" vignette.
 }
 
 \value{The function \code{filechunkname} returns the name of the file
-chunk.
+chunk for the calling cluster node.
 
 For \code{filesort}, the first \code{nsamp} records are read from 
-each file chunk.  They are merged and quantiles formed.  Each worker 
-then reads all the file chunks, retaining the records in its assigned 
-range, and sorts them.  This results in the input file being sorted, 
-in a distributed manner across nodes.
+each file chunk.  They are merged and quantiles formed, one quantile
+range for each cluster node.  Each node then reads all the file chunks, 
+retaining the records in its assigned range, and sorts them.  This 
+results in the input file being sorted, in memory, in a distributed 
+manner across nodes. 
 
 Use \code{filesplit} to convert a file into chunked form, with
 \code{nch} chunks.  The file header, if present, will be retained in the

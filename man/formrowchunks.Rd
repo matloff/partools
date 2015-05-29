@@ -11,7 +11,7 @@
 \alias{docmd}
 
 \title{
-Utilities for \kg{parallel} cluster code, including ``Snowdoop.''
+Utilities for \pkg{parallel} cluster code, including ``Snowdoop.''
 }
 
 \description{
@@ -49,6 +49,7 @@ docmd(toexec)
   \code{FUN(c(a,b)) = FUN(FUN(a),FUN(b))}, such is the case for
   \code{sum} and \code{max}.}
   \item{nby}{Number of variables involved in \code{by}.}
+  \item{toexec}{Quoted string containing command to be executed.}
 }
 
 \details{The function \code{formrowchunks} forms chunks of rows of
@@ -84,6 +85,9 @@ effect of \code{mean}, use \code{sum} but first use \code{cbind} in
 \code{x}, appending a column of 1s, so as to get the cell counts; them
 divide sums by counts.
 
+The \code{docmd} function executes the quoted command.  Useful for
+building up complex command for remote execution.
+
 See vignettes for more information.  
 }
 
@@ -113,6 +117,20 @@ formrowchunks(cls,m,"mc")
 clusterEvalQ(cls,mc)  # list of a 1x2 and a 2x2 matrix
 
 matrixtolist(1,m)  # 3-component list, first is (1,2)
+
+# test of of distribagg(): 
+# form test data
+x <- sample(1:3,10,replace=T)  
+y <- sample(0:1,10,replace=T)
+z <- runif(10); cbind(x,y,z)
+d <- data.frame(x,y,z)
+# distribute to the cluster nodes
+distribsplit(cls,"d")
+clusterEvalQ(cls,d)  # got to the nodes?
+# run our distributed aggregate() on the nodes
+distribagg(cls,"x=d, by=list(d$x,d$y)","max",2)
+# run aggregate() here, check that it matches
+aggregate(x=d,by=list(d$x,d$y),max)
 }
 
 \author{
