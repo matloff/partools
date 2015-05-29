@@ -83,7 +83,11 @@ The package's \code{distribagg} function is a distributed form of
 \code{aggregate}.  Note the restriction on \code{FUN}.  To achieve the
 effect of \code{mean}, use \code{sum} but first use \code{cbind} in
 \code{x}, appending a column of 1s, so as to get the cell counts; them
-divide sums by counts.
+divide sums by counts.  If the data frame \code{dfname} lacks columns
+names, e.g. because it was read in from a headerless file, give the
+columns now, e.g. via a call like \code{clusterEvalQ(cls,names(x) <-
+c("a","bc","def")}; otherwise a conflict may occur when tries to
+coalsece the reports from the different cluster nodes.
 
 The \code{docmd} function executes the quoted command.  Useful for
 building up complex command for remote execution.
