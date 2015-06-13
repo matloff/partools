@@ -7,7 +7,6 @@ Title: Tools for the 'Parallel' Package
 Description: Miscellaneous utilities for the 'parallel' package, 
    cluster-oriented section.  Includes a debugging aid.
 Depends: parallel
-OS_type: Linux/Mac/Unix needed for the dbs() debugging tool
 LazyLoad: no
 ByteCompile: yes
 NeedsCompilation: no
