@@ -112,6 +112,29 @@ filesplit <- function(nch,basename,header=FALSE,seqnums=FALSE) {
    }
 }
 
+# get the number of lines in the file 
+#
+# arguments:
+#
+# infile: quoted file namee
+# chunksize: number of lines to read in one chunk; if -1, then read the
+#            file in one fell swoop
+#
+# the file is read in one chunk at a time, in order to avoid
+# overwhelming memory
+linecount <- function(infile,chunksize=100000) {
+   # icould check for Unix first (Mac, Linux, cygwin), running the more
+   # efficient 'wc -l' in that case
+   con <- file(infile,"r")
+   nlines <- 0
+   repeat {
+      tmp <- readLines(con,chunksize)
+      nread <- length(tmp)
+      if (nread == 0) return(nlines)
+      nlines <- nlines + nread
+   }
+}
+
 filecat <- function (cls, basename, header = FALSE)  {
     lcls <- length(cls)
     ndigs <- ceiling(log10(lcls))
