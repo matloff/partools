@@ -77,12 +77,24 @@ mysortedchunk <- function(mybds,basename,ndigs,colnum,outname,header,sep) {
    assign(outname,sortedmchunk,envir=.GlobalEnv)
 }
 
-# split a file basename into nch chunks, with suffix being chunk number;
-# e.g. if nch = 16, then basename.01, basename.02,..., basename.16;
-# header, if any, is retained in the chunks; optionally, each output
-# line can be preceded by a sequence number, in order to preserve the
-# original ordering
-filesplit <- function(nch,basename,header=FALSE,seqnums=FALSE) {
+# read distributed file, producing scrambled, distributed chunks in
+# memory at the cluster nodes, i.e. line i of the original distributed
+# file has probability 1/nch of ending up at any of the in-memory
+# chunks;  chunk sizes may not exactly equal across nodes, even if nch
+# evenly divides the total number of lines in the distributed file
+readnscramble <- function(basename,nch) 
+{ 
+}
+
+# split a file basename into nch approximately equal-sized chunks, with
+# suffix being chunk number; e.g. if nch = 16, then basename.01,
+# basename.02,..., basename.16; header, if any, is retained in the
+# chunks; optionally, each output line can be preceded by a sequence
+# number, in order to preserve the original ordering; if scramble is
+# set, 
+
+filesplit <- function(nch,basename,
+      header=FALSE,seqnums=FALSE,scramble=FALSE) {
    nlines <- linecount(basename)
    con <- file(basename,open="r")
    if (header) {
