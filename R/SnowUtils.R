@@ -2,11 +2,24 @@
 # general "Snow" (the part of 'parallel' adapted from the old Snow)
 # utilities, some used in Snowdoop but generally applicable
 
-# form chunks of rows of m, corresponding to the number of worker nodes
-# in the cluster cls; places the chunk named mchunkname in the global
-# space of the worker
-formrowchunks <- function(cls,m,mchunkname) {
-   rcs <- clusterSplit(cls,1:nrow(m))
+
+# split matrix/data frame into chunks of rows, placing a chunk into each
+# of the cluster nodes
+#
+# arguments:
+#
+# cls: a 'parallel' cluster
+# m: a matrix or data frame
+# mchunkname: name to be given to the chunks of m at the cluster nodes
+# scramble: if TRUE, randomly assign rows of the data frame to the chunks; 
+#           otherwsie, the first rows go to the first chunk, the next set
+#           of rows go to the second chunk, and so on
+#
+# places the chunk named mchunkname in the global space of the worker
+formrowchunks <- function(cls,m,mchunkname,scramble=FALSE) {
+   nr <- nrow(m)
+   idxs <- if (!scramble) 1:nr else sample(1:nr,nr,replace=FALSE)
+   rcs <- clusterSplit(cls,idxs)
    getrowchunk <- function(rc) 
       assign(mchunkname,m[rc,],envir=.GlobalEnv)
    clusterApply(cls,rcs,getrowchunk)
@@ -55,14 +68,23 @@ exportlibpaths <- function(cls) {
    clusterCall(cls,function(p) .libPaths(p),lp)
 }
 
-# split a vector/matrix/data frame specified in the quoted dfname to
-# approximately equal-sized subsets across the nodes of cluster cls;
-# each remote chunk, now a data frame, will have the same name as the
+# split a vector/matrix/data frame into approximately equal-sized
+# chunks across a cluster 
+#
+# arguments:
+#
+# cls: a 'parallel' cluster
+# dfname: quoted name of matrix/data frame to be split
+# scramble: if TRUE, randomly assign rows of the data frame to the chunks; 
+#           otherwsie, the first rows go to the first chunk, the next set
+#           of rows go to the second chunk, and so on
+*=#
+# each remote chunk, a data frame, will have the same name as the
 # full object
-distribsplit <- function(cls,dfname) {
+distribsplit <- function(cls,dfname,scramble=FALSE) {
    dfr <- get(dfname,envir=environment())
    dfr <- as.data.frame(dfr)
-   formrowchunks(cls,dfr,dfname)
+   formrowchunks(cls,dfr,dfname,scramble)
 }
 
 # collects a distributed matrix/data frame specified by dfname at
