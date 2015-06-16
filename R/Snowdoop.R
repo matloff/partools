@@ -83,9 +83,7 @@ mysortedchunk <- function(mybds,basename,ndigs,colnum,outname,header,sep) {
 # line can be preceded by a sequence number, in order to preserve the
 # original ordering
 filesplit <- function(nch,basename,header=FALSE,seqnums=FALSE) {
-   cmdout <- system(paste("wc -l",basename),intern=TRUE)
-   tmp <- strsplit(cmdout[[1]][1], " ")[[1]]
-   nlines <- as.integer(tmp[length(tmp) - 1])
+   nlines <- linecount(basename)
    con <- file(basename,open="r")
    if (header) {
       hdr <- readLines(con,1)
@@ -123,7 +121,7 @@ filesplit <- function(nch,basename,header=FALSE,seqnums=FALSE) {
 # the file is read in one chunk at a time, in order to avoid
 # overwhelming memory
 linecount <- function(infile,chunksize=100000) {
-   # icould check for Unix first (Mac, Linux, cygwin), running the more
+   # could check for Unix first (Mac, Linux, cygwin), running the more
    # efficient 'wc -l' in that case
    con <- file(infile,"r")
    nlines <- 0
