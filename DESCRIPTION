@@ -7,6 +7,7 @@ Title: Tools for the 'Parallel' Package
 Description: Miscellaneous utilities for the 'parallel' package, 
    cluster-oriented section; "Snowdoop" alternative to MapReduce;
    file splitting and distributed operations such as sort and aggregate.
+   "Software Alchemy" method for parallelizing most statistical methods.
    Includes a debugging aid.
 Depends: parallel
 ByteCompile: yes
