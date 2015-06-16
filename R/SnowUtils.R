@@ -78,7 +78,7 @@ exportlibpaths <- function(cls) {
 # scramble: if TRUE, randomly assign rows of the data frame to the chunks; 
 #           otherwsie, the first rows go to the first chunk, the next set
 #           of rows go to the second chunk, and so on
-*=#
+#
 # each remote chunk, a data frame, will have the same name as the
 # full object
 distribsplit <- function(cls,dfname,scramble=FALSE) {
