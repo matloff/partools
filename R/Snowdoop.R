@@ -20,9 +20,8 @@ filechunkname <- function (basename, ndigs,nodenum=NULL)
 # determined by first sampling nsamp from each chunk; each node's output
 # chunk written to file outname (plus suffix based on node number) in
 # the node's global space
-
 filesort <- function(cls,basename,ndigs,colnum,
-      outname,nsamp=1000,header=FALSE,sep="") 
+      outname,nsamp=1000,header=FALSE,sep=" ") 
 {
    clusterEvalQ(cls,library(partools))
    setclsinfo(cls)
@@ -77,13 +76,44 @@ mysortedchunk <- function(mybds,basename,ndigs,colnum,outname,header,sep) {
    assign(outname,sortedmchunk,envir=.GlobalEnv)
 }
 
+# useful if need data in random order but the distributed file is not in
+# random order
+#
 # read distributed file, producing scrambled, distributed chunks in
 # memory at the cluster nodes, i.e. line i of the original distributed
 # file has probability 1/nch of ending up at any of the in-memory
 # chunks;  chunk sizes may not exactly equal across nodes, even if nch
-# evenly divides the total number of lines in the distributed file
-readnscramble <- function(basename,nch) 
-{ 
+# evenly divides the total number of lines in the distributed file; sep
+# is the file field delineator, e.g. space of comma
+readnscramble <- function(cls,basename,header=FALSE,sep= " ") {
+   nch <- length(cls)
+   ndigs <- getnumdigs(nch)
+   linecounts <- vector(length=nch)
+   # get file names
+   fns <- sapply(1:nch,function(i) 
+      filechunkname(basename,ndigs,nodenum=i))
+   linecounts <- sapply(1:nch,function(i)
+      linecount(fns[i]))
+   cums <- cumsum(linecounts)
+   clusterExport(cls,c("linecounts","cums","fns","nch","header","sep"),
+      envir=environment())
+   totrecs <- cums[nch]
+   # give the nodes their index assignments
+   idxs <- sample(1:totrecs,totrecs,replace=FALSE)
+   clusterApply(cls,idxs,readmypart)
+}
+
+readmypart <- function(myidxs) {
+   mydf <- NULL
+   for (i in 1:nch) {
+      filechunk <- read.table(fns[i],header=header,sep=sep)
+      # which ones are mine?
+      tmp <- myidxs
+      if (i > 1) tmp <- myidxs - cums[i-1]
+      tmp <- tmp[tmp <= linecounts[i]]
+      mydf <- rbind(mydf,filechunk[tmp,])
+   }
+   assign(basename,mydf,envir=.GlobalEnv)
 }
 
 # split a file basename into nch approximately equal-sized chunks, with
@@ -101,7 +131,8 @@ filesplit <- function(nch,basename,
       hdr <- readLines(con,1)
       nlines <- nlines - 1
    }
-   ndigs <- ceiling(log10(nch))
+   # ndigs <- ceiling(log10(nch))
+   ndigs <- getnumdigs(nch)
    chunks <- splitIndices(nlines,nch)
    chunksizes <- sapply(chunks,length)
    if (seqnums) cumulsizes <- cumsum(chunksizes)
@@ -147,7 +178,8 @@ linecount <- function(infile,chunksize=100000) {
 
 filecat <- function (cls, basename, header = FALSE)  {
     lcls <- length(cls)
-    ndigs <- ceiling(log10(lcls))
+    # ndigs <- ceiling(log10(lcls))
+    ndigs <- getnumdigs(lcls)
     if (file.exists(basename)) file.remove(basename)
     conout <- file(basename, open = "w")
     for (i in 1:lcls) {
@@ -163,3 +195,8 @@ filecat <- function (cls, basename, header = FALSE)  {
     close(conout)
 }
 
+# find the number of digits needed for suffixes for nch chunks
+getnumdigs <- function(nch) {
+   # floor(log10(nch)) + 1
+   nchar(as.character(nch))
+}
