@@ -110,7 +110,7 @@ readmypart <- function(myidxs) {
       # which ones are mine?
       tmp <- myidxs
       if (i > 1) tmp <- myidxs - cums[i-1]
-      tmp <- tmp[tmp <= linecounts[i]]
+      tmp <- tmp[tmp <- linecounts[i]]
       mydf <- rbind(mydf,filechunk[tmp,])
    }
    assign(basename,mydf,envir=.GlobalEnv)
