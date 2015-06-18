@@ -62,7 +62,8 @@ The \code{dbs} tool is the only one in this package requiring a
 Unix-family system (Linux, Mac).
 
 For ``quick and dirty'' debugging, there is \code{dbsmsg}, which prints
-messages to files.  There is one file for each member of the cluster,
+messages to files, invoked from within code running at the cluster nodes.  
+There is one file for each member of the cluster,
 e.g. \code{dbs.001}, \code{dbs.002} and so on, and \code{dbsmsg} writes
 to the file associated with the worker invoking it.  Initialize via
 \code{dbsmsgstart}.  

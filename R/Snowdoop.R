@@ -95,11 +95,13 @@ readnscramble <- function(cls,basename,header=FALSE,sep= " ") {
    linecounts <- sapply(1:nch,function(i)
       linecount(fns[i]))
    cums <- cumsum(linecounts)
-   clusterExport(cls,c("linecounts","cums","fns","nch","header","sep"),
+   clusterExport(cls,
+      c("basename","linecounts","cums","fns","nch","header","sep"),
       envir=environment())
    totrecs <- cums[nch]
    # give the nodes their index assignments
-   idxs <- sample(1:totrecs,totrecs,replace=FALSE)
+   tmp <- sample(1:totrecs,totrecs,replace=FALSE)
+   idxs <- clusterSplit(cls,tmp)
    clusterApply(cls,idxs,readmypart)
 }
 
@@ -110,7 +112,8 @@ readmypart <- function(myidxs) {
       # which ones are mine?
       tmp <- myidxs
       if (i > 1) tmp <- myidxs - cums[i-1]
-      tmp <- tmp[tmp <- linecounts[i]]
+      tmp <- tmp[tmp >= 1]
+      tmp <- tmp[tmp <= linecounts[i]]
       mydf <- rbind(mydf,filechunk[tmp,])
    }
    assign(basename,mydf,envir=.GlobalEnv)
