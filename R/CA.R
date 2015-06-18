@@ -1,11 +1,9 @@
 
-# chunks averaging method (N. Matloff, "Software Alchemy: Turning
-# Complex Statistical Computations into Embarrassingly-Parallel Ones,"
-# http://arxiv.org/abs/1409.5827), implemented for R's 'parallel' (formerly
-# Snow) package
+# chunks averaging method (N. Matloff, "Parallel Computation for Data
+# Science," Chapman and Hall, 2015)
 
 # arguments:
- 
+#
 #    cls: 'parallel' cluster
 #    z:  data (data.frame, matrix or vector), one observation per row
 #    ovf:  overall statistical function, say glm()
@@ -13,18 +11,17 @@
 #           vector-valued) from the output of ovf()
 #    estcovf:  if provided, function to extract the estimated 
 #              covariance matrix of the output of estf()  
-#    conv2mat:  if TRUE, convert data framee input to a matrix
+#    conv2mat:  if TRUE, convert z to a matrix (useful if ovf() requires
+#               matrix input)
 #    findmean:  if TRUE, output the average of the estimates from the
 #               chunks; otherwise, output the estimates themselves
- 
+# 
 # value:
-
+#
 #    R list, consisting of the estimates from the chunks, and if
-#    requested, their average, as well as, optionally, the 
-#    estimated covariance matrix calculated from the chunks
-
+#    requested, their average and its estimated covariance matrix 
+#
 ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
-   # require(parallel)
    if (conv2mat) {
       if (is.data.frame(z)) z <- as.matrix(z)
       if (is.vector(z)) z <- matrix(z,ncol=1)
