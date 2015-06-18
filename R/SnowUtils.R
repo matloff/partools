@@ -22,7 +22,7 @@ formrowchunks <- function(cls,m,mchunkname,scramble=FALSE) {
    rcs <- clusterSplit(cls,idxs)
    getrowchunk <- function(rc) 
       assign(mchunkname,m[rc,],envir=.GlobalEnv)
-   clusterApply(cls,rcs,getrowchunk)
+   invisible(clusterApply(cls,rcs,getrowchunk))
 }
 
 # extracts rows (rc=1) or columns (rc=2) of a matrix, producing a list
@@ -82,7 +82,7 @@ exportlibpaths <- function(cls) {
 # each remote chunk, a data frame, will have the same name as the
 # full object
 distribsplit <- function(cls,dfname,scramble=FALSE) {
-   dfr <- get(dfname,envir=environment())
+   dfr <- get(dfname,envir=sys.parent())
    dfr <- as.data.frame(dfr)
    formrowchunks(cls,dfr,dfname,scramble)
 }
