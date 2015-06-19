@@ -206,14 +206,16 @@ killdebug<- function() {
 
 dbsmsgstart <- function(cls) {
    ncls <- length(cls)
-   ndigs <- ceiling(log10(ncls))
+   # ndigs <- ceiling(log10(ncls))
+   ndigs <- getnumdigs(ncls)
    for (i in 1:length(cls))
       cat("\n",file=filechunkname("dbs",ndigs,i),"\n")
 }
 
 dbsmsg <- function(msg) {
    pte <- getpte()
-   ndigs <- ceiling(log10(pte$ncls))
+   # ndigs <- ceiling(log10(pte$ncls))
+   ndigs <- getnumdigs(pte$ncls)
    fn <- filechunkname("dbs",ndigs)
    cat(msg,file=fn,append=TRUE,"\n")
 }
