@@ -123,11 +123,10 @@ readmypart <- function(myidxs) {
 # suffix being chunk number; e.g. if nch = 16, then basename.01,
 # basename.02,..., basename.16; header, if any, is retained in the
 # chunks; optionally, each output line can be preceded by a sequence
-# number, in order to preserve the original ordering; if scramble is
-# set, 
+# number, in order to preserve the original ordering
 
 filesplit <- function(nch,basename,
-      header=FALSE,seqnums=FALSE,scramble=FALSE) {
+      header=FALSE,seqnums=FALSE) {
    nlines <- linecount(basename)
    con <- file(basename,open="r")
    if (header) {

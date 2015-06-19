@@ -1,8 +1,13 @@
-\name{snowdoop,filechunkname,filesort,filesplit}
+\name{snowdoop,filechunkname,filesort,filesplit,
+   readnscramble,linecount,filecat,getnumdigs}
 \alias{snowdoop}
 \alias{filechunkname}
 \alias{filesort}
 \alias{filesplit}
+\alias{filecat}
+\alias{readnscramble}
+\alias{linecount}
+\alias{getnumdigs}
 
 \title{
 Snowdoop.
