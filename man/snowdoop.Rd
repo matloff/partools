@@ -96,7 +96,6 @@ for the others:
 cls <- makeCluster(2)
 setclsinfo(cls)
 
-
 # example of filesplit()
 # make test input file
 m <- rbind(1:2,3:4,5:6) 
@@ -129,11 +128,11 @@ clusterEvalQ(cls,msort)  # data should be sorted on V2
 m1
 m2
 
-# example of readnscramble(); assumes example for filesplit() above has
-# already been done
-# inspect input files
-read.table("m.1",header=FALSE,row.names=1)
-read.table("m.2",header=FALSE,row.names=1)
+# example of readnscramble()
+co2 <- head(CO2,25) 
+write.table(co2,"co2",row.names=FALSE) 
+filesplit(2,"co2",header=TRUE) 
+readnscramble
 
 # example of filechunkname()
 clusterEvalQ(cls,filechunkname("x",3))  # returns "x.1", "x.2"
