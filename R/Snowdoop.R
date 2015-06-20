@@ -1,43 +1,43 @@
 
-# suppose we have a file basename, stored in chunks, say basename.001,
-# basename.002 etc.; this function determine the file name for the chunk
+# suppose we have a file basenm, stored in chunks, say basenm.001,
+# basenm.002 etc.; this function determine the file name for the chunk
 # to be handled by node nodenum; the latter is the ID for the executing
 # node, partoolsenv$myid, set by setclsinfo()
-filechunkname <- function (basename, ndigs,nodenum=NULL) 
+filechunkname <- function (basenm, ndigs,nodenum=NULL) 
 {
-    tmp <- basename
+    tmp <- basenm
     if (is.null(nodenum)) {
        pte <- getpte()
        nodenum <- pte$myid
     }
     n0s <- ndigs - nchar(as.character(nodenum))
     zerostring <- paste(rep("0", n0s),sep="",collapse="")
-    paste(basename, ".", zerostring, nodenum, sep = "") 
+    paste(basenm, ".", zerostring, nodenum, sep = "") 
 }
 
 # distributed file sort on cls, based on column number colnum of input;
-# file name from basename, ndigs; bucket sort, with categories
+# file name from basenm, ndigs; bucket sort, with categories
 # determined by first sampling nsamp from each chunk; each node's output
 # chunk written to file outname (plus suffix based on node number) in
 # the node's global space
-filesort <- function(cls,basename,ndigs,colnum,
+filesort <- function(cls,basenm,ndigs,colnum,
       outname,nsamp=1000,header=FALSE,sep=" ") 
 {
    clusterEvalQ(cls,library(partools))
    setclsinfo(cls)
-   samps <- clusterCall(cls,getsample,basename,ndigs,colnum,
+   samps <- clusterCall(cls,getsample,basenm,ndigs,colnum,
       header=header,sep=sep,nsamp) 
    samp <- Reduce(c,samps)
    bds <- getbounds(samp,length(cls))
    clusterApply(cls,bds,mysortedchunk,
-      basename,ndigs,colnum,outname,header,sep)
+      basenm,ndigs,colnum,outname,header,sep)
    0
 }
 
-getsample <- function(basename,ndigs,colnum,
+getsample <- function(basenm,ndigs,colnum,
       header=FALSE,sep="",nsamp) 
 {
-   fname <- filechunkname(basename,ndigs)
+   fname <- filechunkname(basenm,ndigs)
    read.table(fname,nrows=nsamp,header=header,sep=sep)[,colnum]
 }
 
@@ -53,7 +53,7 @@ getbounds <- function(samp,numnodes) {
    bds
 }
 
-mysortedchunk <- function(mybds,basename,ndigs,colnum,outname,header,sep) {
+mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,header,sep) {
    pte <- getpte()
    me <- pte$myid
    ncls <- pte$ncls
@@ -61,7 +61,7 @@ mysortedchunk <- function(mybds,basename,ndigs,colnum,outname,header,sep) {
    myhi <- mybds[2]
    for (i in 1:ncls) {
       tmp <-
-         read.table(filechunkname(basename,ndigs,i),header=header,sep)
+         read.table(filechunkname(basenm,ndigs,i),header=header,sep)
       tmpcol <- tmp[,colnum]
       if (me == 1) {
          tmp <- tmp[tmpcol <= myhi,] 
@@ -85,24 +85,24 @@ mysortedchunk <- function(mybds,basename,ndigs,colnum,outname,header,sep) {
 # chunks;  chunk sizes may not exactly equal across nodes, even if nch
 # evenly divides the total number of lines in the distributed file; sep
 # is the file field delineator, e.g. space of comma
-readnscramble <- function(cls,basename,header=FALSE,sep= " ") {
+readnscramble <- function(cls,basenm,header=FALSE,sep= " ") {
    nch <- length(cls)
    ndigs <- getnumdigs(nch)
    linecounts <- vector(length=nch)
    # get file names
    fns <- sapply(1:nch,function(i) 
-      filechunkname(basename,ndigs,nodenum=i))
+      filechunkname(basenm,ndigs,nodenum=i))
    linecounts <- sapply(1:nch,
       function(i) linecount(fns[i],header=header))
    cums <- cumsum(linecounts)
    clusterExport(cls,
-      c("basename","linecounts","cums","fns","nch","header","sep"),
+      c("basenm","linecounts","cums","fns","nch","header","sep"),
       envir=environment())
    totrecs <- cums[nch]
    # give the nodes their index assignments
    tmp <- sample(1:totrecs,totrecs,replace=FALSE)
    idxs <- clusterSplit(cls,tmp)
-   clusterApply(cls,idxs,readmypart)
+   invisible(clusterApply(cls,idxs,readmypart))
 }
 
 readmypart <- function(myidxs) {
@@ -116,19 +116,19 @@ readmypart <- function(myidxs) {
       tmp <- tmp[tmp <= linecounts[i]]
       mydf <- rbind(mydf,filechunk[tmp,])
    }
-   assign(basename,mydf,envir=.GlobalEnv)
+   assign(basenm,mydf,envir=.GlobalEnv)
 }
 
-# split a file basename into nch approximately equal-sized chunks, with
-# suffix being chunk number; e.g. if nch = 16, then basename.01,
-# basename.02,..., basename.16; header, if any, is retained in the
+# split a file basenm into nch approximately equal-sized chunks, with
+# suffix being chunk number; e.g. if nch = 16, then basenm.01,
+# basenm.02,..., basenm.16; header, if any, is retained in the
 # chunks; optionally, each output line can be preceded by a sequence
 # number, in order to preserve the original ordering
 
-filesplit <- function(nch,basename,
+filesplit <- function(nch,basenm,
       header=FALSE,seqnums=FALSE) {
-   nlines <- linecount(basename,header=header)
-   con <- file(basename,open="r")
+   nlines <- linecount(basenm,header=header)
+   con <- file(basenm,open="r")
    if (header) {
       hdr <- readLines(con,1)
       nlines <- nlines - 1
@@ -140,7 +140,7 @@ filesplit <- function(nch,basename,
    if (seqnums) cumulsizes <- cumsum(chunksizes)
    for (i in 1:nch) {
       chunk <- readLines(con,chunksizes[i])
-      fn <- filechunkname(basename,ndigs,i)
+      fn <- filechunkname(basenm,ndigs,i)
       conout <- file(fn,open="w")
       if (header) writeLines(hdr,conout)
       if (seqnums) {
@@ -178,15 +178,15 @@ linecount <- function(infile,header=FALSE,chunksize=100000) {
    }
 }
 
-filecat <- function (cls, basename, header = FALSE)  {
+filecat <- function (cls, basenm, header = FALSE)  {
     lcls <- length(cls)
     # ndigs <- ceiling(log10(lcls))
     ndigs <- getnumdigs(lcls)
-    if (file.exists(basename)) file.remove(basename)
-    conout <- file(basename, open = "w")
+    if (file.exists(basenm)) file.remove(basenm)
+    conout <- file(basenm, open = "w")
     for (i in 1:lcls) {
        # read in the entire file chunk
-       fn <- filechunkname(basename, ndigs, i)
+       fn <- filechunkname(basenm, ndigs, i)
        conin <- file(fn, open = "r")
        lines <- readLines(conin,-1)
        if (header && i > 1) {

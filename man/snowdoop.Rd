@@ -19,11 +19,11 @@ file storage.
 }
 
 \usage{
-filechunkname(basename,ndigs,nodenum=NULL)
-filesort(cls,basename,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep = "")
-filesplit(nch,basename,header=FALSE,seqnums=FALSE)
-filecat(cls, basename, header = FALSE)  
-readnscramble(cls,basename,header=FALSE,sep= " ")
+filechunkname(basenm,ndigs,nodenum=NULL)
+filesort(cls,basenm,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep = "")
+filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
+filecat(cls, basenm, header = FALSE)  
+readnscramble(cls,basenm,header=FALSE,sep= " ")
 linecount(infile,chunksize=100000)
 getnumdigs(nch)
 }
@@ -31,7 +31,7 @@ getnumdigs(nch)
 \arguments{
   \item{cls}{A cluster for the \pkg{parallel} package.}
   \item{nch}{Number of chunks for the file split.}
-  \item{basename}{A chunked file name, minus suffix.}
+  \item{basenm}{A chunked file name, minus suffix.}
   \item{ndigs}{Number of digits in the chunked file name suffix.}
   \item{nodenum}{If non-NULL, get the name of the file chunk of cluster node
      \code{nodenum}; otherwise, get the name for the chunk associated
@@ -59,7 +59,7 @@ each file chunk.  They are merged and quantiles formed, one quantile
 range for each cluster node.  Each node then reads all the file chunks, 
 retaining the records in its assigned range, and sorts them.  This 
 results in the input file being sorted, in memory, in a distributed 
-manner across nodes, under the name \code{basename}. 
+manner across nodes, under the name \code{basenm}. 
 
 Use \code{filesplit} to convert a single file into distributed one, with
 \code{nch} chunks.  The file header, if present, will be retained in the
@@ -72,7 +72,7 @@ The reverse operation to \code{filesplit} is performed by
 Operations such as \code{ca} need i.i.d. data. If the original file
 storage was ordered on some variable, one needs to randomize the data
 first, using \code{readnscramble}.  It produces a distributed data
-frame/matrix under the name \code{basename}.
+frame/matrix under the name \code{basenm}.
 
 Some of the functions here are useful mainly as intermediate operations
 for the others:
@@ -132,7 +132,7 @@ m2
 co2 <- head(CO2,25) 
 write.table(co2,"co2",row.names=FALSE) 
 filesplit(2,"co2",header=TRUE) 
-readnscramble
+readnscramble(cls,"co2",header=TRUE)
 
 # example of filechunkname()
 clusterEvalQ(cls,filechunkname("x",3))  # returns "x.1", "x.2"
