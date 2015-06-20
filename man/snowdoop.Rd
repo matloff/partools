@@ -1,5 +1,4 @@
-\name{snowdoop,filechunkname,filesort,filesplit,
-   readnscramble,linecount,filecat,getnumdigs}
+\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs}
 \alias{snowdoop}
 \alias{filechunkname}
 \alias{filesort}
@@ -14,13 +13,19 @@ Snowdoop.
 }
 
 \description{
-Snowdoop operations.
+Snowdoop operations:
+Utilities for distributed computation, including distributed
+file storage.
 }
 
 \usage{
 filechunkname(basename,ndigs,nodenum=NULL)
-filesort(cls,basename,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep = "") 
+filesort(cls,basename,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep = "")
 filesplit(nch,basename,header=FALSE,seqnums=FALSE)
+filecat(cls, basename, header = FALSE)  
+readnscramble(cls,basename,header=FALSE,sep= " ")
+linecount(infile,chunksize=100000)
+getnumdigs(nch)
 }
 
 \arguments{
@@ -38,49 +43,103 @@ filesplit(nch,basename,header=FALSE,seqnums=FALSE)
   \item{header}{TRUE if the file chunks have headers.}
   \item{seqnums}{TRUE if the file chunks will have sequence numbers.}
   \item{sep}{Field delimiter used in \code{read.table}.}
+  \item{infile}{Input file}
+  \item{chunksize}{Number of lines to read at a time, for efficient I/O.}
 }
 
 \details{
-See further documentation in "Snowdoop" vignette.
-}
 
-\value{The function \code{filechunkname} returns the name of the file
-chunk for the calling cluster node.
+Those functions with argument \code{cls} presume that \code{setclsinfo}
+has already been called.
 
-For \code{filesort}, the first \code{nsamp} records are read from 
+Use \code{filesort} to do a distributed file sort, placing the result as
+a distributed data frame/matrix in the memories of the cluster nodes.
+The first \code{nsamp} records are read from 
 each file chunk.  They are merged and quantiles formed, one quantile
 range for each cluster node.  Each node then reads all the file chunks, 
 retaining the records in its assigned range, and sorts them.  This 
 results in the input file being sorted, in memory, in a distributed 
-manner across nodes. 
+manner across nodes, under the name \code{basename}. 
 
-Use \code{filesplit} to convert a file into chunked form, with
+Use \code{filesplit} to convert a single file into distributed one, with
 \code{nch} chunks.  The file header, if present, will be retained in the
 chunks. If \code{seqnums} is TRUE, each line in a chunk will be preceded
-by the line number it had in the original file. 
+by the line number it had in the original file.  
+
+The reverse operation to \code{filesplit} is performed by
+\code{filecat}, which converts a distributed file into a single one.
+
+Operations such as \code{ca} need i.i.d. data. If the original file
+storage was ordered on some variable, one needs to randomize the data
+first, using \code{readnscramble}.  It produces a distributed data
+frame/matrix under the name \code{basename}.
+
+Some of the functions here are useful mainly as intermediate operations
+for the others:
+
+   \itemize{
+   
+      \item The function \code{filechunkname} returns the name of the file
+      chunk for the calling cluster node.
+   
+      \item The \code{linecount} function returns the number of lines in a
+      text file.
+   
+      \item A call to \code{getnumdigs} returns the number of digits in a
+      distributed file name suffix.
+   
+   }
+
 }
 
 \examples{
 cls <- makeCluster(2)
 setclsinfo(cls)
-clusterEvalQ(cls,filechunkname("x",3))  # returns "x.001", "x.002"
 
-# make distributed input file
+
+# example of filesplit()
+# make test input file
+m <- rbind(1:2,3:4,5:6) 
+write.table(m,"m",row.names=FALSE,col.names=FALSE) 
+# apply the function
+filesplit(2,"m",seqnums=T)
+# file m.1 and m.2 created, with contents c(1,1,2) and
+# rbind(c(2,3,4),c(3,5,6)), respectively
+# check it
+read.table("m.1",header=FALSE,row.names=1)
+read.table("m.2",header=FALSE,row.names=1)
+
+# example of filecat(); assumes filesplit() example above already done
+# delete file m so we can make sure we are re-creating it
+unlink("m")
+filecat(cls,"m")
+# check that file m is back
+read.table("m",row.names=1)
+
+# example of filesort()
+# make test distributed input file
 m1 <- matrix(c(5,12,13,3,4,5,8,8,8,1,2,3,6,5,4),byrow=TRUE,ncol=3)
 m2 <- matrix(c(0,22,88,44,5,5,2,6,10,7,7,7),byrow=TRUE,ncol=3)
 write.table(m1,"m.1")
 write.table(m2,"m.2")
-# sort and check result
+# sort on column 2 and check result
 filesort(cls,"m",1,2,"msort",nsamp=3,header=TRUE)
 clusterEvalQ(cls,msort)  # data should be sorted on V2
+# check by comparing to input
+m1
+m2
 
-# file m is rbind(1:2,3:4,5:6)
-scan(file="m",what="",sep="\n")
-filesplit(2,"m",seqnums=T)
-# file m.1 and m.2 created, with contents c(1,1,2) and
-# rbind(c(2,3,4),c(3,5,6)), respectively
-scan(file="m.1",what="",sep="\n")
-scan(file="m.2",what="",sep="\n")
+# example of readnscramble(); assumes example for filesplit() above has
+# already been done
+# inspect input files
+read.table("m.1",header=FALSE,row.names=1)
+read.table("m.2",header=FALSE,row.names=1)
+
+# example of filechunkname()
+clusterEvalQ(cls,filechunkname("x",3))  # returns "x.1", "x.2"
+
+# example of getnumdigs()
+getnumdigs(156)  # should be 3
 
 }
 
