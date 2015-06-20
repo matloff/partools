@@ -93,7 +93,7 @@ readnscramble <- function(cls,basename,header=FALSE,sep= " ") {
    fns <- sapply(1:nch,function(i) 
       filechunkname(basename,ndigs,nodenum=i))
    linecounts <- sapply(1:nch,function(i)
-      linecount(fns[i]))
+      linecount(fns[i]),header=header)
    cums <- cumsum(linecounts)
    clusterExport(cls,
       c("basename","linecounts","cums","fns","nch","header","sep"),
@@ -127,7 +127,7 @@ readmypart <- function(myidxs) {
 
 filesplit <- function(nch,basename,
       header=FALSE,seqnums=FALSE) {
-   nlines <- linecount(basename)
+   nlines <- linecount(basename,header=header)
    con <- file(basename,open="r")
    if (header) {
       hdr <- readLines(con,1)
@@ -165,11 +165,11 @@ filesplit <- function(nch,basename,
 #
 # the file is read in one chunk at a time, in order to avoid
 # overwhelming memory
-linecount <- function(infile,chunksize=100000) {
+linecount <- function(infile,header+FALSE,chunksize=100000) {
    # could check for Unix first (Mac, Linux, cygwin), running the more
    # efficient 'wc -l' in that case
    con <- file(infile,"r")
-   nlines <- 0
+   nlines <- 0 - as.integer(header)
    repeat {
       tmp <- readLines(con,chunksize)
       nread <- length(tmp)
