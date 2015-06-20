@@ -127,13 +127,9 @@ readmypart <- function(myidxs) {
 
 filesplit <- function(nch,basenm,
       header=FALSE,seqnums=FALSE) {
-   nlines <- linecount(basenm,header=header)
+   nlines <- linecount(basenm,header=header)  # not incl. header line
    con <- file(basenm,open="r")
-   if (header) {
-      hdr <- readLines(con,1)
-      nlines <- nlines - 1
-   }
-   # ndigs <- ceiling(log10(nch))
+   if (header) hdr <- readLines(con,1)
    ndigs <- getnumdigs(nch)
    chunks <- splitIndices(nlines,nch)
    chunksizes <- sapply(chunks,length)
