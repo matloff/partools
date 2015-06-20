@@ -165,7 +165,7 @@ filesplit <- function(nch,basename,
 #
 # the file is read in one chunk at a time, in order to avoid
 # overwhelming memory
-linecount <- function(infile,header+FALSE,chunksize=100000) {
+linecount <- function(infile,header=FALSE,chunksize=100000) {
    # could check for Unix first (Mac, Linux, cygwin), running the more
    # efficient 'wc -l' in that case
    con <- file(infile,"r")
