@@ -81,7 +81,7 @@ mysortedchunk <- function(mybds,basename,ndigs,colnum,outname,header,sep) {
 #
 # read distributed file, producing scrambled, distributed chunks in
 # memory at the cluster nodes, i.e. line i of the original distributed
-# file has probability 1/nch of ending up at any of the in-memory
+# file bhas probability 1/nch of ending up at any of the in-memory
 # chunks;  chunk sizes may not exactly equal across nodes, even if nch
 # evenly divides the total number of lines in the distributed file; sep
 # is the file field delineator, e.g. space of comma
@@ -92,8 +92,8 @@ readnscramble <- function(cls,basename,header=FALSE,sep= " ") {
    # get file names
    fns <- sapply(1:nch,function(i) 
       filechunkname(basename,ndigs,nodenum=i))
-   linecounts <- sapply(1:nch,function(i)
-      linecount(fns[i]),header=header)
+   linecounts <- sapply(1:nch,
+      function(i) linecount(fns[i],header=header))
    cums <- cumsum(linecounts)
    clusterExport(cls,
       c("basename","linecounts","cums","fns","nch","header","sep"),
