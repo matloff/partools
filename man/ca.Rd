@@ -33,8 +33,14 @@ Embarrassingly-Parallel Ones," http://arxiv.org/abs/1409.5827, to appear
 in the Journal of Statistical Software.  
 
 The data are broken into chunks, and the given estimator is applied to
-each.  The results are averaged, and an empirical covariance matrix
+each.  The results are averaged, and an estimated covariance matrix
 computed.
+
+Note:  The method assumes i.i.d. data.  If your data set had been stored
+in some sorted order, it must be randomized first, say using the
+\code{scramble} option in \code{distribsplit} or by calling
+\code{readnscramble}, depending on whether your data is already in memory or
+still in a file.
 }
 
 \value{R list with components \code{thts}, the results of applying the
