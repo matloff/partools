@@ -2,20 +2,22 @@
 # chunks averaging, aka Software Alchemy, method (N. Matloff, "Parallel
 # Computation for Data Science," Chapman and Hall, 2015)
 
+# use cabase() if already have a distributed data frame; otherwise, use
+# the ca() wrapper
+
 ############################## ca() ################################
 
 # arguments:
 #
 #    cls: 'parallel' cluster
-#    z:  data (data.frame, matrix or vector), or the quoted name of such
-#        an object; in the latter case, the data is assumed to be
-#        distributed among the cluster nodes, under the name z at each
+#    z:  data (data.frame, matrix or vector)
 #    ovf:  overall statistical function, say glm()
 #    estf:  function to extract the point estimate (possibly
 #           vector-valued) from the output of ovf(), e.g.
 #           coef() in the glm() case
 #    estcovf:  if provided, function to extract the estimated 
-#              covariance matrix of the output of estf()  
+#              covariance matrix of the output of estf(), e.g.
+#              vcov() for glm()
 #    conv2mat:  if TRUE, convert z to a matrix (useful if ovf() requires
 #               matrix input)
 #    findmean:  if TRUE, output the average of the estimates from the
@@ -40,45 +42,52 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
 
 # arguments:
 #
-#    as in ca() above, except
 #    z: quoted name of a distributed data frame/matrix 
+#
+#    remainder as in ca() above, except:
 # 
 # value:
 #
-#    as in ca() above, except
+#    as in ca() above
 #
 cabase <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
    clusterExport(cls,c("ovf","estf","estcovf"),envir=environment())
    clusterCall(cls,function(zname) z168 <<- get(zname),z)
-   wts <- unlist(clusterEvalQ(cls,nrow(z168)))
-   wts <- wts / sum(wts)
    # apply the "theta hat" function, e.g. glm(), and extract the
    # apply the desired statistical method at each chunk
    ovout <- clusterEvalQ(cls,ovf(z168))
-   # theta-hats
-   thts <- lapply(ovout,estf)
-   lth <- length(thts[[1]])
-   tht <- rep(0.0,lth)
-   # find the estimated covariance of the chunk-averaged estimate, if
-   # requested
-   if (!is.null(estcovf)) {
-      thtcov <- matrix(0,nrow=lth,ncol=lth)
-      thtcovs <- lapply(ovout,estcovf)
-   }
+   # theta-hats, with the one for chunk i in row i
+   thts <- t(sapply(ovout,estf))
    # res will be the returned result of this function
    res <- list()
    res$thts <- thts 
-   # find the chunk-averaged theta hat, if requested
+   # find the chunk-averaged theta hat and estimated covariance matrix, 
+   # if requested
    if (findmean) {
+      # dimensionality of theata
+      lth <- length(thts[1,])
+      # theta-hat is a weighted average of the ests at the chunks
+      nrows <- unlist(clusterEvalQ(cls,nrow(z168)))
+      wts <- nrows / sum(nrows)
+      # compute mean
+      tht <- rep(0.0,lth)
       for (i in 1:length(cls)) {
          wti <- wts[i]
-         tht <- tht + wti * thts[[i]]
-         if (!is.null(estcovf)) 
-            thtcov <- thtcov + wti^2 * thtcovs[[i]]
+         tht <- tht + wti * thts[i,]
       }
       res$tht <- tht
-      if (!is.null(estcovf)) res$thtcov <- thtcov
-   } 
+      # compute estimated covariance matrix, if requested
+      # (code structured to possibly add empirical cov est later)
+      if (!is.null(estcovf)) {
+         thtcov <- matrix(0,nrow=lth,ncol=lth)
+         for (i in 1:length(cls)) {
+            wti <- wts[i]
+            summand <- wti^2 * estcovf(ovout[[i]]) 
+            thtcov <- thtcov + summand
+         }
+         res$thtcov <- thtcov
+      } 
+   }
    res
 }
 
