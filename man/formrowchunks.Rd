@@ -19,13 +19,13 @@ Miscellaneous code snippets for use with the \pkg{parallel} package,
 including ``Snowdoop.''}
 
 \usage{
-formrowchunks(cls,m,mchunkname) 
+formrowchunks(cls,m,mchunkname,scramble=FALSE) 
 matrixtolist(rc,m) 
 addlists(lst1,lst2,add)
 setclsinfo(cls)
 getpte()
 exportlibpaths(cls)
-distribsplit(cls,dfname)
+distribsplit(cls,dfname,scramble=FALSE)
 distribcat(cls,dfname) 
 distribagg(cls,aggcmd,FUN,nby) 
 docmd(toexec) 
