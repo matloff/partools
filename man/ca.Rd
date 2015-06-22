@@ -78,7 +78,7 @@ cabase(cls,"u",lmwrap,coef,vcov)
 a <- lm(u[,2] ~ u[,1])
 coef(a)
 vcov(a)
-|
+}
 
 \author{
 Norm Matloff
