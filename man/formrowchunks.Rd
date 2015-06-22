@@ -33,6 +33,8 @@ docmd(toexec)
 
 \arguments{
   \item{cls}{A cluster for the \pkg{parallel} package.}
+  \item{scramble}{If TRUE, randomize the row order in the resulting data
+  frame.}
   \item{rc}{Set to 1 for rows, other for columns.}
   \item{m}{A matrix or data frame.}
   \item{mchunkname}{Quoted name to be given to the created chunks.}
