@@ -128,6 +128,7 @@ distribagg <- function(cls,aggcmd,FUN,nby) {
    clusterExport(cls,"remotecmd",envir=environment())
    # run the command, and combine the returned data frames into one big
    # data frame
+   clusterExport(cls,"docmd",envir=environment())
    aggs <- clusterEvalQ(cls,docmd(remotecmd))
    agg <- Reduce(rbind,aggs)
    # typically a given cell will found at more than one cluster node;
