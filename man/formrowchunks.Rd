@@ -105,6 +105,7 @@ call to \code{aggregate}, though possibly in different row order.
 }
 
 \examples{
+# examples of addlists()
 l1 <- list(a=2, b=5, c=1)
 l2 <- list(a=8, c=12, d=28)
 addlists(l1,l2,sum)  # list with a=10, b=5, c=13, d=28
@@ -112,14 +113,19 @@ z1 <- list(x = c(5,12,13), y = c(3,4,5))
 z2 <- list(y = c(8,88))
 addlists(z1,z2,c)  # list with x=(5,12,13), y=(3,4,5,8,88)
 
+# need 'parallel' cluster for the remaining examples
 cls <- makeCluster(2)
 
 setclsinfo(cls)
+# check it
 clusterEvalQ(cls,partoolsenv$myid)  # returns 1, 2
 clusterEvalQ(cls,partoolsenv$ncls)  # returns 2, 2
 
+# formrowchunks example; see up a matrix to be distributed first
 m <- rbind(1:2,3:4,5:6)
+# apply the function
 formrowchunks(cls,m,"mc")
+# check results
 clusterEvalQ(cls,mc)  # list of a 1x2 and a 2x2 matrix
 
 matrixtolist(1,m)  # 3-component list, first is (1,2)
@@ -133,6 +139,7 @@ d <- data.frame(x,y,z)
 # distribute to the cluster nodes
 distribsplit(cls,"d")
 clusterEvalQ(cls,d)  # got to the nodes?
+
 # run our distributed aggregate() on the nodes
 distribagg(cls,"x=d, by=list(d$x,d$y)","max",2)
 # run aggregate() here, check that it matches
