@@ -1,0 +1,28 @@
+
+\documentclass[11pt]{article}
+
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+\setlength{\topmargin}{-0.25in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9.25in}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{2mm}
+
+\usepackage{times}
+\usepackage{graphicx}
+
+% library(knitr)
+%\VignetteIndexEntry{Partools}
+
+\title{Overview of the partools Package}
+
+\begin{document}
+
+\maketitle
+
+
+\end{document}
+
