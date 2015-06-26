@@ -101,40 +101,53 @@ distribcat <- function(cls,dfname) {
 # arguments:
 
 #    cls: cluster
-#    aggcmd: a quoted string specifying the 'x' and 'by' portions of the
-#            desired aggregate() command
-#    FUN: quoted name of desired aggregation function; must have the
-#         property that FUN(c(x,y)) = FUN(FUN(x),FUN(y)), e.g. max(),
-#         sum()
-#    nby: number of variables specified in the 'by' argument of aggregate()
+#    ynames: names of variables on which FUN is to be applied
+#    xnames: names of variables that define the grouping
+#    dataname: quoted name of the data frame
+#    FUN: quoted name of aggregation function to be used in aggregation
+#         within cluster nodes
+#    FUN1: quoted name of the aggregation function to be used in 
+#          aggregation between cluster nodes
 
 # e.g. for the call at the nodes
 #
-#    aggregate(x=mtcars,by=list(mtcars$cyl,mtcars$gear),FUN=max)
+#    aggregate(cbind(mpg,disp,hp) ~ cyl+gear,data=mtcars,FUN=max)
 #
 # we would call
 #
-#    distribagg("x=mtcars,by=list(mtcars$cyl,mtcars$gear","max",2)
+#    distribagg(cls,c("mpg","disp","hp"),c("cyl","gear"),mtcars,max)
 
 # return value: aggregate()-style data frame, with column of cell counts
 # appended at the end
 
 #    distribagg(cls,"x=d, by=list(d$x,d$y)","max",2)
 
-distribagg <- function(cls,aggcmd,FUN,nby) {
+distribagg <- function(cls,ynames,xnames,dataname,FUN,FUN1=FUN) {
+   nby <- length(xnames) # number in the "by" arg to aggregate()
    # set up aggregate() command to be run on the cluster nodes
-   tmp <- paste("aggregate(",aggcmd,sep="")
-   remotecmd <- paste(tmp,",FUN=",FUN,")",sep="")
+   ypart <- paste("cbind(",paste(ynames,collapse=","),")",sep="")
+   xpart <- paste(xnames,collapse="+")
+   forla <- paste(ypart,"~",paste(xnames,collapse="+"))
+   remotecmd <-
+      paste("aggregate(",forla,",data=",dataname,",",FUN,")",sep="")
    clusterExport(cls,"remotecmd",envir=environment())
    # run the command, and combine the returned data frames into one big
    # data frame
    aggs <- clusterEvalQ(cls,docmd(remotecmd))
    agg <- Reduce(rbind,aggs)
    # typically a given cell will found at more than one cluster node;
-   # they must be combined, using FUN
-   fun <- get(FUN)
-   aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN=fun)
+   # they must be combined, using FUN1
+   FUN1 <- get(FUN1)
+   aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN)
 }
+
+distribtable <- function(cls,xnames,dataname) {
+   tmp <- distribagg(cls,xnames[1],xnames,dataname,"length","sum")
+   names(tmp)[ncol(tmp)] <- "counts"
+   xtabs(counts ~ .,data=tmp)
+}
+
+######################### misc. utilities ########################
 
 # execute the contents of a quoted command; main use is with
 # clusterEvalQ()
