@@ -138,7 +138,7 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUN1=FUN) {
    # typically a given cell will found at more than one cluster node;
    # they must be combined, using FUN1
    FUN1 <- get(FUN1)
-   aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN)
+   aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
 }
 
 distribtable <- function(cls,xnames,dataname) {

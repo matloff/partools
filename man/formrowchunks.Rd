@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,docmd,}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribtable,docmd}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -8,6 +8,7 @@
 \alias{distribsplit}
 \alias{distribcat}
 \alias{distribagg}
+\alias{distribtable}
 \alias{docmd}
 
 \title{
@@ -115,8 +116,8 @@ addlists(z1,z2,c)  # list with x=(5,12,13), y=(3,4,5,8,88)
 
 # need 'parallel' cluster for the remaining examples
 cls <- makeCluster(2)
-
 setclsinfo(cls)
+
 # check it
 clusterEvalQ(cls,partoolsenv$myid)  # returns 1, 2
 clusterEvalQ(cls,partoolsenv$ncls)  # returns 2, 2
@@ -131,19 +132,35 @@ clusterEvalQ(cls,mc)  # list of a 1x2 and a 2x2 matrix
 matrixtolist(1,m)  # 3-component list, first is (1,2)
 
 # test of of distribagg(): 
-# form test data
-x <- sample(1:3,10,replace=T)  
+# form and distribute test data
+x <- sample(1:3,10,replace=T)
 y <- sample(0:1,10,replace=T)
-z <- runif(10); cbind(x,y,z)
-d <- data.frame(x,y,z)
-# distribute to the cluster nodes
+u <- runif(10)
+v <- runif(10)
+d <- data.frame(x,y,u,v)
 distribsplit(cls,"d")
-clusterEvalQ(cls,d)  # got to the nodes?
+# check that it's there at the cluster nodes
+clusterEvalQ(cls,d) 
+d
+# try the function
+distribagg(cls,c("u","v"), c("x","y"),"d","max")
+# check result
+aggregate(cbind(u,v) ~ x+y,d,max)
 
-# run our distributed aggregate() on the nodes
-distribagg(cls,"x=d, by=list(d$x,d$y)","max",2)
-# run aggregate() here, check that it matches
-aggregate(x=d,by=list(d$x,d$y),max)
+# real data
+# don't forget to distribute
+mtc <- mtcars
+distribsplit(cls,"mtc")
+
+distribagg(cls,c("mpg","disp","hp"),c("cyl","gear"),"mtc","max")
+# check
+aggregate(cbind(mpg,disp,hp) ~ cyl+gear,data=mtcars,FUN=max)
+
+# test of distribtable()
+distribtable(cls,c("cyl","gear","carb"),"mtc")
+# check
+table(mtcars[,c("cyl","gear","carb")])
+
 }
 
 \author{
