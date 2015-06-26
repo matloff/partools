@@ -28,7 +28,7 @@ getpte()
 exportlibpaths(cls)
 distribsplit(cls,dfname,scramble=FALSE)
 distribcat(cls,dfname) 
-distribagg(cls,aggcmd,FUN,nby) 
+distribagg(cls,ynames,xnames,dataname,FUN,FUN1) 
 docmd(toexec) 
 }
 
@@ -45,13 +45,15 @@ docmd(toexec)
      concatenation and so on.}
   \item{dfname}{Quoted name of a data frame, either centralized or
   distributed.} 
-  \item{aggcmd}{Quoted string for the \code{x} and \code{by} portions of
-  the desired call to \code{aggregate}.}
-  \item{FUN}{Quoted string containing the name of \code{FUN} in the
-  desired \code{aggregate} call. Must have the property that
-  \code{FUN(c(a,b)) = FUN(FUN(a),FUN(b))}, such is the case for
-  \code{sum} and \code{max}.}
-  \item{nby}{Number of variables involved in \code{by}.}
+  \item{ynames}{Vector of quoted names of variables on which \code{FUN} 
+     is to be applied.}
+  \item{xnames}{Vector of quoted names of variables that define the
+     grouping.}
+  \item{dataname}{Quoted name of a distributed data frame.}
+  \item{FUN}{Quoted name of aggregation function to be used in
+     aggregation within cluster nodes.}
+  \item{FUN1}{Quoted name of aggregation function to be used in
+     aggregation between cluster nodes.}
   \item{toexec}{Quoted string containing command to be executed.}
 }
 
@@ -82,18 +84,17 @@ is taken by \code{distribcat}, coalsecing variables of the given name in
 the cluster nodes into one grand data frame as the calling (i.e.
 manager) node.
 
-The package's \code{distribagg} function is a distributed form of
-\code{aggregate}.  Note the restriction on \code{FUN}.  To achieve the
-effect of \code{mean}, use \code{sum} but first use \code{cbind} in
-\code{x}, appending a column of 1s, so as to get the cell counts; them
-divide sums by counts.  If the data frame \code{dfname} lacks columns
-names, e.g. because it was read in from a headerless file, give the
-columns now, e.g. via a call like \code{clusterEvalQ(cls,names(x) <-
-c("a","bc","def")}; otherwise a conflict may occur when tries to
-coalsece the reports from the different cluster nodes.
+The package's \code{distribagg} function is a distributed (and somewhat
+restricted) form of \code{aggregate}.  
+
+The \code{distribtable} function is a distributed form of \code{table}.
 
 The \code{docmd} function executes the quoted command.  Useful for
-building up complex command for remote execution.
+building up complex command for remote execution.  An R \code{formula}
+will be constructed from the arguments \code{ynames} and \code{xnames},
+with the latter put on the left side of the \code{~} sign, with
+\code{cbind} for combining, and the latter put on the right side, with
+\code{+} signs as delimiters.
 
 See vignettes for more information.  
 }
@@ -103,6 +104,10 @@ In the case of \code{addlists}, the return value is the new list.
 
 The \code{distribagg} function returns a data frame, the same as would a
 call to \code{aggregate}, though possibly in different row order.
+
+The \code{distribtable} function returns an R table, the same as would a
+call to \code{table}, though the class is the \code{"xtabs"} subclass of
+\code{"table"}.
 }
 
 \examples{
