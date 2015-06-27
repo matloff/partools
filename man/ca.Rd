@@ -18,9 +18,9 @@ calm(cls,dataname,forla)
 
 \arguments{
   \item{cls}{A cluster run under the \pkg{parallel} package.}
-  \item{z}{A data frame, matrix or vector, one observation per row/element. 
+  \item{z}{A data frame, matrix or vector, one observation per row/element.} 
   \item{dataname}{Quoted name of a distributed data frame, such as is 
-     produced by \code{distribsplit} or \code{readnscramble}.}}
+     produced by \code{distribsplit} or \code{readnscramble}.}
   \item{ovf}{Overall statistical function, say \code{glm}.}
   \item{estf}{Function to extract the point estimate (possibly
      vector-valued) from the output of \code{ovf}.}
