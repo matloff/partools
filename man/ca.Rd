@@ -65,6 +65,8 @@ still in a file.
 }
 
 \examples{
+
+
 cls <- makeCluster(2)
 setclsinfo(cls)
 
@@ -77,6 +79,13 @@ distribsplit(cls,"u")
 calm(cls,"u","u3 ~ u1+u2")$tht
 # check; results should be approximately the same
 lm(u[,3] ~ u[,1]+u[,2])
+
+data(prgeng) 
+distribsplit(cls,"prgeng") 
+calm(cls,"prgeng","wageinc ~ age+I(age^2)+sex+wkswrkd")$tht 
+lm(wageinc ~ age+I(age^2)+sex+wkswrkd,data=prgeng)
+
+
 }
 
 \author{
