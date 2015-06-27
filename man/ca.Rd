@@ -71,11 +71,10 @@ setclsinfo(cls)
 # generate test data, as distributed data frame
 u <- matrix(rnorm(5000),ncol=2)
 u[,2] <- u[,1] + u[,2]
+colnames(u) <- c("u1","u2")
 distribsplit(cls,"u")
-# wrapper for lm(), as our estf()
-lmwrap <- function(u) {k <- ncol(u); lm(u[,k]~u[,-k])}
 # apply the function
-cabase(cls,"u",lmwrap,coef,vcov)
+calm(cls,"u","u2 ~ u1")
 # check; results should be approximately the same
 a <- lm(u[,2] ~ u[,1])
 coef(a)
