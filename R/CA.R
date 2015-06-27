@@ -42,7 +42,7 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
 
 # arguments:
 #
-#    z: quoted name of a distributed data frame/matrix 
+#    dataname: quoted name of a distributed data frame/matrix 
 #
 #    remainder as in ca() above, except:
 # 
@@ -50,9 +50,9 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
 #
 #    as in ca() above
 #
-cabase <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
+cabase <- function(cls,dataname,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
    clusterExport(cls,c("ovf","estf","estcovf"),envir=environment())
-   clusterCall(cls,function(zname) z168 <<- get(zname),z)
+   clusterCall(cls,function(zname) z168 <<- get(zname),dataname)
    # apply the "theta hat" function, e.g. glm(), and extract the
    # apply the desired statistical method at each chunk
    ovout <- clusterEvalQ(cls,ovf(z168))
@@ -88,7 +88,28 @@ cabase <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
          res$thtcov <- thtcov
       } 
    }
+   clusterEvalQ(cls,rm(ovf))
    res
+}
+
+# ca() wrapper for lm()
+#
+# arguments:
+#
+#    cls: cluster
+#    dataname: quoted name of a distributed data frame
+#    forla: quoted string representing R formula, 
+#           e.g. "weight ~ height + age"
+#
+# value: Software Alchemy estimate, statistically equivalent to direct
+#    nonparallel call to lm(); R list is in value of ca() 
+#
+calm <- function(cls,dataname,forla) {
+   ovf <- function(u) {
+      tmp <- paste("lm(",forla,",data=",dataname,")",collapse="")
+      docmd(tmp)
+   }
+   cabase(cls,dataname,ovf,coef,vcov)
 }
 
 

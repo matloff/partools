@@ -1,6 +1,7 @@
-\name{ca,cabase}
+\name{ca,cabase,calm}
 \alias{ca}
-\alias{ca,cabase}
+\alias{cabase}
+\alias{calm}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -12,23 +13,24 @@ Easy parallelization of most statistical computations.
 \usage{
 ca(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE)
 cabase(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE)
+calm(cls,dataname,forla) 
 }
 
 \arguments{
   \item{cls}{A cluster run under the \pkg{parallel} package.}
-  \item{z}{Data. In the case of \code{ca}, a data.frame, matrix or 
-  vector, one observation per row/element. For \code{cabase}, \code{z}
-  is the quoted name of a distributed data frame, such as is produced by
-  \code{distribsplit} or \code{readnscramble}.}
+  \item{z}{A data frame, matrix or vector, one observation per row/element. 
+  \item{dataname}{Quoted name of a distributed data frame, such as is 
+     produced by \code{distribsplit} or \code{readnscramble}.}}
   \item{ovf}{Overall statistical function, say \code{glm}.}
   \item{estf}{Function to extract the point estimate (possibly
-  vector-valued) from the output of \code{ovf}.}
+     vector-valued) from the output of \code{ovf}.}
   \item{estcovf}{if provided, function to extract the estimated 
-  covariance matrix of the output of \code{estf}}.
+     covariance matrix of the output of \code{estf}}.
   \item{conv2mat}{If TRUE, convert data framee input to a matrix 
-  (needed for some cases of 'ovf').}
+     (needed for some cases of 'ovf').}
   \item{findmean}{If TRUE, output the average of the estimates from the
-  chunks; otherwise, output only the estimates themselves.}
+     chunks; otherwise, output only the estimates themselves.}
+  \item{forla}{Quoted string representing an R formula.} 
 }
 
 \details{Implements the ``Software Alchemy'' method for parallelizing

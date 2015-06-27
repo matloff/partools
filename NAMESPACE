@@ -5,6 +5,6 @@ export(dbs,writemgrscreen,writewrkrscreens,killdebug,dbsmsgstart,dbsmsg,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,linecount,
       readnscramble,getnumdigs,
    distribsplit,distribcat,distribagg,distribtable,docmd,
-   ca,cabase,
+   ca,cabase,calm,
    setclsinfo,filechunkname,exportlibpaths,filesplit)
  
