@@ -69,16 +69,14 @@ cls <- makeCluster(2)
 setclsinfo(cls)
 
 # generate test data, as distributed data frame
-u <- matrix(rnorm(5000),ncol=2)
-u[,2] <- u[,1] + u[,2]
-colnames(u) <- c("u1","u2")
+u <- matrix(rnorm(7500),ncol=3)
+u[,3] <- u[,1] + u[,2] + u[,3]
+colnames(u) <- c("u1","u2","u3")
 distribsplit(cls,"u")
 # apply the function
-calm(cls,"u","u2 ~ u1")
+calm(cls,"u","u3 ~ u1+u2")$tht
 # check; results should be approximately the same
-a <- lm(u[,2] ~ u[,1])
-coef(a)
-vcov(a)
+lm(u[,3] ~ u[,1]+u[,2])
 }
 
 \author{
