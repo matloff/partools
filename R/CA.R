@@ -50,12 +50,20 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
 #
 #    as in ca() above
 #
-cabase <- function(cls,dataname,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
+cabase <- function(cls,dataname,ovf,estf,
+      estcovf=NULL,conv2mat=TRUE,findmean=TRUE,cacall=FALSE) {
    clusterExport(cls,c("ovf","estf","estcovf"),envir=environment())
-   clusterCall(cls,function(zname) z168 <<- get(zname),dataname)
+   # z168 will be real if cabase() was invoked by ca(), otherwise just a
+   # convenience in computing wts later
+   if (!cacall) {
+      z168cmd <- paste("z168 <- get('",dataname,"')",sep="") 
+      clusterExport(cls,"z168cmd",envir=environment()) 
+      clusterEvalQ(cls,eval(parse(text=z168cmd))) 
+   }
    # apply the "theta hat" function, e.g. glm(), and extract the
    # apply the desired statistical method at each chunk
-   ovout <- clusterEvalQ(cls,ovf(z168))
+   ovout <- if (cacall) clusterEvalQ(cls,ovf(z168)) else
+                        clusterEvalQ(cls,ovf()) 
    # theta-hats, with the one for chunk i in row i
    thts <- t(sapply(ovout,estf))
    # res will be the returned result of this function
