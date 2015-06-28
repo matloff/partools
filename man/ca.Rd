@@ -98,7 +98,7 @@ application of Software Alchemy to the R functions \code{lm}, \code{glm}
 and so on.
 
 In the case of \code{caprcomp}, the estimator values on the individual
-data chunks are also reported
+data chunks are also reported, in the list element \code{chunkrots}.
 
 }
 
