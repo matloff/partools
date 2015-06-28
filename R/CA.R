@@ -77,12 +77,14 @@ cabase <- function(cls,ovf,estf,
       # since the chunk sizes will differ by at most 1, the weights will
       # be very close to equal, so make them so
       wts <- rep(1 / length(cls), length(cls))
-      # compute mean
+      # compute mean (leave open for restoring weights in future
+      # version)
       tht <- rep(0.0,lth)
       for (i in 1:length(cls)) {
          wti <- wts[i]
          tht <- tht + wti * thts[i,]
       }
+      attr(tht,"p") <- attr(thts[1,],"p")
       res$tht <- tht
       # compute estimated covariance matrix, if requested
       # (code structured to possibly add empirical cov est later)
@@ -130,5 +132,40 @@ caglm <- function(cls,glmargs) {
    cabase(cls,ovf,coef,vcov)
 }
 
+# ca() wrapper for prcomp()
+# arguments:
+#
+#    prcompargs: arguments to go into prcomp()
+#
+# value:
+#
+#    R list, with componentns:
+#
+#       sdev, rotation: as in prcomp()
+#       thts: the sdev/rotation results of applying prcomp()
+#             to the individual data chunksb
+caprcomp <- function(cls,prcompargs) {
+   ovf <- function(u) {
+      tmp <- paste("prcomp(",prcompargs,")",collapse="")
+      docmd(tmp)
+   }
+   estf <- function(pcout) {
+      c(pcout$sdev,pcout$rotation)
+   }
+   cabout <- cabase(cls,ovf,estf)
+   tmp <- cabout$tht
+   p <- findp(length(tmp))
+   res <- list()
+   res$sdev <- tmp[1:p]
+   res$rotation <- matrix(tmp[-(1:p)],ncol=p)
+   res$chunkrots <- cabout$thts
+   res
+}
+
+# solves p + p^2 = l
+findp <- function(l) {
+   tmp <- (-1 + sqrt(1+4*l)) / 2
+   round(tmp)
+}
 
 

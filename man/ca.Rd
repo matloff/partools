@@ -1,8 +1,9 @@
-\name{ca,cabase,calm,caglm}
+\name{ca,cabase,calm,caglm,caprcomp}
 \alias{ca}
 \alias{cabase}
 \alias{calm}
 \alias{caglm}
+\alias{caprcomp}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -37,8 +38,37 @@ caglm(cls,dataname,glmargs)
   \item{glmargs}{Quoted string representing arguments to \code{glm},
      e.g. R formula, \code{data} specification, and \code{family}
      arguments.}
+  \item{prcompargs}{Quoted string representing arguments to 
+     \code{prcomp}.}
   \item{cacall}{If TRUE, indicates that \code{cabase} had been called by
-  \code{cac}.}
+     \code{ca}.}
+}
+
+\value{
+
+The functions \code{ca} and \code{cabase} return an R list, with the
+following components:
+
+\itemize{
+   \item \code{tht}:  the Software Alchemy estimator
+   \item \code{thtcov} if requested, the estimated covariance matrix of
+      \code{tht}
+   \item \code{thts} the estimator calculated from the individual data
+      chunks
+}
+
+The wrapper functions \code{calm} and \code{caglm} return the
+coefficient vectors and their estimated covariance matrices.
+
+Another wrapper function, \code{caprcomp}, returns list elements
+\code{sdev} (square roots of the eigenvalues) and \code{rotation}, as
+with \code{prcomp}.  However, the eigenvectors corresponding to the
+smaller eigenvalues may have high variances in in the nonparallel
+version, which will be reflected in large differences from chunk to
+chunk; thus \code{caprcomp} returns the \code{thts} element from the
+output of \code{cabase}.  This is an important advantage of the Software
+Alchemy approach.
+
 }
 
 \details{Implements the ``Software Alchemy'' method for parallelizing
@@ -62,6 +92,14 @@ in some sorted order, it must be randomized first, say using the
 \code{scramble} option in \code{distribsplit} or by calling
 \code{readnscramble}, depending on whether your data is already in memory or
 still in a file.
+
+The functions \code{calm}, \code{caglm} etc. are wrappers for the
+application of Software Alchemy to the R functions \code{lm}, \code{glm}
+and so on.
+
+In the case of \code{caprcomp}, the estimator values on the individual
+data chunks are also reported
+
 }
 
 \value{R list with these components:
@@ -113,6 +151,9 @@ distribsplit(cls,"newadult")
 caglm(cls," gt50 ~ ., family = binomial,data=newadult")$tht 
 # compare to nonparallel
 glm(gt50 ~ .,family=binomial,data=newadult) 
+
+caprcomp(cls,'prgeng,scale=T') 
+prcomp(prgeng,scale=T) 
 
 }
 
