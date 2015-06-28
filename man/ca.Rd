@@ -1,7 +1,8 @@
-\name{ca,cabase,calm}
+\name{ca,cabase,calm,caglm}
 \alias{ca}
 \alias{cabase}
 \alias{calm}
+\alias{caglm}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -31,6 +32,8 @@ calm(cls,dataname,forla)
   \item{findmean}{If TRUE, output the average of the estimates from the
      chunks; otherwise, output only the estimates themselves.}
   \item{forla}{Quoted string representing an R formula.} 
+  \item{forlafam}{Quoted string representing an R formula and the
+  \code{glm} argument \code{family}, separated by a comma.} 
 }
 
 \details{Implements the ``Software Alchemy'' method for parallelizing
@@ -83,8 +86,14 @@ lm(u[,3] ~ u[,1]+u[,2])
 data(prgeng) 
 distribsplit(cls,"prgeng") 
 calm(cls,"prgeng","wageinc ~ age+I(age^2)+sex+wkswrkd")$tht 
+# compare to nonparallel
 lm(wageinc ~ age+I(age^2)+sex+wkswrkd,data=prgeng)
 
+data(newadult) 
+distribsplit(cls,"newadult") 
+caglm(cls,"newadult"," gt50 ~ ., family = binomial")$tht 
+# compare to nonparallel
+glm(gt50 ~ .,family=binomial,data=newadult) 
 
 }
 

@@ -112,4 +112,15 @@ calm <- function(cls,dataname,forla) {
    cabase(cls,dataname,ovf,coef,vcov)
 }
 
+# ca() wrapper for glm()
+# arguments and value as in calm()
+caglm <- function(cls,dataname,forlafam) {
+   ovf <- function(u) {
+      tmp <- paste("glm(",forlafam,",data=",dataname,")",collapse="")
+      docmd(tmp)
+   }
+   cabase(cls,dataname,ovf,coef,vcov)
+}
+
+
 
