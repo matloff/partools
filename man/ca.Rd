@@ -57,9 +57,6 @@ following components:
       chunks
 }
 
-The wrapper functions \code{calm} and \code{caglm} return the
-coefficient vectors and their estimated covariance matrices.
-
 Another wrapper function, \code{caprcomp}, returns list elements
 \code{sdev} (square roots of the eigenvalues) and \code{rotation}, as
 with \code{prcomp}.  However, the eigenvectors corresponding to the
@@ -97,9 +94,6 @@ The functions \code{calm}, \code{caglm} etc. are wrappers for the
 application of Software Alchemy to the R functions \code{lm}, \code{glm}
 and so on.
 
-In the case of \code{caprcomp}, the estimator values on the individual
-data chunks are also reported, in the list element \code{chunkrots}.
-
 }
 
 \value{R list with these components:
@@ -115,6 +109,12 @@ data chunks are also reported, in the list element \code{chunkrots}.
       if requested
       
    }
+
+The wrapper functions \code{calm} and \code{caglm} return the
+coefficient vectors and their estimated covariance matrices.
+
+In the case of \code{caprcomp}, the estimator values on the individual
+data chunks are also reported, in the list element \code{chunkrots}.
 
 }
 
