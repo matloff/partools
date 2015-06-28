@@ -25,8 +25,9 @@
 # 
 # value:
 #
-#    R list, consisting of the estimates from the chunks, and if
-#    requested, their average and its estimated covariance matrix 
+#    R list, consisting of the estimates from the chunks, thts, and if
+#    requested, their average tht and its estimated covariance matrix 
+#    thtcov
 #
 ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
    if (conv2mat) {
@@ -42,24 +43,23 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
 
 # arguments:
 #
-#    dataname: quoted name of a distributed data frame/matrix 
-#
-#    remainder as in ca() above, except:
-# 
 # value:
+#
+#    as in ca() above, except:
+#
+#    cacall: TRUE if cabase() was invoked by ca()
+#
+# if cacall is FALSE, then the distributed data is not explicitly
+# accessed, only via ovf(); however, it is assumed that the data has
+# been created using distribsplit() or filesplit()
+#
+# value: 
 #
 #    as in ca() above
 #
-cabase <- function(cls,dataname,ovf,estf,
+cabase <- function(cls,ovf,estf,
       estcovf=NULL,conv2mat=TRUE,findmean=TRUE,cacall=FALSE) {
    clusterExport(cls,c("ovf","estf","estcovf"),envir=environment())
-   # z168 will be real if cabase() was invoked by ca(), otherwise just a
-   # convenience in computing wts later
-   if (!cacall) {
-      z168cmd <- paste("z168 <- get('",dataname,"')",sep="") 
-      clusterExport(cls,"z168cmd",envir=environment()) 
-      clusterEvalQ(cls,eval(parse(text=z168cmd))) 
-   }
    # apply the "theta hat" function, e.g. glm(), and extract the
    # apply the desired statistical method at each chunk
    ovout <- if (cacall) clusterEvalQ(cls,ovf(z168)) else
@@ -72,11 +72,11 @@ cabase <- function(cls,dataname,ovf,estf,
    # find the chunk-averaged theta hat and estimated covariance matrix, 
    # if requested
    if (findmean) {
-      # dimensionality of theata
+      # dimensionality of theta
       lth <- length(thts[1,])
-      # theta-hat is a weighted average of the ests at the chunks
-      nrows <- unlist(clusterEvalQ(cls,nrow(z168)))
-      wts <- nrows / sum(nrows)
+      # since the chunk sizes will differ by at most 1, the weights will
+      # be very close to equal, so make them so
+      wts <- rep(1 / length(cls), length(cls))
       # compute mean
       tht <- rep(0.0,lth)
       for (i in 1:length(cls)) {
@@ -105,29 +105,29 @@ cabase <- function(cls,dataname,ovf,estf,
 # arguments:
 #
 #    cls: cluster
-#    dataname: quoted name of a distributed data frame
-#    forla: quoted string representing R formula, 
-#           e.g. "weight ~ height + age"
+#    lmargs: quoted string representing arguments to lm()
+#            e.g. "weight ~ height + age, data-mlb"
 #
 # value: Software Alchemy estimate, statistically equivalent to direct
-#    nonparallel call to lm(); R list is in value of ca() 
+#    nonparallel call to lm(); R list is value of ca() 
 #
-calm <- function(cls,dataname,forla) {
+calm <- function(cls,lmargs) {
    ovf <- function(u) {
-      tmp <- paste("lm(",forla,",data=",dataname,")",collapse="")
+      tmp <- paste("lm(",lmargs,")",collapse="")
       docmd(tmp)
    }
-   cabase(cls,dataname,ovf,coef,vcov)
+   cabase(cls,ovf,coef,vcov)
 }
 
 # ca() wrapper for glm()
-# arguments and value as in calm()
-caglm <- function(cls,dataname,forlafam) {
+# arguments and value as in calm(), except that it should include
+# specification of family
+caglm <- function(cls,glmargs) {
    ovf <- function(u) {
-      tmp <- paste("glm(",forlafam,",data=",dataname,")",collapse="")
+      tmp <- paste("glm(",glmargs,")",collapse="")
       docmd(tmp)
    }
-   cabase(cls,dataname,ovf,coef,vcov)
+   cabase(cls,ovf,coef,vcov)
 }
 
 
