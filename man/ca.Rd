@@ -1,9 +1,10 @@
-\name{ca,cabase,calm,caglm,caprcomp}
+\name{ca,cabase,calm,caglm,caprcomp,cakm}
 \alias{ca}
 \alias{cabase}
 \alias{calm}
 \alias{caglm}
 \alias{caprcomp}
+\alias{cakm}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -14,22 +15,21 @@ Easy parallelization of most statistical computations.
 
 \usage{
 ca(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE)
-cabase(cls,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE,cacall=FALSE)
-calm(cls,dataname,lmargs) 
-caglm(cls,dataname,glmargs) 
+cabase(cls,ovf,estf,estcovf=NULL,findmean=TRUE,cacall=FALSE)
+calm(cls,lmargs) 
+caglm(cls,glmargs) 
+cakm(cls,kmargs) 
 }
 
 \arguments{
   \item{cls}{A cluster run under the \pkg{parallel} package.}
   \item{z}{A data frame, matrix or vector, one observation per row/element.} 
-  \item{dataname}{Quoted name of a distributed data frame, such as is 
-     produced by \code{distribsplit} or \code{readnscramble}.}
   \item{ovf}{Overall statistical function, say \code{glm}.}
-  \item{estf}{Function to extract the point estimate (possibly
+  \item{estf}{Function to extract the point estimate (typically
      vector-valued) from the output of \code{ovf}.}
-  \item{estcovf}{if provided, function to extract the estimated 
+  \item{estcovf}{If provided, function to extract the estimated 
      covariance matrix of the output of \code{estf}}.
-  \item{conv2mat}{If TRUE, convert data framee input to a matrix 
+  \item{conv2mat}{If TRUE, convert data frame input to a matrix 
      (needed for some cases of 'ovf').}
   \item{findmean}{If TRUE, output the average of the estimates from the
      chunks; otherwise, output only the estimates themselves.}
@@ -40,59 +40,44 @@ caglm(cls,dataname,glmargs)
      arguments.}
   \item{prcompargs}{Quoted string representing arguments to 
      \code{prcomp}.}
+  \item{kmargs}{Quoted string representing arguments to 
+     \code{kmeans}.}
   \item{cacall}{If TRUE, indicates that \code{cabase} had been called by
      \code{ca}.}
 }
 
-\value{
-
-The functions \code{ca} and \code{cabase} return an R list, with the
-following components:
-
-\itemize{
-   \item \code{tht}:  the Software Alchemy estimator
-   \item \code{thtcov} if requested, the estimated covariance matrix of
-      \code{tht}
-   \item \code{thts} the estimator calculated from the individual data
-      chunks
-}
-
-Another wrapper function, \code{caprcomp}, returns list elements
-\code{sdev} (square roots of the eigenvalues) and \code{rotation}, as
-with \code{prcomp}.  However, the eigenvectors corresponding to the
-smaller eigenvalues may have high variances in in the nonparallel
-version, which will be reflected in large differences from chunk to
-chunk; thus \code{caprcomp} returns the \code{thts} element from the
-output of \code{cabase}.  This is an important advantage of the Software
-Alchemy approach.
-
-}
-
 \details{Implements the ``Software Alchemy'' method for parallelizing
 statistical computations (N. Matloff, \emph{Parallel Computation for
-Data Science}, Chapman and Hall, 2015.  This can result in substantial
+Data Science}, Chapman and Hall, 2015.)  This can result in substantial
 speedups in computation.
 
 The data are broken into chunks, and the given estimator is applied to
 each.  The results are averaged, and an estimated covariance matrix
-computed.
+computed (optional).
 
 The key point is that the resulting estimator is statistically
 equivalent to the original, nonparallel one, in the sense that they have
 the same asymptotic statistical accuracy.  Since one would use Software
 Alchemy only with large data sets anyway (otherwise, parallel
-computation would not be needed), the asymptotic aspect should not be an
-issue.
-
-Note:  The method assumes i.i.d. data.  If your data set had been stored
-in some sorted order, it must be randomized first, say using the
-\code{scramble} option in \code{distribsplit} or by calling
-\code{readnscramble}, depending on whether your data is already in memory or
-still in a file.
+computation would not be needed for speed), the asymptotic aspect should
+not be an issue.  In other words, one achieves the same statistical
+accuracy while possibly attaining much faster computation.
 
 The functions \code{calm}, \code{caglm} etc. are wrappers for the
 application of Software Alchemy to the R functions \code{lm}, \code{glm}
-and so on.
+and so on.  For other estimators, the user may call \code{ca} or
+\code{cabase} directly, or write a custom wrapper using the ones here as
+a model.
+
+Another wrapper function, \code{caprcomp}, acts on \code{prcomp}.
+The \code{cakm} function does k-Means analysis,
+wrapping \code{kmeans}.
+
+The method assumes that the base estimator is asymptotically normal, and
+assumes i.i.d. data.  If your data set had been stored in some sorted
+order, it must be randomized first, say using the \code{scramble} option
+in \code{distribsplit} or by calling \code{readnscramble}, depending on
+whether your data is already in memory or still in a file.
 
 }
 
@@ -110,11 +95,34 @@ and so on.
       
    }
 
-The wrapper functions \code{calm} and \code{caglm} return the
-coefficient vectors and their estimated covariance matrices.
+The wrapper functions return the following list elements:
 
-In the case of \code{caprcomp}, the estimator values on the individual
-data chunks are also reported, in the list element \code{chunkrots}.
+   \itemize{
+
+      \item \code{calm}, \code{caglm}: estimated regression coefficients
+      and their estimated covariance matricx
+
+      \item \code{caprcomp}: \code{sdev} (square roots of the
+      eigenvalues) and \code{rotation}, as with \code{prcomp};
+      \code{thts} is returned as well.
+
+      \item \code{cakm}: \code{centers} and \code{size}, as with
+      \code{kmeans}; note that the order of the centers may come out
+      different from that of \code{kmeans}, due to random
+      initialization; consider using \code{set.seed};
+      \code{thts} is returned as well.
+
+   }
+
+The wrappers that return \code{thts} are useful for algorithms that may
+exhibit some instability.  For \code{prcomp}, for instance, the
+eigenvectors corresponding to the smaller eigenvalues may have high
+variances in the nonparallel version, which will be reflected in large
+differences from chunk to chunk; thus \code{caprcomp} returns the
+\code{thts} element from the output of \code{cabase}.  Note that this
+reflects a fundamental problem with the algorithm on these variables,
+not due to Software Alchemy; on the contrary, this is an important
+advantage of the Software Alchemy approach.
 
 }
 
@@ -154,6 +162,12 @@ glm(gt50 ~ .,family=binomial,data=newadult)
 
 caprcomp(cls,'prgeng,scale=T') 
 prcomp(prgeng,scale=T) 
+
+pe <- prgeng[,c(1,3,8)] 
+distribsplit(cls,"pe") 
+z1 <- cakm(cls,'pe,centers=3',3); z1$size; z1$centers 
+# check algorithm unstable
+z1$thts  # looks unstable
 
 }
 
