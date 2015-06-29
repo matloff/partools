@@ -136,6 +136,7 @@ caglm <- function(cls,glmargs) {
 # arguments:
 #
 #    prcompargs: arguments to go into prcomp()
+#    p: number of variables
 #
 # value:
 #
@@ -144,28 +145,50 @@ caglm <- function(cls,glmargs) {
 #       sdev, rotation: as in prcomp()
 #       thts: the sdev/rotation results of applying prcomp()
 #             to the individual data chunksb
-caprcomp <- function(cls,prcompargs) {
+caprcomp <- function(cls,prcompargs,p) {
    ovf <- function(u) {
       tmp <- paste("prcomp(",prcompargs,")",collapse="")
       docmd(tmp)
    }
-   estf <- function(pcout) {
-      c(pcout$sdev,pcout$rotation)
-   }
+   # we're interested in both sdev and rotation, so string them together
+   # into one single vector for averaging
+   estf <- function(pcout) c(pcout$sdev,pcout$rotation)
    cabout <- cabase(cls,ovf,estf)
+   # now extract the sdev and rotation parts back
    tmp <- cabout$tht
-   p <- findp(length(tmp))
    res <- list()
    res$sdev <- tmp[1:p]
    res$rotation <- matrix(tmp[-(1:p)],ncol=p)
-   res$chunkrots <- cabout$thts
+   res$thts <- cabout$thts
    res
 }
 
-# solves p + p^2 = l
-findp <- function(l) {
-   tmp <- (-1 + sqrt(1+4*l)) / 2
-   round(tmp)
+# ca() wrapper for kmean()
+#
+# arguments:
+#
+#    kmargs: arguments for kmeans()
+#    p: number of variables
+#
+# value: sdev and rotation from kmeans() output, plus thts to explore
+# possible instability
+#
+cakm <- function(cls,kmargs,p) {
+   ovf <- function(u) {
+      tmp <- paste("kmeans(",kmargs,")",collapse="")
+      docmd(tmp)
+   }
+   # as in caprcomp(), string the output entities together, then later
+   # extract them back
+   estf <- function(kmout) c(kmout$size,kmout$centers)
+   kmout <- cabase(cls,ovf,estf)
+   ncenters <- length(kmout$tht) / (1+p)
+   tmp <- kmout$tht
+   res <- list()
+   res$size <- round(tmp[1:ncenters] * length(cls))
+   res$centers <- matrix(tmp[-(1:ncenters)],ncol=p)
+   res$thts <- kmout$thts
+   res
 }
 
 
