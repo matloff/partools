@@ -68,7 +68,8 @@ operation.
 
 If \code{xterm} is NULL, you will be prompted to create the terminal
 windows by hand (or use existing ones), and run \code{screen} there as
-instructed.  \code{Terminal} works on Macs. 
+instructed.  \code{Terminal} works on Macs; label the windows by hand,
+by clicking "Shell" then "Edit".
 
 When finished with the debugging session, run \code{killdebug} from the
 original window (the one from which you invoked \code{dbs}) to quit the
