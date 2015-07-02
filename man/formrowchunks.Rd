@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribtable,docmd}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribtable,distribrange,docmd,geteltis}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -9,7 +9,9 @@
 \alias{distribcat}
 \alias{distribagg}
 \alias{distribtable}
+\alias{distribrange}
 \alias{docmd}
+\alias{geteltis}
 
 \title{
 Utilities for \pkg{parallel} cluster code, including ``Snowdoop.''
@@ -29,7 +31,9 @@ exportlibpaths(cls)
 distribsplit(cls,dfname,scramble=FALSE)
 distribcat(cls,dfname) 
 distribagg(cls,ynames,xnames,dataname,FUN,FUN1) 
+distribrange(cls,vec,na.rm=FALSE) 
 docmd(toexec) 
+geteltis(lst,i)
 }
 
 \arguments{
@@ -54,7 +58,11 @@ docmd(toexec)
      aggregation within cluster nodes.}
   \item{FUN1}{Quoted name of aggregation function to be used in
      aggregation between cluster nodes.}
+  \item{vec}{Quoted expression that evaluates to a vector.}
+  \item{na.rm}{Remove NA values.}
   \item{toexec}{Quoted string containing command to be executed.}
+  \item{lst}{An R list of vectors.}
+  \item{i}{A column index}
 }
 
 \details{The function \code{formrowchunks} forms chunks of rows of
@@ -89,6 +97,8 @@ restricted) form of \code{aggregate}.
 
 The \code{distribtable} function is a distributed form of \code{table}.
 
+The \code{distribrange} function is a distributed form of \code{range}.
+
 The \code{docmd} function executes the quoted command.  Useful for
 building up complex command for remote execution.  An R \code{formula}
 will be constructed from the arguments \code{ynames} and \code{xnames},
@@ -96,7 +106,9 @@ with the latter put on the left side of the \code{~} sign, with
 \code{cbind} for combining, and the latter put on the right side, with
 \code{+} signs as delimiters.
 
-See vignettes for more information.  
+The \code{geteltis} function extracts from an R list of vectors element
+\code{i} from each.
+
 }
 
 \value{

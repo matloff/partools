@@ -147,9 +147,25 @@ distribtable <- function(cls,xnames,dataname) {
    xtabs(counts ~ .,data=tmp)
 }
 
+distribrange <- function(cls,vec,na.rm=FALSE) {
+   narm <- if(na.rm) 'TRUE' else 'FALSE'  
+   narm <- paste("na.rm=",narm)
+   tmp <- paste("range(", vec, ",",narm,")",collapse = "")
+   rangeout <- clusterCall(cls,docmd,tmp)
+   vecmin <- min(geteltis(rangeout,1))
+   vecmax <- max(geteltis(rangeout,2))
+   c(vecmin,vecmax)
+}
+
 ######################### misc. utilities ########################
 
 # execute the contents of a quoted command; main use is with
 # clusterEvalQ()
 docmd <- function(toexec) eval(parse(text=toexec))
 
+# extract element i of each element in the R list lst, which is a list
+# of vectors
+geteltis <- function(lst,i) {
+   get1elti <- function(lstmember) lstmember[i]
+   sapply(lst,get1elti)
+}
