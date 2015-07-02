@@ -66,6 +66,7 @@ cabase <- function(cls,ovf,estf,
                         clusterEvalQ(cls,ovf()) 
    # theta-hats, with the one for chunk i in row i
    thts <- t(sapply(ovout,estf))
+   if (is.vector(thts)) thts <- matrix(thts,ncol=1)
    # res will be the returned result of this function
    res <- list()
    res$thts <- thts 
@@ -191,4 +192,24 @@ cakm <- function(cls,kmargs,p) {
    res
 }
 
+# finds the means of the columns in the string expression cols
+cameans <- function(cls,cols) {
+   ovf <- function(u) {
+      tmp <- paste("colMeans(",cols,")",collapse="")
+      docmd(tmp)
+   }
+   estf <- function(z) z
+   cabase(cls,ovf,estf)
+}
 
+# finds the quantiles of the vector defined in the string vec
+caquantile <- function(cls,vec,probs=c(0.25,0.50,0.75)) {
+   ovf <- function(u) {
+      probs <- paste(probs,collapse=",")
+      probs <- paste("c(",probs,")",sep="")
+      tmp <- paste("quantile(",vec,",",probs,",", ")",collapse="")
+      docmd(tmp)
+   }
+   estf <- function(z) z
+   cabase(cls,ovf,estf)
+}

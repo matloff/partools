@@ -1,10 +1,12 @@
-\name{ca,cabase,calm,caglm,caprcomp,cakm}
+\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile}
 \alias{ca}
 \alias{cabase}
 \alias{calm}
 \alias{caglm}
 \alias{caprcomp}
 \alias{cakm}
+\alias{cameans}
+\alias{caquantile}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -19,6 +21,8 @@ cabase(cls,ovf,estf,estcovf=NULL,findmean=TRUE,cacall=FALSE)
 calm(cls,lmargs) 
 caglm(cls,glmargs) 
 cakm(cls,kmargs) 
+cameans(cls,cols) 
+caquantile(cls,vec, probs = c(0.25, 0.5, 0.75)) 
 }
 
 \arguments{
@@ -44,6 +48,11 @@ cakm(cls,kmargs)
      \code{kmeans}.}
   \item{cacall}{If TRUE, indicates that \code{cabase} had been called by
      \code{ca}.}
+  \item{cols}{A quoted string that evaluates to data frame or matrix.}
+  \item{vec}{A quoted string that evaluates to a vector.}
+  \item{probs}{As in the argument with the same name in
+     \code{quantile}. Should not be 0.00 or 1.00, as asymptotic
+     normality doesn't hold.}
 }
 
 \details{Implements the ``Software Alchemy'' method for parallelizing
@@ -63,15 +72,26 @@ computation would not be needed for speed), the asymptotic aspect should
 not be an issue.  In other words, one achieves the same statistical
 accuracy while possibly attaining much faster computation.
 
-The functions \code{calm}, \code{caglm} etc. are wrappers for the
-application of Software Alchemy to the R functions \code{lm}, \code{glm}
-and so on.  For other estimators, the user may call \code{ca} or
-\code{cabase} directly, or write a custom wrapper using the ones here as
-a model.
+Wrapper functions, applying Software Alchemy to the corresponding R
+function:
 
-Another wrapper function, \code{caprcomp}, acts on \code{prcomp}.
-The \code{cakm} function does k-Means analysis,
-wrapping \code{kmeans}.
+   \itemize{
+
+      \item \code{calm}: Wrapper for \code{lm}.
+
+      \item \code{caglm}: Wrapper for \code{glm}.
+
+      \item \code{caprcomp}: Wrapper for \code{prcomp}.
+
+      \item \code{cakm}: Wrapper for \code{kmeans}.
+
+      \item \code{caprcomp}: Wrapper for \code{prcomp}.
+
+      \item \code{cameans}: Wrapper for \code{colMeans}.
+
+      \item \code{caquantile}: Wrapper for \code{quantile}.
+
+   }
 
 The method assumes that the base estimator is asymptotically normal, and
 assumes i.i.d. data.  If your data set had been stored in some sorted
@@ -91,7 +111,7 @@ whether your data is already in memory or still in a file.
       \item \code{tht}, the chunk-averaged overall estimator, if requested
    
       \item \code{thtcov}, the estimated covariance matrix of \code{tht},
-      if requested
+      if available
       
    }
 
@@ -157,11 +177,13 @@ sqrt(diag(caout$thtcov))
 data(newadult) 
 distribsplit(cls,"newadult") 
 caglm(cls," gt50 ~ ., family = binomial,data=newadult")$tht 
-# compare to nonparallel
-glm(gt50 ~ .,family=binomial,data=newadult) 
 
 caprcomp(cls,'prgeng,scale=T') 
 prcomp(prgeng,scale=T) 
+
+cameans(cls,"prgeng")
+cameans(cls,"prgeng[,c('age','wageinc')]")
+caquantile(cls,'prgeng$age')
 
 pe <- prgeng[,c(1,3,8)] 
 distribsplit(cls,"pe") 
