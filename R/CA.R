@@ -193,9 +193,11 @@ cakm <- function(cls,kmargs,p) {
 }
 
 # finds the means of the columns in the string expression cols
-cameans <- function(cls,cols) {
+cameans <- function(cls,cols,na.rm=FALSE) {
    ovf <- function(u) {
-      tmp <- paste("colMeans(",cols,")",collapse="")
+      narm <- if(na.rm) 'TRUE' else 'FALSE'  
+      narm <- paste("na.rm=",narm)
+      tmp <- paste("colMeans(",cols,",",narm,")",collapse="")
       docmd(tmp)
    }
    estf <- function(z) z
@@ -203,11 +205,13 @@ cameans <- function(cls,cols) {
 }
 
 # finds the quantiles of the vector defined in the string vec
-caquantile <- function(cls,vec,probs=c(0.25,0.50,0.75)) {
+caquantile <- function(cls,vec,probs=c(0.25,0.50,0.75),na.rm=FALSE) {
    ovf <- function(u) {
       probs <- paste(probs,collapse=",")
       probs <- paste("c(",probs,")",sep="")
-      tmp <- paste("quantile(",vec,",",probs,",", ")",collapse="")
+      narm <- if(na.rm) 'TRUE' else 'FALSE'  
+      narm <- paste("na.rm=",narm)
+      tmp <- paste("quantile(",vec,",",probs,",",narm,")",collapse="")
       docmd(tmp)
    }
    estf <- function(z) z

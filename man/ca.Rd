@@ -21,8 +21,8 @@ cabase(cls,ovf,estf,estcovf=NULL,findmean=TRUE,cacall=FALSE)
 calm(cls,lmargs) 
 caglm(cls,glmargs) 
 cakm(cls,kmargs) 
-cameans(cls,cols) 
-caquantile(cls,vec, probs = c(0.25, 0.5, 0.75)) 
+cameans(cls,cols,na.rm=FALSE) 
+caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE) 
 }
 
 \arguments{
