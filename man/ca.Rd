@@ -64,6 +64,12 @@ The data are broken into chunks, and the given estimator is applied to
 each.  The results are averaged, and an estimated covariance matrix
 computed (optional).
 
+In \code{cabase}, the data object is assumed to be a distributed data
+frame or matrix, produced by \code{distribsplit} or
+\code{readnscramble}. Note by the way that the data object is not
+specified explicitly in the argument list; this is done through the
+function \code{ovf}.
+
 The key point is that the resulting estimator is statistically
 equivalent to the original, nonparallel one, in the sense that they have
 the same asymptotic statistical accuracy.  Since one would use Software
@@ -92,6 +98,16 @@ function:
       \item \code{caquantile}: Wrapper for \code{quantile}.
 
    }
+
+A note on NA values:  Some R functions such as \code{lm}, \code{glm} and
+\code{prcomp} have an \code{na.action} argument.  The default is
+\code{na.omit}, which means that cases with at least one NA value will
+be discarded. (This is also settable via \code{options()}.) However,
+\code{na.omit} seems to have no effect in \code{prcomp} unless that
+function's \code{formula} option is used. When in doubt, apply the
+function \code{na.omit} directly; e.g. \code{na.omit(d)} for a data
+frame \code{d} returns a data frame consisting of only the intact rows of
+\code{d}.
 
 The method assumes that the base estimator is asymptotically normal, and
 assumes i.i.d. data.  If your data set had been stored in some sorted
