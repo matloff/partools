@@ -1,4 +1,4 @@
-\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs}
+\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave}
 \alias{snowdoop}
 \alias{filechunkname}
 \alias{filesort}
@@ -7,6 +7,7 @@
 \alias{readnscramble}
 \alias{linecount}
 \alias{getnumdigs}
+\alias{filesave}
 
 \title{
 Snowdoop.
@@ -24,6 +25,7 @@ filesort(cls,basenm,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep = "")
 filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
 filecat(cls, basenm, header = FALSE)  
 readnscramble(cls,basenm,header=FALSE,sep= " ")
+filesave((cls,dname,newbasename,ndigs,sep)
 linecount(infile,chunksize=100000)
 getnumdigs(nch)
 }
@@ -45,6 +47,11 @@ getnumdigs(nch)
   \item{sep}{Field delimiter used in \code{read.table}.}
   \item{infile}{Input file}
   \item{chunksize}{Number of lines to read at a time, for efficient I/O.}
+  \item{dname}{Quoted name of a distributed data frame or matrix.}
+  \item{newbasename}{Quoted name of the prefix of a distributed file,
+     e.g. \code{xyz} for a distributed file \code{xyz.01}, \code{xyz.02}
+     etc.}
+  \item{sep}{A field delimiter for lines in a text file, e.g. 'm'.}
 }
 
 \details{
@@ -73,6 +80,12 @@ Operations such as \code{ca} need i.i.d. data. If the original file
 storage was ordered on some variable, one needs to randomize the data
 first, using \code{readnscramble}.  It produces a distributed data
 frame/matrix under the name \code{basenm}.
+
+If you wish to use this same randomized data in a future session, you
+can save it as a distributed file by calling \code{filesave}. Of course,
+this function is also useful if one wishes to save a distributed data
+frame or matrix that was created computationally rather than from read
+from a distributed file.
 
 Some of the functions here are useful mainly as intermediate operations
 for the others:
@@ -133,6 +146,8 @@ co2 <- head(CO2,25)
 write.table(co2,"co2",row.names=FALSE) 
 filesplit(2,"co2",header=TRUE) 
 readnscramble(cls,"co2",header=TRUE)
+# save the scrambled version
+filesave(cls,'co2','co2s',1,sep=',')
 
 # example of filechunkname()
 clusterEvalQ(cls,filechunkname("x",3))  # returns "x.1", "x.2"
