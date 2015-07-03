@@ -193,6 +193,20 @@ filecat <- function (cls, basenm, header = FALSE)  {
     close(conout)
 }
 
+# saves the distributed data frame/matrix d to a distributed file of the
+# specified basename; the suffix has ndigs digits, and the field
+# separator will be sep
+filesave <- function(cls,dname,newbasename,ndigs,sep) {
+   tmp <- paste('"',newbasename,'",',ndigs,sep='')
+   cmd <- paste('myfilename <- filechunkname(',tmp,')',sep='')
+   clusterExport(cls,"cmd",envir=environment())
+   clusterEvalQ(cls,eval(parse(text=cmd)))
+   tmp <- paste(dname,'myfilename',sep=',')
+   cmd <- paste('write.table(',tmp,',row.names=FALSE,sep="',sep,'")',sep='')
+   clusterExport(cls,"cmd",envir=environment())
+   clusterEvalQ(cls,docmd(cmd))
+}
+
 # find the number of digits needed for suffixes for nch chunks
 getnumdigs <- function(nch) {
    # floor(log10(nch)) + 1

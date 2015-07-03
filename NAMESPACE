@@ -3,7 +3,7 @@ import(parallel)
 
 export(dbs,writemgrscreen,writewrkrscreens,killdebug,dbsmsgstart,dbsmsg,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,linecount,
-      readnscramble,getnumdigs,
+      readnscramble,getnumdigs,filesave,
    distribsplit,distribcat,distribagg,distribtable,distribrange,
       docmd,geteltis,
    ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,
