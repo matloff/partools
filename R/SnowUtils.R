@@ -141,11 +141,12 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUN1=FUN) {
    aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
 }
 
-distribtable <- function(cls,xnames,dataname) {
-   tmp <- distribagg(cls,xnames[1],xnames,dataname,"length","sum")
-   names(tmp)[ncol(tmp)] <- "counts"
-   xtabs(counts ~ .,data=tmp)
-}
+# currently not in service; xtabs() call VERY slow
+# distribtable <- function(cls,xnames,dataname) {
+#    tmp <- distribagg(cls,xnames[1],xnames,dataname,"length","sum")
+#    names(tmp)[ncol(tmp)] <- "counts"
+#    xtabs(counts ~ .,data=tmp)
+# }
 
 distribrange <- function(cls,vec,na.rm=FALSE) {
    narm <- if(na.rm) 'TRUE' else 'FALSE'  

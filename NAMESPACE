@@ -4,7 +4,7 @@ import(parallel)
 export(dbs,writemgrscreen,writewrkrscreens,killdebug,dbsmsgstart,dbsmsg,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,linecount,
       readnscramble,getnumdigs,filesave,
-   distribsplit,distribcat,distribagg,distribtable,distribrange,
+   distribsplit,distribcat,distribagg,distribrange,
       docmd,geteltis,
    ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,
    setclsinfo,filechunkname,exportlibpaths,filesplit)

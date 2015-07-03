@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribtable,distribrange,docmd,geteltis}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,docmd,geteltis}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -8,7 +8,6 @@
 \alias{distribsplit}
 \alias{distribcat}
 \alias{distribagg}
-\alias{distribtable}
 \alias{distribrange}
 \alias{docmd}
 \alias{geteltis}
@@ -95,8 +94,6 @@ manager) node.
 The package's \code{distribagg} function is a distributed (and somewhat
 restricted) form of \code{aggregate}.  
 
-The \code{distribtable} function is a distributed form of \code{table}.
-
 The \code{distribrange} function is a distributed form of \code{range}.
 
 The \code{docmd} function executes the quoted command.  Useful for
@@ -117,9 +114,9 @@ In the case of \code{addlists}, the return value is the new list.
 The \code{distribagg} function returns a data frame, the same as would a
 call to \code{aggregate}, though possibly in different row order.
 
-The \code{distribtable} function returns an R table, the same as would a
-call to \code{table}, though the class is the \code{"xtabs"} subclass of
-\code{"table"}.
+% The \code{distribtable} function returns an R table, the same as would a
+% call to \code{table}, though the class is the \code{"xtabs"} subclass of
+% \code{"table"}.
 }
 
 \examples{
@@ -172,11 +169,6 @@ distribsplit(cls,"mtc")
 distribagg(cls,c("mpg","disp","hp"),c("cyl","gear"),"mtc","max")
 # check
 aggregate(cbind(mpg,disp,hp) ~ cyl+gear,data=mtcars,FUN=max)
-
-# test of distribtable()
-distribtable(cls,c("cyl","gear","carb"),"mtc")
-# check
-table(mtcars[,c("cyl","gear","carb")])
 
 }
 
