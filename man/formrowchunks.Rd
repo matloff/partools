@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,docmd,geteltis}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,docmd,geteltis}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -9,6 +9,7 @@
 \alias{distribcat}
 \alias{distribagg}
 \alias{distribrange}
+\alias{distribcounts}
 \alias{docmd}
 \alias{geteltis}
 
@@ -31,6 +32,7 @@ distribsplit(cls,dfname,scramble=FALSE)
 distribcat(cls,dfname) 
 distribagg(cls,ynames,xnames,dataname,FUN,FUN1) 
 distribrange(cls,vec,na.rm=FALSE) 
+distribcounts(cls,xnames,dataname)
 docmd(toexec) 
 geteltis(lst,i)
 }
@@ -92,7 +94,8 @@ the cluster nodes into one grand data frame as the calling (i.e.
 manager) node.
 
 The package's \code{distribagg} function is a distributed (and somewhat
-restricted) form of \code{aggregate}.  
+restricted) form of \code{aggregate}.  The special case of aggregating
+counts is handled by \code{distribcounts}.
 
 The \code{distribrange} function is a distributed form of \code{range}.
 
@@ -169,6 +172,10 @@ distribsplit(cls,"mtc")
 distribagg(cls,c("mpg","disp","hp"),c("cyl","gear"),"mtc","max")
 # check
 aggregate(cbind(mpg,disp,hp) ~ cyl+gear,data=mtcars,FUN=max)
+
+distribcounts(cls,c("cyl","gear"),"mtc")
+# check
+table(mtc$cyl,mtc$gear)
 
 }
 
