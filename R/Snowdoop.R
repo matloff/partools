@@ -1,4 +1,6 @@
 
+# dealing with Snowdoop distributed files
+
 # suppose we have a file basenm, stored in chunks, say basenm.001,
 # basenm.002 etc.; this function determine the file name for the chunk
 # to be handled by node nodenum; the latter is the ID for the executing
@@ -205,6 +207,20 @@ filesave <- function(cls,dname,newbasename,ndigs,sep) {
    cmd <- paste('write.table(',tmp,',row.names=FALSE,sep="',sep,'")',sep='')
    clusterExport(cls,"cmd",envir=environment())
    clusterEvalQ(cls,docmd(cmd))
+}
+
+# reads in a distributed file with prefix fname, producing a distributed
+# data frame dname
+fileread <- function(cls,fname,dname,ndigs,header=FALSE,sep) {
+   fnameq <- paste("'",fname,"'",sep="")
+   tmp <- paste(fnameq,ndigs,sep=',')
+   cmd <- paste("mychunk <- filechunkname(",tmp,")")
+   clusterExport(cls,"cmd",envir=environment())
+   clusterEvalQ(cls,eval(parse(text=cmd)))
+   tmp <- paste(dname,"<- read.table(mychunk,header=",header,",sep='")
+   cmd <- paste(tmp,sep,"')",sep="")
+   clusterExport(cls,"cmd",envir=environment())
+   clusterEvalQ(cls,eval(parse(text=cmd)))
 }
 
 # find the number of digits needed for suffixes for nch chunks

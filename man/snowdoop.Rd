@@ -1,4 +1,4 @@
-\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave}
+\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave,fileread}
 \alias{snowdoop}
 \alias{filechunkname}
 \alias{filesort}
@@ -8,6 +8,7 @@
 \alias{linecount}
 \alias{getnumdigs}
 \alias{filesave}
+\alias{fileread}
 
 \title{
 Snowdoop.
@@ -48,6 +49,8 @@ getnumdigs(nch)
   \item{infile}{Input file}
   \item{chunksize}{Number of lines to read at a time, for efficient I/O.}
   \item{dname}{Quoted name of a distributed data frame or matrix.}
+  \item{fname}{Quoted name of a distributed file.}
+  \item{ndigs}{Number of digits in file name suffix.)
   \item{newbasename}{Quoted name of the prefix of a distributed file,
      e.g. \code{xyz} for a distributed file \code{xyz.01}, \code{xyz.02}
      etc.}
@@ -85,7 +88,8 @@ If you wish to use this same randomized data in a future session, you
 can save it as a distributed file by calling \code{filesave}. Of course,
 this function is also useful if one wishes to save a distributed data
 frame or matrix that was created computationally rather than from read
-from a distributed file.
+from a distributed file.  To go the other direction, i.e. read a
+distributed file, use \code{fileread}.
 
 Some of the functions here are useful mainly as intermediate operations
 for the others:
@@ -154,6 +158,16 @@ clusterEvalQ(cls,filechunkname("x",3))  # returns "x.1", "x.2"
 
 # example of getnumdigs()
 getnumdigs(156)  # should be 3
+
+# examples of filesave() and fileread()
+mtc <- mtcars
+distribsplit(cls,"mtc")
+# save distributed data frame to distributed file
+filesave(cls,'mtc','ctm',1,',') 
+# read it back in to a new distributed data frame
+fileread(cls,'ctm','ctmnew',1,header=TRUE,sep=',') 
+# check it
+clusterEvalQ(cls,ctmnew) 
 
 }
 
