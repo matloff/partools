@@ -75,8 +75,8 @@ cabase <- function(cls,ovf,estf,
    if (findmean) {
       # dimensionality of theta
       lth <- length(thts[1,])
-      # since the chunk sizes will differ by at most 1, the weights will
-      # be very close to equal, so make them so
+      # since the chunk sizes will differ by a negligible amount, 
+      # so set equal weights
       wts <- rep(1 / length(cls), length(cls))
       # compute mean (leave open for restoring weights in future
       # version)
@@ -216,4 +216,10 @@ caquantile <- function(cls,vec,probs=c(0.25,0.50,0.75),na.rm=FALSE) {
    }
    estf <- function(z) z
    cabase(cls,ovf,estf)
+}
+
+# a Software Alchemy version of aggregate()/distribagg(); finds the
+# groups, applying FUN to each, then averaging across the cluster
+caagg <- function(cls,ynames,xnames,dataname,FUN) {
+   distribagg(cls,ynames,xnames,dataname,FUN,"mean")
 }

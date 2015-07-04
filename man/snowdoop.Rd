@@ -50,7 +50,7 @@ getnumdigs(nch)
   \item{chunksize}{Number of lines to read at a time, for efficient I/O.}
   \item{dname}{Quoted name of a distributed data frame or matrix.}
   \item{fname}{Quoted name of a distributed file.}
-  \item{ndigs}{Number of digits in file name suffix.)
+  \item{ndigs}{Number of digits in file name suffix.}
   \item{newbasename}{Quoted name of the prefix of a distributed file,
      e.g. \code{xyz} for a distributed file \code{xyz.01}, \code{xyz.02}
      etc.}

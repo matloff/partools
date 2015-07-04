@@ -1,4 +1,4 @@
-\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile}
+\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg}
 \alias{ca}
 \alias{cabase}
 \alias{calm}
@@ -7,6 +7,7 @@
 \alias{cakm}
 \alias{cameans}
 \alias{caquantile}
+\alias{caagg}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -23,6 +24,7 @@ caglm(cls,glmargs)
 cakm(cls,kmargs) 
 cameans(cls,cols,na.rm=FALSE) 
 caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE) 
+caagg(cls,ynames,xnames,dataname,FUN)
 }
 
 \arguments{
@@ -53,6 +55,7 @@ caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE)
   \item{probs}{As in the argument with the same name in
      \code{quantile}. Should not be 0.00 or 1.00, as asymptotic
      normality doesn't hold.}
+  \item{FUN}{Quoted name of a function.}
 }
 
 \details{Implements the ``Software Alchemy'' method for parallelizing
@@ -79,7 +82,7 @@ not be an issue.  In other words, one achieves the same statistical
 accuracy while possibly attaining much faster computation.
 
 Wrapper functions, applying Software Alchemy to the corresponding R
-function:
+function (or function elsewere in this package):
 
    \itemize{
 
@@ -96,6 +99,9 @@ function:
       \item \code{cameans}: Wrapper for \code{colMeans}.
 
       \item \code{caquantile}: Wrapper for \code{quantile}.
+
+      \item \code{caagg}: Like \code{distribagg}, but finds the
+         average value of \code{FUN} across the cluster nodes.
 
    }
 
@@ -189,6 +195,11 @@ caout$tht
 lm(wageinc ~ age+I(age^2)+sex+wkswrkd,data=prgeng)
 # get standard errors of the beta-hats
 sqrt(diag(caout$thtcov))
+
+# find mean age for all combinations of the cit and sex variables
+caagg(cls,"age",c("cit","sex"),"prgeng","mean") 
+# compare to nonparallel
+aggregate(age ~ cit+sex,data=prgeng,mean)  
 
 data(newadult) 
 distribsplit(cls,"newadult") 
