@@ -17,11 +17,58 @@
 % library(knitr)
 %\VignetteIndexEntry{Partools}
 
-\title{Overview of the partools Package}
+\title{partools: a Sensiible Package for Large Data Sets}
+
+\author{Norm Matloff, with Contributions form Alex Rumbaugh}
 
 \begin{document}
 
 \maketitle
+
+With the advent of Big Data, the Hadoop framework became ubiquitous.
+Yet it was clear that Hadoop had major shortcomings, and recently these
+are being much more seriously discussed.\footnote{See for example ``The
+Hadoop Honeymoon is Over,'' {\it
+https://www.linkedin.com/pulse/hadoop-honeymoon-over-martyn-jones}} This
+has resulted in a new platform, Spark, gaining popularity.  As with
+Hadoop, there is an R interfaces available for Spark, named SparkR. 
+
+Spark overcomes one of Hadoop's major problems, which is the lack of
+ability to cache data in a multi-pass computation.  However, Spark
+unfortunately retains the drawbacks of Hadoop:
+
+\begin{itemize}
+
+\item Due to reliance on sophisticated infrastructure involving Java and
+Scalar, they are difficult to install and properly configure for those
+who are not computer systems experts. 
+
+\item A major plus for Hadoop/Spark, fault tolerance, is needed only for
+users working on extremely large clusters, consisting of hundreds or
+thousands of nodes. Disk failure rates are simply too low for fault
+tolerance to be an issue on other systems.\footnote{In addition, one can
+provide fault tolerance externally, say with the XtreemFS system.}
+Worse, the fault tolerance mechanisms, which are especially extensive in
+Spark, {\it slow down the computation}.
+
+\end{itemize}
+
+The one firm advantage of Hadoop/Spark is their use of distributed file
+systems.  Under the philosophy ``Move the computation to the data,
+rather than {\it vice versa},'' network traffic may be greatly reduced,
+thus speeding up computation.
+
+Therefore:
+
+\begin{quote}
+It makes sense to develop and use a package that retains the
+distributed-file nature of Hadoop/Spark  while staying fully within 
+the simple-yet-more-powerful R framework.  The {\bf partools} package
+is designed to meet these goals.
+\end{quote}
+
+\section{Overview of the partools Package}
+
 
 
 \end{document}
