@@ -164,6 +164,14 @@ distribrange <- function(cls,vec,na.rm=FALSE) {
    c(vecmin,vecmax)
 }
 
+# execute the command cmd at each cluster node, typically select(), then
+# collect using rbind() at the caller
+distribgetrows <- function(cls,cmd) {
+   clusterExport(cls,'cmd',envir=environment())
+   res <- clusterEvalQ(cls,docmd(cmd))
+   Reduce(rbind,res)
+}
+
 ######################### misc. utilities ########################
 
 # execute the contents of a quoted command; main use is with

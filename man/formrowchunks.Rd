@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,docmd,geteltis}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,geteltis}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -10,6 +10,7 @@
 \alias{distribagg}
 \alias{distribrange}
 \alias{distribcounts}
+\alias{distribgetrows}
 \alias{docmd}
 \alias{geteltis}
 
@@ -33,6 +34,7 @@ distribcat(cls,dfname)
 distribagg(cls,ynames,xnames,dataname,FUN,FUN1) 
 distribrange(cls,vec,na.rm=FALSE) 
 distribcounts(cls,xnames,dataname)
+distribgetrows(cls,cmd)
 docmd(toexec) 
 geteltis(lst,i)
 }
@@ -61,6 +63,7 @@ geteltis(lst,i)
      aggregation between cluster nodes.}
   \item{vec}{Quoted expression that evaluates to a vector.}
   \item{na.rm}{Remove NA values.}
+  \item{cmd}{An R command.}
   \item{toexec}{Quoted string containing command to be executed.}
   \item{lst}{An R list of vectors.}
   \item{i}{A column index}
@@ -98,6 +101,11 @@ restricted) form of \code{aggregate}.  The special case of aggregating
 counts is handled by \code{distribcounts}.
 
 The \code{distribrange} function is a distributed form of \code{range}.
+
+The \code{distribgetrows} function can be used  a distributed form of,
+for instance, \code{select}.  In the latter case, the specified rows
+will be selected at each cluster node, then \code{rbind}-ed together at
+the caller.
 
 The \code{docmd} function executes the quoted command.  Useful for
 building up complex command for remote execution.  An R \code{formula}
@@ -176,6 +184,9 @@ aggregate(cbind(mpg,disp,hp) ~ cyl+gear,data=mtcars,FUN=max)
 distribcounts(cls,c("cyl","gear"),"mtc")
 # check
 table(mtc$cyl,mtc$gear)
+
+# extract and collect all the mtc rows in which the number of cylinders is 8
+distribgetrows(cls,'mtc[mtc$cyl == 8,]')
 
 }
 
