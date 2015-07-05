@@ -27,6 +27,7 @@ filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
 filecat(cls, basenm, header = FALSE)  
 readnscramble(cls,basenm,header=FALSE,sep= " ")
 filesave((cls,dname,newbasename,ndigs,sep)
+fileread(cls,fname,dname,ndigs,header=FALSE,sep)
 linecount(infile,chunksize=100000)
 getnumdigs(nch)
 }
