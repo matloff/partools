@@ -1,4 +1,3 @@
-
 \documentclass[11pt]{article}
 
 \setlength{\oddsidemargin}{0.0in}
@@ -19,7 +18,7 @@
 
 \title{partools: a Sensiible Package for Large Data Sets}
 
-\author{Norm Matloff, with Contributions form Alex Rumbaugh}
+\author{Norm Matloff, with Contributions from Alex Rumbaugh}
 
 \begin{document}
 
@@ -89,7 +88,59 @@ y} at its node.
 
 \end{itemize}
 
-\subsection{Statistical Functions vs. Tabulative Functions}
+\subsection{Package Structure}
+
+To understand the function structure, and indeed the central philosophy,
+keep in mind the following definitions, for a cluster in the R {\bf
+parallel} package.
+
+\begin{itemize}
+
+\item A {\it distributed file} {\bf x} consists of a number of separate
+physical files, with names {\bf x.01}, {\bf x.02} and so
+on.\footnote{The number of leading 0s in the suffix will depend on the
+number of cluster nodes.}  The file {\bf x} consists of the {\bf
+rbind()} of the rows of those separate files, though {\bf x} may be
+virtual.  Cluster node {\bf i} is responsible for {\bf x.i}.
+
+\item A {\it distributed data frame} (or distributed matrix) {\bf d}
+consists of a number of separate data frames, one at each cluster node,
+all named {\bf d}.  The data frame as a whole consists of the {\bf
+rbind()} of the rows of those separate data frames, though it may be
+virtual.
+
+\end{itemize}
+
+The fact that all the file chunks or data frame chunks have the same
+name (or same prefix) plays a key role in the software.
+
+The package consists of three main groups of functions:
+
+\begin{itemize}
+
+\item {\bf distributed-file functions:}
+
+   \begin{itemize}
+
+   \item {\bf filesplit():}  Create distributed file from monotlithic one.
+
+   \item {\bf filecat():}  Create monotlithic file from distributed one.
+
+   \item {\bf fileread():}  Read distributed file into distributed data
+   frame.
+
+   \item {\bf filesave():}  Write distributed data frame to distributed
+   file.
+
+   \end{itemize}
+
+\item {\bf tabulative functions:}
+
+\item {\bf statistical functions:}
+
+\end{itemize}
+
+There are also attendant support functions.
 
 One important point is the distinction between {\it statistical}
 functions and {\it tabulative} ones.
