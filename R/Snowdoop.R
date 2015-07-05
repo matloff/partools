@@ -220,7 +220,7 @@ fileread <- function(cls,fname,dname,ndigs,header=FALSE,sep) {
    tmp <- paste(dname,"<- read.table(mychunk,header=",header,",sep='")
    cmd <- paste(tmp,sep,"')",sep="")
    clusterExport(cls,"cmd",envir=environment())
-   clusterEvalQ(cls,eval(parse(text=cmd)))
+   invisible(clusterEvalQ(cls,eval(parse(text=cmd))))
 }
 
 # find the number of digits needed for suffixes for nch chunks
