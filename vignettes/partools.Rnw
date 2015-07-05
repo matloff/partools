@@ -67,8 +67,41 @@ the simple-yet-more-powerful R framework.  The {\bf partools} package
 is designed to meet these goals.
 \end{quote}
 
+Since {\bf partools} uses the portion of the R {\bf parallel} package
+derived from the package {\bf snow}, and because it is meant as an
+alternative to Hadoop, we informally refer to {\bf partools} as
+Snowdoop.
+
 \section{Overview of the partools Package}
 
+The package is based on the following very simple principles:
+
+\begin{itemize}
+
+\item Files are stored in a distributed manner, in files with a common
+basename. For example, the file {\bf x} is stored as separate files {\bf
+x.01}, {\bf x.02} etc. 
+
+\item Data frames and matrices are stored in memory at the nodes in a
+distributed manner, with a common name.  For example, the data frame
+{\bf y} is stored in chunks at the cluster nodes, each chunk known as {\bf
+y} at its node.
+
+\end{itemize}
+
+\subsection{Statistical Functions vs. Tabulative Functions}
+
+One important point is the distinction between {\it statistical}
+functions and {\it tabulative} ones.
+
+A statistical function is inherently an approximation.  An estimated
+regression coefficient $\widehat{\beta}_i$ is subject to sampling
+variability, as reflected in the standard error reported in the output
+of {\bf lm()}.  With a large data set, the standard error may be small ---
+or maybe not, if the number of predictor variables is large (which is
+common in large data sets).
+
+By contrast, tabulative functions must be exact.
 
 
 \end{document}
