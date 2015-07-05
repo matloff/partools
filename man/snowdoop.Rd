@@ -40,7 +40,8 @@ getnumdigs(nch)
   \item{nodenum}{If non-NULL, get the name of the file chunk of cluster node
      \code{nodenum}; otherwise, get the name for the chunk associated
      with this node.}
-  \item{colnum}{Column number on which the sort will be done.}
+  \item{colnum}{Column number on which the sort will be done.  It is
+     assumed that this data column is free of NAs.}
   \item{outname}{Quoted name for the chunks of sorted output.}
   \item{nsamp}{Number of records to sample in each file chunk to
      determine bins for the bucket sort.}
