@@ -129,6 +129,9 @@ The package consists of three main groups of functions:
    \item {\bf fileread():}  Read distributed file into distributed data
    frame.
 
+   \item {\bf readnscramble():}  Read distributed file into distributed
+   data frame, but randomize the record order.
+
    \item {\bf filesave():}  Write distributed data frame to distributed
    file.
 
@@ -138,22 +141,30 @@ The package consists of three main groups of functions:
 
 \item {\bf statistical functions:}
 
+These use the Software Alchemy (SA) method ({\it Parallel Computation for
+Data Science}, N. Matloff, Chapman and Hall, 2015.) to parallelize
+statistical operations.  The resulting estimators have the same
+statistical accuracy as the original serial ones.
+
+   \begin{itemize}
+
+   \item {\bf ca():} General SA algorithm.
+
+   \item {\bf cabase():} Core of {\bf ca()}.
+
+   \item {\bf calm():}  Wrapper for SA version of R's {\bf lm()}.
+
+   \item {\bf caglm():}  Wrapper for SA version of R's {\bf glm()}.
+
+   \item {\bf cakm():}  Wrapper for SA version of R's {\bf kmeans()}.
+
+   \item {\bf cakm():}  Wrapper for SA version of R's {\bf aggregate()}.
+
+   \end{itemize}
+
 \end{itemize}
 
 There are also attendant support functions.
-
-One important point is the distinction between {\it statistical}
-functions and {\it tabulative} ones.
-
-A statistical function is inherently an approximation.  An estimated
-regression coefficient $\widehat{\beta}_i$ is subject to sampling
-variability, as reflected in the standard error reported in the output
-of {\bf lm()}.  With a large data set, the standard error may be small ---
-or maybe not, if the number of predictor variables is large (which is
-common in large data sets).
-
-By contrast, tabulative functions must be exact.
-
 
 \end{document}
 
