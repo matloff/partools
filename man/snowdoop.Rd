@@ -84,7 +84,10 @@ The reverse operation to \code{filesplit} is performed by
 Operations such as \code{ca} need i.i.d. data. If the original file
 storage was ordered on some variable, one needs to randomize the data
 first, using \code{readnscramble}.  It produces a distributed data
-frame/matrix under the name \code{basenm}.
+frame/matrix under the name \code{basenm}.  Note that a record in chunk
+\code{i} of the distributed file will likely end up in chunk \code{j} in
+the distributed data frame/matrix, with \code{j} different from
+\code{i}.
 
 If you wish to use this same randomized data in a future session, you
 can save it as a distributed file by calling \code{filesave}. Of course,
