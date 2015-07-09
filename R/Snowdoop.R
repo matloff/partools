@@ -127,8 +127,7 @@ readmypart <- function(myidxs) {
 # chunks; optionally, each output line can be preceded by a sequence
 # number, in order to preserve the original ordering
 
-filesplit <- function(nch,basenm,
-      header=FALSE,seqnums=FALSE) {
+filesplit <- function(nch,basenm,header=FALSE,seqnums=FALSE) {
    nlines <- linecount(basenm,header=header)  # not incl. header line
    con <- file(basenm,open="r")
    if (header) hdr <- readLines(con,1)
@@ -151,6 +150,16 @@ filesplit <- function(nch,basenm,
       writeLines(chunk,conout)
       close(conout)
    }
+}
+
+# like filesplit(), but randomizing the records
+#
+# more efficient versions could be written that do not go through
+# in-memory intermediary
+filesplitrand <- function(cls,fname,newbasename,ndigs,header=FALSE,sep) {
+   tmpdf <- read.table(fname,header=header,sep=sep)
+   distribsplit(cls,'tmpdf',scramble=TRUE)
+   filesave(cls,'tmpdf',newbasename,ndigs,sep=sep)
 }
 
 # get the number of lines in the file 

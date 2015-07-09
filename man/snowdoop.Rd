@@ -1,4 +1,4 @@
-\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave,fileread}
+\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave,fileread,filesplitrand}
 \alias{snowdoop}
 \alias{filechunkname}
 \alias{filesort}
@@ -9,6 +9,7 @@
 \alias{getnumdigs}
 \alias{filesave}
 \alias{fileread}
+\alias{filesplitrand}
 
 \title{
 Snowdoop.
@@ -28,6 +29,7 @@ filecat(cls, basenm, header = FALSE)
 readnscramble(cls,basenm,header=FALSE,sep= " ")
 filesave((cls,dname,newbasename,ndigs,sep)
 fileread(cls,fname,dname,ndigs,header=FALSE,sep)
+filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
 linecount(infile,chunksize=100000)
 getnumdigs(nch)
 }
@@ -87,7 +89,8 @@ first, using \code{readnscramble}.  It produces a distributed data
 frame/matrix under the name \code{basenm}.  Note that a record in chunk
 \code{i} of the distributed file will likely end up in chunk \code{j} in
 the distributed data frame/matrix, with \code{j} different from
-\code{i}.
+\code{i}.  If you wish to directly produce a randomized distributed file 
+from a monolithic one, use \code{filesplitrand}.
 
 If you wish to use this same randomized data in a future session, you
 can save it as a distributed file by calling \code{filesave}. Of course,
