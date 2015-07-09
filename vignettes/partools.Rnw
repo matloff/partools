@@ -39,7 +39,7 @@ unfortunately retains the drawbacks of Hadoop:
 \begin{itemize}
 
 \item Due to reliance on sophisticated infrastructure involving Java and
-Scalar, they are difficult to install and properly configure for those
+Scala, they are difficult to install and properly configure for those
 who are not computer systems experts. 
 
 \item A major plus for Hadoop/Spark, fault tolerance, is needed only for
@@ -192,9 +192,10 @@ There are also attendant support functions.
 The example here involves the well-known airline flight delay data,
 available at {\it http://stat-computing.org/dataexpo/2009/the-data.html.
 For convenience, we'll just use the data for 2008, which consists of
-about 7 million records.}  This is large enough to illustrate speedup due
-to parallelism, but small enough that we won't have to wait really long
-amounts of time in our sample session here.
+about 7 million records.}  This is large enough to illustrate speedup
+due to parallelism, but small enough that we won't have to wait really
+long amounts of time in our sample session here.  The session was run on
+a 16-core machine, with a 16-node {\bf parallel} cluster.
 
 
 \end{document}
