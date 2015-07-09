@@ -10,7 +10,7 @@
 \setlength{\parindent}{0in}
 \setlength{\parskip}{2mm} 
 
-\usepackage{times}
+% \usepackage{times}
 \usepackage{graphicx}
 
 % library(knitr)
@@ -192,10 +192,10 @@ There are also attendant support functions.
 The example here involves the well-known airline flight delay data,
 available at {\it http://stat-computing.org/dataexpo/2009/the-data.html.
 For convenience, we'll just use the data for 2008, which consists of
-about 7 million records.  This is large enough to illustrate speedup due
+about 7 million records.}  This is large enough to illustrate speedup due
 to parallelism, but small enough that we won't have to wait really long
 amounts of time in our sample session here.
-}
+
 
 \end{document}
 
