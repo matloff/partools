@@ -64,7 +64,11 @@ getnumdigs(nch)
 \details{
 
 Those functions with argument \code{cls} presume that \code{setclsinfo}
-has already been called.
+has already been called.  
+
+Note that if the user has the \code{data.table} package, further speed
+improvement may be obtained by using \code{fread} instead of
+\code{read.table}. Comments in the code show suggested changes.
 
 Use \code{filesort} to do a distributed file sort, placing the result as
 a distributed data frame/matrix in the memories of the cluster nodes.

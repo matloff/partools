@@ -62,8 +62,8 @@ mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,header,sep) {
    mylo <- mybds[1]
    myhi <- mybds[2]
    for (i in 1:ncls) {
-      tmp <-
-         read.table(filechunkname(basenm,ndigs,i),header=header,sep)
+      tmp <- read.table(filechunkname(basenm,ndigs,i),header=header,sep)
+      # tmp <- freadfilechunkname(basenm,ndigs,i),header=header,sep)
       tmpcol <- tmp[,colnum]
       if (me == 1) {
          tmp <- tmp[tmpcol <= myhi,] 
@@ -111,6 +111,7 @@ readmypart <- function(myidxs) {
    mydf <- NULL
    for (i in 1:nch) {
       filechunk <- read.table(fns[i],header=header,sep=sep)
+      # filechunk <- freadfns[i],header=header,sep=sep)
       # which ones are mine?
       tmp <- myidxs
       if (i > 1) tmp <- myidxs - cums[i-1]
@@ -158,6 +159,7 @@ filesplit <- function(nch,basenm,header=FALSE,seqnums=FALSE) {
 # in-memory intermediary
 filesplitrand <- function(cls,fname,newbasename,ndigs,header=FALSE,sep) {
    tmpdf <- read.table(fname,header=header,sep=sep)
+   # tmpdf <- freadfname,header=header,sep=sep)
    distribsplit(cls,'tmpdf',scramble=TRUE)
    filesave(cls,'tmpdf',newbasename,ndigs,sep=sep)
 }
@@ -227,6 +229,7 @@ fileread <- function(cls,fname,dname,ndigs,header=FALSE,sep) {
    clusterExport(cls,"cmd",envir=environment())
    clusterEvalQ(cls,eval(parse(text=cmd)))
    tmp <- paste(dname,"<- read.table(mychunk,header=",header,",sep='")
+   # tmp <- paste(dname,"<- fread(mychunk,header=",header,",sep='")
    cmd <- paste(tmp,sep,"')",sep="")
    clusterExport(cls,"cmd",envir=environment())
    invisible(clusterEvalQ(cls,eval(parse(text=cmd))))
