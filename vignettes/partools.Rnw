@@ -207,10 +207,11 @@ There are also attendant support functions.
 
 \section{Sample Session}
 
-The example here involves the well-known airline flight delay data,
-available at {\it http://stat-computing.org/dataexpo/2009/the-data.html.
+Our data set, from
+{\it http://stat-computing.org/dataexpo/2009/the-data.html} consists of
+the well-known records of airline flight delay.
 For convenience, we'll just use the data for 2008, which consists of
-about 7 million records.}  This is large enough to illustrate speedup
+about 7 million records.  This is large enough to illustrate speedup
 due to parallelism, but small enough that we won't have to wait really
 long amounts of time in our sample session here.  
 
@@ -302,6 +303,57 @@ distributed object:
 \begin{verbatim}
 > sundayeved <- distribgetrows(cls,'with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,])')
 \end{verbatim}
+
+In, say, investigating data accuracy, we may wish to flag all records
+having an inordinate number of NA values.  As I first step, we may wish
+to add a column to our data frame, indicating how many NA values are in
+each row.  If we did not have the advantage of distributed computation,
+here is how long it would take for our flight delay data:
+
+\begin{verbatim}
+> sumna            
+function(x) sum(is.na(x))
+> system.time(yr2008$n1 <- apply(yr2008[,c(5,7,8,11:16,19:21)],1,sumna))
+   user  system elapsed
+268.463   0.773 269.542
+\end{verbatim}
+
+But it is of course much faster on a distributed basis, using the {\bf
+parallel} package function {\bf clusterEvalQ()}:
+
+\begin{verbatim}
+> clusterExport(cls,"sumna",envir=environment())
+> system.time(clusterEvalQ(cls,yr2008$n1 <- apply(yr2008[,c(5,7,8,11:16,19:21)],1,sumna)))
+   user  system elapsed 
+  0.094   0.012  16.758 
+\end{verbatim}
+
+The speedup here was about 16, fully utilizing all 16 cores.
+
+We may wish to gather together for in-depth analysis all the records
+have 8 or more NA values.  In the nonparallel context, it would take
+some time:
+
+\begin{verbatim}
+> system.time(na8 <- yr2008[yr2008$n1 > 7,])
+   user  system elapsed 
+  9.292   0.028   9.327 
+\end{verbatim}
+
+In the distributed manner, it is slightly faster:
+
+\begin{verbatim}
+> system.time(na8d <- distribgetrows(cls,'yr2008[yr2008$n1 > 7,]'))
+   user  system elapsed 
+  5.524   0.160   6.584 
+\end{verbatim}
+
+The speedup is less here, as the resulting data must travel from the
+cluster nodes to the cluster manager. In this case, this is just a
+memory-to-memory transfer rather than across a netwrok, as we are on a
+multicore machine, but it still takes time.  If the number of records
+satisfying the filtering condition had been smaller than the 136246 we
+had here, the speedup factor would have been greater.
 
 \end{document}
 
