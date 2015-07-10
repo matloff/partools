@@ -21,6 +21,7 @@ ca(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE)
 cabase(cls,ovf,estf,estcovf=NULL,findmean=TRUE,cacall=FALSE)
 calm(cls,lmargs) 
 caglm(cls,glmargs) 
+caprcomp(cls,prcompargs, p)
 cakm(cls,kmargs) 
 cameans(cls,cols,na.rm=FALSE) 
 caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE) 
@@ -205,8 +206,8 @@ data(newadult)
 distribsplit(cls,"newadult") 
 caglm(cls," gt50 ~ ., family = binomial,data=newadult")$tht 
 
-caprcomp(cls,'prgeng,scale=T') 
-prcomp(prgeng,scale=T) 
+caprcomp(cls,'newadult,scale=TRUE',5)$sdev
+prcomp(newadult,scale=TRUE)$sdev
 
 cameans(cls,"prgeng")
 cameans(cls,"prgeng[,c('age','wageinc')]")
