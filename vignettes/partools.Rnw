@@ -16,7 +16,7 @@
 % library(knitr)
 %\VignetteIndexEntry{Partools}
 
-\title{partools: a Sensiible Package for Large Data Sets}
+\title{{\bf partools: a Sensiible Package for Large Data Sets}}
 
 \author{Norm Matloff, with Contributions from Alex Rumbaugh}
 
@@ -70,6 +70,24 @@ Since {\bf partools} uses the portion of the R {\bf parallel} package
 derived from the package {\bf snow}, and because it is meant as an
 alternative to Hadoop, we informally refer to {\bf partools} as
 Snowdoop.
+
+\section{Where Is the Magic?}
+
+As you will see later, {\bf partools} can deliver some impressive
+speedups.  But there is nothing magical about this.  Instead, the value
+of the package consists of just two simple sources:
+
+\begin{itemize}
+
+\item [(a)] The package follows a philosophy of forming distributed
+objects {\it and keeping using them in distributed form throughout one's
+R session.}
+
+\item [(b)] The package consists of a number of utility functions that
+greatly facilitate creating, storing and {\it analyzing} distributed
+objects.
+
+\end{itemize}
 
 \section{Overview of the partools Package}
 
@@ -212,47 +230,82 @@ then read into memory at the 16 cluster nodes using {\bf fileread()}:
 > fileread(cls,'yr2008r','yr2008',2,header=TRUE, sep=",")
 \end{verbatim}
 
-The function {\bf filesplitrand()} was used instead of {\bf filesplit()}
-to construct the distributed file, in order to randomize the placement
-of the records of {\bf yr2008} across cluster nodes.  The advantage of
-randomization will be explained shortly.
+The call to {\bf filesplitrand()} splits the file as described above;
+since these files are permanent, we can skip this step in future R
+sessions involving this data (if the file doesn't change).  The function
+{\bf filesplitrand()} was used instead of {\bf filesplit()} to construct
+the distributed file, in order to randomize the placement of the records
+of {\bf yr2008} across cluster nodes.  The advantage of randomization
+will be explained shortly.
 
 In order to run timing comparisons, the full file was also read into
 memory at the cluster manager:
 
 \begin{verbatim}
-> yr2008 <- read.csv("2008.csv")
+> yr2008 <- read.csv("yr2008")
 \end{verbatim}
 
 The first operation run involved the package's distributed version of
-R's {\bf aggregate()}:
+R's {\bf aggregate()}.  Here we want to tabulate day of week, month and
+whether the flight was canceled, broken down into cells according to
+flight origin and destination.  We'll find the maximum value in each
+cell.
 
 \begin{verbatim}
-> system.time(print(distribagg(cls, c("DayOfWeek","Month","Cancelled"),
+> system.time(print(distribagg(cls, c("DepDelay","ArrDelay","AirTime"),
    c("Origin","Dest"),"yr2008", FUN="max")))  
 ...
-4595    ORD  SAV         7    12         1
-4596    ORF  SAV         1     8         0
-4597    DEN  SBA         7    12         1
-4598    DFW  SBA         7    12         1
+5193    CDV  YAK      327      325      54
+5194    JNU  YAK      317      308      77
+5195    SLC  YKM      110      118     115
+5196    IPL  YUM      162      163      26
 ...
    user  system elapsed  
-  2.570   0.126  22.778  
+  2.291   0.084  15.952 
 \end{verbatim}
 
 \begin{verbatim}
+> system.time(print(aggregate(cbind(DepDelay,ArrDelay,AirTime) ~ 
+   Origin+Dest,data=yr2008,FUN=max)))  
 ...
-4595    ORD  SAV         7    12         1
-4596    ORF  SAV         1     8         0
-4597    DEN  SBA         7    12         1
-4598    DFW  SBA         7    12         1
+5193    CDV  YAK      327      325      54
+5194    JNU  YAK      317      308      77
+5195    SLC  YKM      110      118     115
+5196    IPL  YUM      162      163      26
 ...
    user  system elapsed  
-260.372   0.284 260.732  
+249.038   0.444 249.634
 \end{verbatim}
 
 So, the results of {\bf distribagg()} did indeed match those of {\bf
-aggregate()}, but more than 11 times faster!
+aggregate()}, but did so more than 15 times faster!
+
+Remember, the key philosophy of {\bf partools} is to create distributed
+objects and then keep using them in distributed form.  However, in some
+cases, we may wish to collect a distributed result into a monolithic
+object, especially if the result is small.  This is done in the next
+example:
+
+Say we wish to do a filter operation, extracting the data on all the
+Sunday evening flights, and collect it into one place.   Here is the
+direct version:
+
+\begin{verbatim}
+> sundayeve <- with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,])
+\end{verbatim}
+
+This actually is not a time-consuming operation, but again, in typical
+{\bf partools} use, we would only have the distributed version of {\bf
+yr2008}.  Here is how we would achieve the same effect from the
+distributed object:
+
+\begin{verbatim}
+> sundayeved <- distribgetrows(cls,'with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,])')
+\end{verbatim}
 
 \end{document}
+
+system.time(rowsf <- with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,]))
+system.time(rowsf <- with(yr2008,yr2008[DayOfWeek > 1 & DayOfWeek < 7 & DepTime > 1800 & Distance < 1000,]))
+
 
