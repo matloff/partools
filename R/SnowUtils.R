@@ -169,7 +169,9 @@ distribrange <- function(cls,vec,na.rm=FALSE) {
 distribgetrows <- function(cls,cmd) {
    clusterExport(cls,'cmd',envir=environment())
    res <- clusterEvalQ(cls,docmd(cmd))
-   Reduce(rbind,res)
+   tmp <- Reduce(rbind,res)
+   notallna <- function(row) any(!is.na(row))
+   tmp[apply(tmp,1,notallna),]
 }
 
 ######################### misc. utilities ########################
