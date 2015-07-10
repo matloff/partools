@@ -194,9 +194,65 @@ available at {\it http://stat-computing.org/dataexpo/2009/the-data.html.
 For convenience, we'll just use the data for 2008, which consists of
 about 7 million records.}  This is large enough to illustrate speedup
 due to parallelism, but small enough that we won't have to wait really
-long amounts of time in our sample session here.  The session was run on
-a 16-core machine, with a 16-node {\bf parallel} cluster.
+long amounts of time in our sample session here.  
 
+The session was run on a 16-core machine, with a 16-node {\bf parallel}
+cluster.  Note carefully, though, that we should not expect a 16-fold
+speedup. In the world of parallel computation, one usually gets of
+speedups of considerably less than $n$ for a platform of $n$
+computational entities.  Indeed, one is often saddened to find that the
+parallel version is actually {\it slower} than the serial one!
+
+The file, {\bf yr2008}, was first split into a distributed file, stored
+in {\bf yr2008.01},...,{\bf yr2008.16}, using {\bf filesplitrand()}, and
+then read into memory at the 16 cluster nodes using {\bf fileread()}:
+
+\begin{verbatim}
+> filesplitrand(cls,'yr2008','yr2008r',2,header=TRUE,sep=",")
+> fileread(cls,'yr2008r','yr2008',2,header=TRUE, sep=",")
+\end{verbatim}
+
+The function {\bf filesplitrand()} was used instead of {\bf filesplit()}
+to construct the distributed file, in order to randomize the placement
+of the records of {\bf yr2008} across cluster nodes.  The advantage of
+randomization will be explained shortly.
+
+In order to run timing comparisons, the full file was also read into
+memory at the cluster manager:
+
+\begin{verbatim}
+> yr2008 <- read.csv("2008.csv")
+\end{verbatim}
+
+The first operation run involved the package's distributed version of
+R's {\bf aggregate()}:
+
+\begin{verbatim}
+> system.time(print(distribagg(cls, c("DayOfWeek","Month","Cancelled"),
+   c("Origin","Dest"),"yr2008", FUN="max")))  
+...
+4595    ORD  SAV         7    12         1
+4596    ORF  SAV         1     8         0
+4597    DEN  SBA         7    12         1
+4598    DFW  SBA         7    12         1
+...
+   user  system elapsed  
+  2.570   0.126  22.778  
+\end{verbatim}
+
+\begin{verbatim}
+...
+4595    ORD  SAV         7    12         1
+4596    ORF  SAV         1     8         0
+4597    DEN  SBA         7    12         1
+4598    DFW  SBA         7    12         1
+...
+   user  system elapsed  
+260.372   0.284 260.732  
+\end{verbatim}
+
+So, the results of {\bf distribagg()} did indeed match those of {\bf
+aggregate()}, but more than 11 times faster!
 
 \end{document}
 
