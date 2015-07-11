@@ -42,14 +42,14 @@ unfortunately retains the drawbacks of Hadoop:
 rely on Java/Scala.  This makes them difficult to install, configure and
 use for those who are not computer systems experts. 
 
-\item A major plus for Hadoop/Spark, fault tolerance, is needed only for
-users working on extremely large clusters, consisting of hundreds or
-thousands of nodes. Disk failure rates are simply too low for fault
-tolerance to be an issue for many Hadoop/Snow users, who do not have
-such large systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy}
-on other systems.
-Worse, the fault tolerance mechanisms, which are especially extensive in
-Spark, {\it slow down the computation}.
+\item Although a major plus for Hadoop/Spark is fault tolerance, it is
+needed only for users working on extremely large clusters, consisting of
+hundreds or thousands of nodes. Disk failure rates are simply too low
+for fault tolerance to be an issue for many Hadoop/Snow users, who do
+not have such large
+systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy} on other
+systems.  Worse, the fault tolerance mechanisms, which are especially
+extensive in Spark, {\it slow down the computation}.
 
 \end{itemize}
 
@@ -162,8 +162,6 @@ The package consists of three main groups of functions:
 
    \item {\bf filesave():}  Write distributed data frame to distributed
    file.
-
-   \item {\bf filesort():}  Distributed file-based sort.
 
    \item {\bf filechunkname():} For the calling cluster node, returns
    the full name of the file chunk, including suffix, e.g. '01', '02'
