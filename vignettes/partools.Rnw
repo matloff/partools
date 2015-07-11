@@ -153,6 +153,10 @@ The package consists of three main groups of functions:
    \item {\bf filesave():}  Write distributed data frame to distributed
    file.
 
+   \item {\bf filechunkname():} For the calling cluster node, returns
+   the full name of the file chunk, including suffix, e.g. '01', '02'
+   etc.
+
    \end{itemize}
 
 \item {\bf tabulative functions:}
@@ -183,7 +187,9 @@ The package consists of three main groups of functions:
 These use the Software Alchemy (SA) method ({\it Parallel Computation for
 Data Science}, N. Matloff, Chapman and Hall, 2015.) to parallelize
 statistical operations.  The resulting estimators have the same
-statistical accuracy as the original serial ones.
+statistical accuracy as the original serial ones.\footnote{In the world
+of parallel computation, the standard word for nonparallel is {\it
+serial}.}
 
    \begin{itemize}
 
@@ -330,9 +336,15 @@ parallel} package function {\bf clusterEvalQ()}:
 
 The speedup here was about 16, fully utilizing all 16 cores.
 
-We may wish to gather together for in-depth analysis all the records
-have 8 or more NA values.  In the nonparallel context, it would take
-some time:
+Ordinarily, we would continue that NA analysis on a distributed basis,
+in keeping with the {\bf partools} philosophy of setting up distributed
+objects and then repeatedly dealing with them on a distributed basis.
+If our subsequent operations continue to have time complexity linear in
+the number of records processes, we should continue to get speedups of
+about 16.
+
+On the other hand, we may wish to gather together all the records have 8
+or more NA values.  In the nonparallel context, it would take some time:
 
 \begin{verbatim}
 > system.time(na8 <- yr2008[yr2008$n1 > 7,])
@@ -355,9 +367,31 @@ multicore machine, but it still takes time.  If the number of records
 satisfying the filtering condition had been smaller than the 136246 we
 had here, the speedup factor would have been greater.
 
-\end{document}
+Now let's turn to statistical operations, starting of course with linear
+regression.  As noted, these {\bf partools} functions make use of
+Software Alchemy, which replaces the given operation by a {\it
+distributed, statistically equivalent} operation.  This will often
+produce a significant speedup.  Note again that though the result may
+different from the non-distributed version, say in the third significant
+digit, it is just as accurate statistically.
 
-system.time(rowsf <- with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,]))
-system.time(rowsf <- with(yr2008,yr2008[DayOfWeek > 1 & DayOfWeek < 7 & DepTime > 1800 & Distance < 1000,]))
+In the flight data, we predicted the arrival delay from the departure
+delay and distance, comparing the distributed and serial versions, using
+the calls
+
+\begin{verbatim}
+calm(cls,'ArrDelay ~ DepDelay+Distance,data=yr2008')$tht))  # 45.076
+lm(ArrDelay ~ DepDelay+Distance,data=yr2008)))  # 74.472
+\end{verbatim}
+
+The run times were 45.076 and 74.472, respectively.  The estimated
+regression coefficients were virtually identical:
+
+\begin{verbatim}
+-1.061375756  1.019153821 -0.001213223
+-1.061369     1.019154    -0.001213
+\end{verbatim}
+
+\end{document}
 
 
