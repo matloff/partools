@@ -16,7 +16,7 @@
 % library(knitr)
 %\VignetteIndexEntry{Partools}
 
-\title{{\bf partools: a Sensiible Package for Large Data Sets}}
+\title{{\bf partools: a Sensible Package for Large Data Sets}}
 
 \author{Norm Matloff, with Contributions from Alex Rumbaugh}
 
@@ -30,7 +30,7 @@ are being much more seriously discussed.\footnote{See for example ``The
 Hadoop Honeymoon is Over,'' {\it
 https://www.linkedin.com/pulse/hadoop-honeymoon-over-martyn-jones}} This
 has resulted in a new platform, Spark, gaining popularity.  As with
-Hadoop, there is an R interfaces available for Spark, named SparkR. 
+Hadoop, there is an R interface available for Spark, named SparkR. 
 
 Spark overcomes one of Hadoop's major problems, which is the lack of
 ability to cache data in a multi-pass computation.  However, Spark
@@ -39,14 +39,15 @@ unfortunately retains the drawbacks of Hadoop:
 \begin{itemize}
 
 \item Due to reliance on sophisticated infrastructure involving Java and
-Scala, they are difficult to install and properly configure for those
+Scala, they are difficult to install, configure and use for those
 who are not computer systems experts. 
 
 \item A major plus for Hadoop/Spark, fault tolerance, is needed only for
 users working on extremely large clusters, consisting of hundreds or
 thousands of nodes. Disk failure rates are simply too low for fault
-tolerance to be an issue on other systems.\footnote{In addition, one can
-provide fault tolerance externally, say with the XtreemFS system.}
+tolerance to be an issue for many Hadoop/Snow users, who do not have
+such large systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy}
+on other systems.
 Worse, the fault tolerance mechanisms, which are especially extensive in
 Spark, {\it slow down the computation}.
 
@@ -59,17 +60,26 @@ thus speeding up computation.
 
 Therefore:
 
-\begin{quote}
+\begin{quote} 
+
 It makes sense to develop and use a package that retains the
-distributed-file nature of Hadoop/Spark  while staying fully within 
-the simple-yet-more-powerful R framework.  The {\bf partools} package
-is designed to meet these goals.
+distributed-file nature of Hadoop/Spark  while staying fully within the
+simple, familiar and yet powerful R framework.  
+
+The {\bf partools} package is designed to meet these goals.  It is
+intended as {\bf an alternative to Snow/Hadoop}, not necessarily for all
+settings, but for many R programmers who are using, or considering using
+Hadoop/Snow.
+
 \end{quote}
 
 Since {\bf partools} uses the portion of the R {\bf parallel} package
 derived from the package {\bf snow}, and because it is meant as an
 alternative to Hadoop, we informally refer to {\bf partools} as
 Snowdoop.
+
+Note that if fault tolerance is an issue, one can provide it externally,
+say with the XtreemFS system.
 
 \section{Where Is the Magic?}
 
@@ -184,12 +194,13 @@ The package consists of three main groups of functions:
 
 \item {\bf statistical functions:}
 
-These use the Software Alchemy (SA) method ({\it Parallel Computation for
-Data Science}, N. Matloff, Chapman and Hall, 2015.) to parallelize
-statistical operations.  The resulting estimators have the same
-statistical accuracy as the original serial ones.\footnote{In the world
-of parallel computation, the standard word for nonparallel is {\it
-serial}.}
+These use the Software Alchemy (SA) method ({\it Parallel Computation
+for Data Science}, N. Matloff, Chapman and Hall, 2015.) to parallelize
+statistical operations.  The idea is simple:  Apply the given estimator
+to each chunk in the distributed object, and average over chunks.  It is
+proven that the resulting distributed estimator has the same statistical
+accuracy as the original serial ones.\footnote{In the world of parallel
+computation, the standard word for nonparallel is {\it serial}.}
 
    \begin{itemize}
 
@@ -376,21 +387,104 @@ different from the non-distributed version, say in the third significant
 digit, it is just as accurate statistically.
 
 In the flight data, we predicted the arrival delay from the departure
-delay and distance, comparing the distributed and serial versions, using
-the calls
+delay and distance, comparing the distributed and serial versions, 
 
 \begin{verbatim}
-calm(cls,'ArrDelay ~ DepDelay+Distance,data=yr2008')$tht))  # 45.076
-lm(ArrDelay ~ DepDelay+Distance,data=yr2008)))  # 74.472
+> system.time(print(lm(ArrDelay ~ DepDelay+Distance,data=yr2008)))  
+...     
+Coefficients:
+(Intercept)     DepDelay     Distance  
+  -1.061369     1.019154    -0.001213  
+
+   user  system elapsed 
+ 77.107  12.463  76.225 
+> system.time(print(calm(cls,'ArrDelay ~ DepDelay+Distance,data=yr2008')$tht))  
+ (Intercept)     DepDelay     Distance 
+-1.061262941  1.019150592 -0.001213252 
+   user  system elapsed 
+ 13.414   0.691  18.396 
 \end{verbatim}
 
-The run times were 45.076 and 74.472, respectively.  The estimated
-regression coefficients were virtually identical:
+Linear regression is very hard to parallelize, so the speedup of more than
+4 here is nice.  Coefficient estimates were virtually identical.
+
+Next, principal components.  Since R's {\bf prcomp()} does not handle NA
+values for nonformula specifications, let's do that separately first:
 
 \begin{verbatim}
--1.061375756  1.019153821 -0.001213223
--1.061369     1.019154    -0.001213
+> system.time(cc <- na.omit(yr2008[,c(12:16,19:21)]))
+   user  system elapsed 
+  9.540   0.351   9.907 
+> system.time(clusterEvalQ(cls,cc <- na.omit(yr2008[,c(12:16,19:21)])))
+   user  system elapsed 
+  0.885   0.232   2.352 
 \end{verbatim}
+
+Note that this too was faster in the distributed approach, though both
+times were small.  And now the PCA runs:
+
+\begin{verbatim}
+> system.time(ccout <- prcomp(cc))
+   user  system elapsed 
+ 61.905  49.605  58.444 
+> ccout$sdev
+[1] 5.752546e+02 5.155227e+01 2.383117e+01 1.279210e+01 9.492825e+00
+[6] 5.530152e+00 1.133015e-03 6.626621e-12
+> system.time(ccoutdistr <- caprcomp(cls,'cc',8))
+   user  system elapsed 
+  5.023   0.604   8.949 
+> ccoutdistr$sdev 
+[1] 5.752554e+02 5.155127e+01 2.383122e+01 1.279184e+01 9.492570e+00
+[6] 5.529869e+00 9.933142e-04 8.679427e-13
+\end{verbatim}
+
+Thus, more than a 6-fold speedup here.  Agreement of the component
+standard deviations is good. 
+
+Last, let's find the {\it interquartile range} for several columns.
+This is a robust measure of dispersion, defined at the difference
+between the 75$^{th}$ and 25$^{th}$ percentiles. 
+
+Here is serial code to find this:
+
+\begin{verbatim}
+# find the interquartile range for a vector x
+iqr <- function(x) {tmp <- quantile(x,na.rm=T); tmp[4] - tmp[2]}
+# find the interquartile range for each column of a data frame dfr
+iqrm <- function(dfr) apply(dfr,2,iqr)
+\end{verbatim}
+
+So, let's compare times.  First, the serial version:
+
+\begin{verbatim}
+> system.time(print(iqrm(yr2008[,c(5:8,12:16,19:21)])))
+          DepTime        CRSDepTime           ArrTime        CRSArrTime 
+              800               790               802               792 
+ActualElapsedTime    CRSElapsedTime           AirTime          ArrDelay 
+               80                79                77                22 
+         DepDelay          Distance            TaxiIn           TaxiOut 
+               12               629                 4                 9 
+   user  system elapsed 
+ 29.280   0.243  29.554 
+\end{verbatim}
+
+For the distributed version,
+
+\begin{verbatim}
+> system.time(print(colMeans(distribgetrows(cls,'iqrm(yr2008[,c(5:8,12:16,19:21)])'))))
+          DepTime        CRSDepTime           ArrTime        CRSArrTime 
+         800.1250          790.0625          801.8125          791.8750 
+ActualElapsedTime    CRSElapsedTime           AirTime          ArrDelay 
+          80.0000           78.9375           76.5625           22.0000 
+         DepDelay          Distance            TaxiIn           TaxiOut 
+          12.0000          627.6875            4.0000            9.0000 
+   user  system elapsed 
+  0.009   0.002   2.587 
+\end{verbatim}
+
+Here the speedup was more than 11-fold, with agreement generally to
+three significant digits.  Once again, note that statistically speaking,
+both estimators have the same accuracy.
 
 \end{document}
 
