@@ -62,7 +62,8 @@ mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,header,sep) {
    mylo <- mybds[1]
    myhi <- mybds[2]
    for (i in 1:ncls) {
-      tmp <- read.table(filechunkname(basenm,ndigs,i),header=header,sep)
+      tmp <-
+         read.table(filechunkname(basenm,ndigs,i),header=header,sep=sep)
       # tmp <- freadfilechunkname(basenm,ndigs,i),header=header,sep)
       tmpcol <- tmp[,colnum]
       if (me == 1) {
