@@ -23,12 +23,12 @@ file storage.
 
 \usage{
 filechunkname(basenm,ndigs,nodenum=NULL)
-filesort(cls,basenm,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep = "")
+filesort(cls,basenm,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep=" ",fread=FALSE)
 filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
 filecat(cls, basenm, header = FALSE)  
 readnscramble(cls,basenm,header=FALSE,sep= " ")
 filesave((cls,dname,newbasename,ndigs,sep)
-fileread(cls,fname,dname,ndigs,header=FALSE,sep)
+fileread(cls,fname,dname,ndigs,header=FALSE,sep=" ",fread=FALSE)
 filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
 linecount(infile,chunksize=100000)
 getnumdigs(nch)
@@ -45,6 +45,8 @@ getnumdigs(nch)
   \item{colnum}{Column number on which the sort will be done.  It is
      assumed that this data column is free of NAs.}
   \item{outname}{Quoted name for the chunks of sorted output.}
+  \item{fread}{If true, use \code{fread} instead of \code{read.table};
+     generally much faster if \code{data.table} package is installed.}
   \item{nsamp}{Number of records to sample in each file chunk to
      determine bins for the bucket sort.}
   \item{header}{TRUE if the file chunks have headers.}
