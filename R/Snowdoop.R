@@ -23,7 +23,7 @@ filechunkname <- function (basenm, ndigs,nodenum=NULL)
 # chunk written to file outname (plus suffix based on node number) in
 # the node's global space
 filesort <- function(cls,basenm,ndigs,colnum,
-      outname,nsamp=1000,header=FALSE,sep=" ") 
+      outname,nsamp=1000,header=FALSE,sep=" ",fread=FALSE) 
 {
    clusterEvalQ(cls,library(partools))
    setclsinfo(cls)
@@ -31,9 +31,12 @@ filesort <- function(cls,basenm,ndigs,colnum,
       header=header,sep=sep,nsamp) 
    samp <- Reduce(c,samps)
    bds <- getbounds(samp,length(cls))
-   clusterApply(cls,bds,mysortedchunk,
-      basenm,ndigs,colnum,outname,header,sep)
-   0
+   if (fread) {
+     clusterEvalQ(cls,library(data.table))
+     clusterEvalQ(cls,myfread <- fread)
+   } else {clusterEvalQ(cls,myfread <- read.table)}
+   invisible(clusterApply(cls,bds,mysortedchunk,
+      basenm,ndigs,colnum,outname,header,sep))
 }
 
 getsample <- function(basenm,ndigs,colnum,
@@ -55,7 +58,8 @@ getbounds <- function(samp,numnodes) {
    bds
 }
 
-mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,header,sep) {
+mysortedchunk <-
+      function(mybds,basenm,ndigs,colnum,outname,header,sep) {
    pte <- getpte()
    me <- pte$myid
    ncls <- pte$ncls
@@ -63,7 +67,7 @@ mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,header,sep) {
    myhi <- mybds[2]
    for (i in 1:ncls) {
       tmp <-
-         read.table(filechunkname(basenm,ndigs,i),header=header,sep=sep)
+         myfread(filechunkname(basenm,ndigs,i),header=header,sep=sep)
       # tmp <- freadfilechunkname(basenm,ndigs,i),header=header,sep)
       tmpcol <- tmp[,colnum]
       if (me == 1) {
@@ -223,13 +227,17 @@ filesave <- function(cls,dname,newbasename,ndigs,sep) {
 
 # reads in a distributed file with prefix fname, producing a distributed
 # data frame dname
-fileread <- function(cls,fname,dname,ndigs,header=FALSE,sep) {
+fileread <- function(cls,fname,dname,ndigs,header=FALSE,sep=" ",fread=FALSE) {
+   if (fread) {
+     clusterEvalQ(cls,library(data.table))
+     clusterEvalQ(cls,myfread <- fread)
+   } else {clusterEvalQ(cls,myfread <- read.table)}
    fnameq <- paste("'",fname,"'",sep="")
    tmp <- paste(fnameq,ndigs,sep=',')
    cmd <- paste("mychunk <- filechunkname(",tmp,")")
    clusterExport(cls,"cmd",envir=environment())
    clusterEvalQ(cls,eval(parse(text=cmd)))
-   tmp <- paste(dname,"<- read.table(mychunk,header=",header,",sep='")
+   tmp <- paste(dname,"<- myfread(mychunk,header=",header,",sep='")
    # tmp <- paste(dname,"<- fread(mychunk,header=",header,",sep='")
    cmd <- paste(tmp,sep,"')",sep="")
    clusterExport(cls,"cmd",envir=environment())
