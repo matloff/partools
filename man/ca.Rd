@@ -22,7 +22,7 @@ cabase(cls,ovf,estf,estcovf=NULL,findmean=TRUE,cacall=FALSE)
 calm(cls,lmargs) 
 caglm(cls,glmargs) 
 caprcomp(cls,prcompargs, p)
-cakm(cls,kmargs) 
+cakm(cls,mtdf,ncenters,p)
 cameans(cls,cols,na.rm=FALSE) 
 caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE) 
 caagg(cls,ynames,xnames,dataname,FUN)
@@ -47,8 +47,7 @@ caagg(cls,ynames,xnames,dataname,FUN)
      arguments.}
   \item{prcompargs}{Quoted string representing arguments to 
      \code{prcomp}.}
-  \item{kmargs}{Quoted string representing arguments to 
-     \code{kmeans}.}
+  \item{mtdf}{Quoted name of a distributed matrix or data frame.}
   \item{cacall}{If TRUE, indicates that \code{cabase} had been called by
      \code{ca}.}
   \item{cols}{A quoted string that evaluates to data frame or matrix.}
@@ -215,7 +214,7 @@ caquantile(cls,'prgeng$age')
 
 pe <- prgeng[,c(1,3,8)] 
 distribsplit(cls,"pe") 
-z1 <- cakm(cls,'pe,centers=3',3); z1$size; z1$centers 
+z1 <- cakm(cls,'pe',3,3); z1$size; z1$centers 
 # check algorithm unstable
 z1$thts  # looks unstable
 
