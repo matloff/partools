@@ -38,7 +38,7 @@ unfortunately retains the drawbacks of Hadoop:
 
 \begin{itemize}
 
-\item They are based on a complex, rather opaque infrastructure, and
+\item Hadoop/Spark have a complex, rather opaque infrastructure, and
 rely on Java/Scala.  This makes them difficult to install, configure and
 use for those who are not computer systems experts. 
 
@@ -47,14 +47,14 @@ needed only for users working on extremely large clusters, consisting of
 hundreds or thousands of nodes. Disk failure rates are simply too low
 for fault tolerance to be an issue for many Hadoop/Snow users, who do
 not have such large
-systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy} on other
-systems.  Worse, the fault tolerance mechanisms, which are especially
-extensive in Spark, {\it slow down the computation}.
+systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy} Worse, the
+fault tolerance mechanisms, which are especially extensive in Spark,
+{\it slow down the computation}.
 
 \end{itemize}
 
 The one firm advantage of Hadoop/Spark is their use of distributed file
-systems.  Under the philosophy ``Move the computation to the data,
+systems.  Under the philosophy, ``Move the computation to the data,
 rather than {\it vice versa},'' network traffic may be greatly reduced,
 thus speeding up computation.
 
@@ -62,14 +62,14 @@ Therefore:
 
 \begin{quote} 
 
-It makes sense to develop and use a package that retains the
-distributed-file nature of Hadoop/Spark  while staying fully within the
-simple, familiar and yet powerful R framework.  
+It is desirable to have a package that retains the distributed-file
+nature of Hadoop/Spark  while staying fully within the simple, familiar,
+yet powerful R framework.  
 
 The {\bf partools} package is designed to meet these goals.  It is
-intended as {\bf an alternative to Snow/Hadoop}, not necessarily for all
-settings, but for many R programmers who are using, or considering using
-Hadoop/Snow.
+intended as {\bf a simple, sensible alternative to Snow/Hadoop}.  Though
+not necessarily appropriate for all settings, for many R programmers,
+{\bf partools} may be a much better choice than {\bf Hadoop/Snow}.
 
 \end{quote}
 
@@ -78,8 +78,8 @@ derived from the package {\bf snow}, and because it is meant as an
 alternative to Hadoop, we informally refer to {\bf partools} as
 Snowdoop.
 
-Note that if fault tolerance is an issue, one can provide it externally,
-say with the XtreemFS system.
+The package does not provide fault tolerance of its own.  If this is an
+issue, one can provide it externally, say with the XtreemFS system.
 
 \section{Where Is the Magic?}
 
@@ -101,7 +101,8 @@ objects.
 
 \section{Overview of the partools Package}
 
-The package is based on the following very simple principles:
+The package is based on the following very simple principles, involving
+{\it distributed files} and {\it distributed data frames/matrices}.
 
 \begin{itemize}
 
@@ -118,49 +119,52 @@ y} at its node.
 
 \subsection{Package Structure}
 
-To understand the function structure, and indeed the central philosophy,
-keep in mind the following definitions, for a cluster in the R {\bf
-parallel} package.
+% To understand the function structure, and indeed the central philosophy,
+% keep in mind the following definitions, for a cluster in the R {\bf
+% parallel} package.
+% 
+% \begin{itemize}
+% 
+% \item A {\it distributed file} {\bf x} consists of a number of separate
+% physical files, with names {\bf x.01}, {\bf x.02} and so
+% on.\footnote{The number of leading 0s in the suffix will depend on the
+% number of cluster nodes.}  The file {\bf x} consists of the {\bf
+% rbind()} of the rows of those separate files, though {\bf x} may be
+% virtual.  Cluster node {\bf i} is responsible for {\bf x.i}.
+% 
+% \item A {\it distributed data frame} (or distributed matrix) {\bf d}
+% consists of a number of separate data frames, one at each cluster node,
+% all named {\bf d}.  The data frame as a whole consists of the {\bf
+% rbind()} of the rows of those separate data frames, though it may be
+% virtual.
+% 
+% \end{itemize}
 
-\begin{itemize}
-
-\item A {\it distributed file} {\bf x} consists of a number of separate
-physical files, with names {\bf x.01}, {\bf x.02} and so
-on.\footnote{The number of leading 0s in the suffix will depend on the
-number of cluster nodes.}  The file {\bf x} consists of the {\bf
-rbind()} of the rows of those separate files, though {\bf x} may be
-virtual.  Cluster node {\bf i} is responsible for {\bf x.i}.
-
-\item A {\it distributed data frame} (or distributed matrix) {\bf d}
-consists of a number of separate data frames, one at each cluster node,
-all named {\bf d}.  The data frame as a whole consists of the {\bf
-rbind()} of the rows of those separate data frames, though it may be
-virtual.
-
-\end{itemize}
-
-The fact that all the file chunks or data frame chunks have the same
-name (or same prefix) plays a key role in the software.
+Again, in a distributed file, all the file chunks have the same prefix,
+and in a distributed data frame, all chunks have the same name at the
+various cluster nodes.  This plays a key role in the software.
 
 The package consists of three main groups of functions:
 
-\begin{itemize}
-
-\item {\bf distributed-file functions:}
+{\bf Distributed-file functions:}
 
    \begin{itemize}
 
-   \item {\bf filesplit():}  Create distributed file from monotlithic one.
+   \item {\bf filesplit():}  Create a distributed file from monotlithic one.
 
-   \item {\bf filecat():}  Create monotlithic file from distributed one.
+   \item {\bf filesplitrand():}  Create a distributed file from monotlithic one,
+   but randomize the record order.
 
-   \item {\bf fileread():}  Read distributed file into distributed data
+   \item {\bf filecat():}  Create a monotlithic file from distributed one.
+
+   \item {\bf fileread():}  Read a distributed file into distributed data
    frame.
 
-   \item {\bf readnscramble():}  Read distributed file into distributed
-   data frame, but randomize the record order.
+   \item {\bf readnscramble():}  Read a distributed file into distributed
+   data frame, 
+   but randomize the record order.
 
-   \item {\bf filesave():}  Write distributed data frame to distributed
+   \item {\bf filesave():}  Write a distributed data frame to a distributed
    file.
 
    \item {\bf filechunkname():} For the calling cluster node, returns
@@ -169,38 +173,39 @@ The package consists of three main groups of functions:
 
    \end{itemize}
 
-\item {\bf tabulative functions:}
+{\bf Tabulative functions:}
 
    \begin{itemize}
 
-   \item {\bf distribsplit():}  Create distributed data frame/matrix
+   \item {\bf distribsplit():}  Create a distributed data frame/matrix
    from monotlithic one.
 
-   \item {\bf distribcat():}  Create monotlithic data frame/matrix from
+   \item {\bf distribcat():}  Create a monotlithic data frame/matrix from
    distributed one.
 
    \item {\bf distribagg():}  Distributed form of R's {\bf aggregate()}.
 
-   \item {\bf distribrange():}  Wrapper for {\bf distribagg()} to obtain
+   \item {\bf distribcounts():}  Wrapper for {\bf distribagg()} to obtain
    cell counts.
 
-   \item {\bf distribgetrows()}: Applies an R {\bf select()} or similar
-   operation to the distributed object, and collects the results into a
-   single object at the caller.
+   \item {\bf distribgetrows()}: Applies an R {\bf subset()} or similar
+   filtering operation to the distributed object, and collects the
+   results into a single object at the caller.
 
    \item {\bf distribrange():}  Distributed form of R's {\bf range()}.
 
    \end{itemize}
 
-\item {\bf statistical functions:}
+{\bf Statistical functions:}
 
-These use the Software Alchemy (SA) method ({\it Parallel Computation
-for Data Science}, N. Matloff, Chapman and Hall, 2015.) to parallelize
-statistical operations.  The idea is simple:  Apply the given estimator
-to each chunk in the distributed object, and average over chunks.  It is
-proven that the resulting distributed estimator has the same statistical
-accuracy as the original serial ones.\footnote{In the world of parallel
-computation, the standard word for nonparallel is {\it serial}.}
+These all use the Software Alchemy (SA) method ({\it Parallel
+Computation for Data Science}, N. Matloff, Chapman and Hall, 2015) to
+parallelize statistical operations.  The idea is simple:  Apply the
+given estimator to each chunk in the distributed object, and average
+over chunks.  It is proven that the resulting distributed estimator has
+the same statistical accuracy --- the same asymptotic variance --- as
+the original serial ones.\footnote{In the world of parallel computation,
+the standard word for nonparallel is {\it serial}.}
 
    \begin{itemize}
 
@@ -208,19 +213,39 @@ computation, the standard word for nonparallel is {\it serial}.}
 
    \item {\bf cabase():} Core of {\bf ca()}.
 
+   \item {\bf caagg():} SA analog of {\bf distribagg()}.
+
+   \item {\bf cameans()}:  Finds means in the specified columns.
+
+   \item {\bf caquantile():}  Wrapper for SA version of R's {\bf
+   quantile()}.
+
    \item {\bf calm():}  Wrapper for SA version of R's {\bf lm()}.
 
    \item {\bf caglm():}  Wrapper for SA version of R's {\bf glm()}.
 
    \item {\bf cakm():}  Wrapper for SA version of R's {\bf kmeans()}.
 
-   \item {\bf cakm():}  Wrapper for SA version of R's {\bf aggregate()}.
+   \item {\bf caprcomp():}  Wrapper for SA version of R's {\bf prcomp()}.
 
    \end{itemize}
 
-\end{itemize}
+{\bf Support functions:}
 
-There are also attendant support functions.
+   \begin{itemize}
+
+   \item {\bf formrowchunks():} Form chunks of rows of a data
+   frame/matrix.
+
+   \item {\bf matrixtolist():} For a list of the rows or columns of a
+   data frame or matrix.
+
+   \item {\bf addlists():}  ``Add'' two lists, meaning add values of
+   elements of the same name, and copy the others.
+
+   \item {\bf dbs(), dbsmsg(), etc.:}  Debugging aids.
+
+   \end{itemize}
 
 \section{Sample Session}
 
@@ -240,7 +265,7 @@ computational entities.  Indeed, one is often saddened to find that the
 parallel version is actually {\it slower} than the serial one!
 
 The file, {\bf yr2008}, was first split into a distributed file, stored
-in {\bf yr2008.01},...,{\bf yr2008.16}, using {\bf filesplitrand()}, and
+in {\bf yr2008r.01},...,{\bf yr2008r.16}, using {\bf filesplitrand()}, and
 then read into memory at the 16 cluster nodes using {\bf fileread()}:
 
 \begin{verbatim}
@@ -253,8 +278,8 @@ since these files are permanent, we can skip this step in future R
 sessions involving this data (if the file doesn't change).  The function
 {\bf filesplitrand()} was used instead of {\bf filesplit()} to construct
 the distributed file, in order to randomize the placement of the records
-of {\bf yr2008} across cluster nodes.  The advantage of randomization
-will be explained shortly.
+of {\bf yr2008} across cluster nodes.  Random arrangement of the rows is
+required for SA.
 
 In order to run timing comparisons, the full file was also read into
 memory at the cluster manager:
@@ -264,8 +289,8 @@ memory at the cluster manager:
 \end{verbatim}
 
 The first operation run involved the package's distributed version of
-R's {\bf aggregate()}.  Here we want to tabulate day of week, month and
-whether the flight was canceled, broken down into cells according to
+R's {\bf aggregate()}.  Here we want to tabulate departure delay,
+arrival delay and flight time, broken down into cells according to
 flight origin and destination.  We'll find the maximum value in each
 cell.
 
@@ -281,6 +306,8 @@ cell.
    user  system elapsed  
   2.291   0.084  15.952 
 \end{verbatim}
+
+The serial version was much slower.
 
 \begin{verbatim}
 > system.time(print(aggregate(cbind(DepDelay,ArrDelay,AirTime) ~ 
@@ -299,10 +326,10 @@ So, the results of {\bf distribagg()} did indeed match those of {\bf
 aggregate()}, but did so more than 15 times faster!
 
 Remember, the key philosophy of {\bf partools} is to create distributed
-objects and then keep using them in distributed form.  However, in some
-cases, we may wish to collect a distributed result into a monolithic
-object, especially if the result is small.  This is done in the next
-example:
+objects and then keep using them repeatedly in distributed form.
+However, in some cases, we may wish to collect a distributed result into
+a monolithic object, especially if the result is small.  This is done in
+the next example:
 
 Say we wish to do a filter operation, extracting the data on all the
 Sunday evening flights, and collect it into one place.   Here is the
@@ -321,11 +348,12 @@ distributed object:
 > sundayeved <- distribgetrows(cls,'with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,])')
 \end{verbatim}
 
-In, say, investigating data accuracy, we may wish to flag all records
-having an inordinate number of NA values.  As I first step, we may wish
-to add a column to our data frame, indicating how many NA values are in
-each row.  If we did not have the advantage of distributed computation,
-here is how long it would take for our flight delay data:
+As another example, say we are investigating data completeness.  We may
+wish to flag all records having an inordinate number of NA values.  As I
+first step, we may wish to add a column to our data frame, indicating
+how many NA values are in each row.  If we did not have the advantage of
+distributed computation, here is how long it would take for our flight
+delay data:
 
 \begin{verbatim}
 > sumna            
@@ -441,10 +469,9 @@ times were small.  And now the PCA runs:
 Thus, more than a 6-fold speedup here.  Agreement of the component
 standard deviations is good. 
 
-Last, let's find the {\it interquartile range} for several columns.
+Next, let's find the {\it interquartile range} for several columns.
 This is a robust measure of dispersion, defined at the difference
 between the 75$^{th}$ and 25$^{th}$ percentiles. 
-
 Here is serial code to find this:
 
 \begin{verbatim}
@@ -485,6 +512,60 @@ ActualElapsedTime    CRSElapsedTime           AirTime          ArrDelay
 Here the speedup was more than 11-fold, with agreement generally to
 three significant digits.  Once again, note that statistically speaking,
 both estimators have the same accuracy.
+
+The package also includes a distributed version of k-means clustering.
+Here it is on the flight delay data.  First, retain only the NA-free
+rows for the variables of interest, then run:
+
+\begin{verbatim}
+> fileread(cls,'yr2008r','yr2008',2,header=TRUE, sep=",")
+> invisible(clusterEvalQ(cls,y28 <- na.omit(yr2008[,c(5:8,13:16,19:21)])))
+> system.time(koutpar <- cakm(cls,'y28',3,11))
+   user  system elapsed
+  4.083   0.132   9.293
+\end{verbatim}
+
+Compare to serial:
+
+\begin{verbatim}
+> yr2008 <- read.csv('y2008')
+> y28 <- na.omit(yr2008[,c(5:8,13:16,19:21)])
+> system.time(koutser <- kmeans(y28,3))
+   user  system elapsed
+ 54.394   0.558  55.032
+\end{verbatim}
+
+So, the distributed version is about 6 times faster.  Results are
+virtually identical:
+
+\begin{verbatim}
+> koutpar$centers
+          [,1]      [,2]     [,3]     [,4]     [,5]
+[1,] 1741.3967 1718.0296 1876.433 1895.435 110.4398
+[2,]  932.4057  936.6907 1081.743 1082.813 108.5091
+[3,] 1311.2193 1308.1838 1496.267 1525.790 267.8620
+          [,6]      [,7]      [,8]      [,9]    [,10]
+[1,]  85.25672 13.101844 14.826940  569.2534 6.742315
+[2,]  84.66763  3.091913  4.517502  561.0567 6.785464
+[3,] 238.93152  8.668587 11.698193 1886.8964 7.541735
+        [,11]
+[1,] 16.71571
+[2,] 15.63046
+[3,] 18.35916
+> koutser$centers
+    DepTime CRSDepTime  ArrTime CRSArrTime
+1 1741.3888  1718.0217 1876.418   1895.425
+2  932.3681   936.6674 1081.737   1082.809
+3 1311.4436  1308.3525 1496.404   1525.905
+  CRSElapsedTime   AirTime  ArrDelay  DepDelay
+1       110.4363  85.25292 13.100842 14.826083
+2       108.5151  84.67361  3.092439  4.518112
+3       267.8669 238.93668  8.672439 11.701706
+   Distance   TaxiIn  TaxiOut
+1  569.2226 6.742079 16.71604
+2  561.1148 6.785409 15.63038
+3 1886.9094 7.542760 18.35823
+\end{verbatim}
 
 \end{document}
 
