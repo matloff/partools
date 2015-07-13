@@ -174,9 +174,16 @@ caprcomp <- function(cls,prcompargs,p) {
 # value: sdev and rotation from kmeans() output, plus thts to explore
 # possible instability
 #
-cakm <- function(cls,kmargs,p) {
+cakm <- function(cls,mtdf,ncenters,p) {
+   # need the same initial centers for each node; take them from Node 1;
+   # can take the first few records from the first chunk, since the data
+   # is assumed to be randomized
+   hdcmd <- paste('head(',mtdf,',',ncenters,')',sep='')
+   clusterExport(cls,'hdcmd',envir=environment())
+   ctrs <- clusterEvalQ(cls,eval(parse(text=hdcmd)))[[1]]
+   clusterExport(cls,'ctrs',envir=environment())
    ovf <- function(u) {
-      tmp <- paste("kmeans(",kmargs,")",collapse="")
+      tmp <- paste("kmeans(",mtdf,",centers=ctrs)",collapse="",sep="")
       docmd(tmp)
    }
    # as in caprcomp(), string the output entities together, then later
