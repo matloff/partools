@@ -158,8 +158,8 @@ matrixtolist(1,m)  # 3-component list, first is (1,2)
 
 # test of of distribagg(): 
 # form and distribute test data
-x <- sample(1:3,10,replace=T)
-y <- sample(0:1,10,replace=T)
+x <- sample(1:3,10,replace=TRUE)
+y <- sample(0:1,10,replace=TRUE)
 u <- runif(10)
 v <- runif(10)
 d <- data.frame(x,y,u,v)
