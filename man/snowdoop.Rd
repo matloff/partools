@@ -132,7 +132,7 @@ setclsinfo(cls)
 m <- rbind(1:2,3:4,5:6) 
 write.table(m,"m",row.names=FALSE,col.names=FALSE) 
 # apply the function
-filesplit(2,"m",seqnums=T)
+filesplit(2,"m",seqnums=TRUE)
 # file m.1 and m.2 created, with contents c(1,1,2) and
 # rbind(c(2,3,4),c(3,5,6)), respectively
 # check it
