@@ -36,7 +36,7 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
    }
    z168 <- z
    distribsplit(cls,"z168")
-   cabase(cls,"z168",ovf,estf,estcovf,conv2mat,findmean) 
+   cabase(cls,"z168",ovf,estf,estcovf,findmean,cacall=TRUE) 
 }
 
 ############################## cabase() ##############################
@@ -57,8 +57,7 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
 #
 #    as in ca() above
 #
-cabase <- function(cls,ovf,estf,
-      estcovf=NULL,conv2mat=TRUE,findmean=TRUE,cacall=FALSE) {
+cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,cacall=FALSE) {
    clusterExport(cls,c("ovf","estf","estcovf"),envir=environment())
    # apply the "theta hat" function, e.g. glm(), and extract the
    # apply the desired statistical method at each chunk
@@ -164,20 +163,21 @@ caprcomp <- function(cls,prcompargs,p) {
    res
 }
 
-# ca() wrapper for kmean()
+# ca() wrapper for kmeans()
 #
 # arguments:
 #
-#    kmargs: arguments for kmeans()
+#    mtdf: matrix or data frame
+#    ncenters: number of clusters to find
 #    p: number of variables
 #
 # value: sdev and rotation from kmeans() output, plus thts to explore
 # possible instability
 #
 cakm <- function(cls,mtdf,ncenters,p) {
-   # need the same initial centers for each node; take them from Node 1;
-   # can take the first few records from the first chunk, since the data
-   # is assumed to be randomized
+   # need the same initial centers for each node; can take the first few
+   # records from the first chunk, since the data is assumed to be
+   # randomized
    hdcmd <- paste('head(',mtdf,',',ncenters,')',sep='')
    clusterExport(cls,'hdcmd',envir=environment())
    ctrs <- clusterEvalQ(cls,eval(parse(text=hdcmd)))[[1]]
