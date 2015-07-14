@@ -30,7 +30,7 @@ readnscramble(cls,basenm,header=FALSE,sep= " ")
 filesave((cls,dname,newbasename,ndigs,sep)
 fileread(cls,fname,dname,ndigs,header=FALSE,sep=" ",fread=FALSE)
 filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
-linecount(infile,chunksize=100000)
+linecount(infile,header=FALSE,chunksize=100000)
 getnumdigs(nch)
 }
 
