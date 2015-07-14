@@ -27,7 +27,7 @@ filesort(cls,basenm,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep=" ",fre
 filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
 filecat(cls, basenm, header = FALSE)  
 readnscramble(cls,basenm,header=FALSE,sep= " ")
-filesave((cls,dname,newbasename,ndigs,sep)
+filesave(cls,dname,newbasename,ndigs,sep)
 fileread(cls,fname,dname,ndigs,header=FALSE,sep=" ",fread=FALSE)
 filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
 linecount(infile,header=FALSE,chunksize=100000)
