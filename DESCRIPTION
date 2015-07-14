@@ -12,6 +12,7 @@ Description: Miscellaneous utilities for the 'parallel' package,
    presented in N. Matloff, Parallel Computation for Data Science,
    Chapman and Hall, 2015.  Includes a debugging aid.
 Depends: parallel
+Suggests: data.table
 ByteCompile: yes
 NeedsCompilation: no
 License: GPL (>= 2)
