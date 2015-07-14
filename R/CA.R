@@ -36,7 +36,7 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
    }
    z168 <- z
    distribsplit(cls,"z168")
-   cabase(cls,"z168",ovf,estf,estcovf,findmean,cacall=TRUE) 
+   cabase(cls,,ovf,estf,estcovf,findmean,cacall=TRUE) 
 }
 
 ############################## cabase() ##############################
