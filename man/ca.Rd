@@ -47,11 +47,17 @@ caagg(cls,ynames,xnames,dataname,FUN)
      arguments.}
   \item{prcompargs}{Quoted string representing arguments to 
      \code{prcomp}.}
+  \item{p}{Number of columns in data}
+  \item{na.rm}{If TRUE, remove NA values from the analysis.}
   \item{mtdf}{Quoted name of a distributed matrix or data frame.}
+  \item{ncenters}{Number of clusters to find.}
   \item{cacall}{If TRUE, indicates that \code{cabase} had been called by
      \code{ca}.}
   \item{cols}{A quoted string that evaluates to data frame or matrix.}
   \item{vec}{A quoted string that evaluates to a vector.}
+  \item{ynames}{A vector of quoted variable names.}
+  \item{xnames}{A vector of quoted variable names.}
+  \item{dataname}{Quote name of a data frame or matrix.}
   \item{probs}{As in the argument with the same name in
      \code{quantile}. Should not be 0.00 or 1.00, as asymptotic
      normality doesn't hold.}

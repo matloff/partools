@@ -51,16 +51,15 @@ getnumdigs(nch)
      determine bins for the bucket sort.}
   \item{header}{TRUE if the file chunks have headers.}
   \item{seqnums}{TRUE if the file chunks will have sequence numbers.}
-  \item{sep}{Field delimiter used in \code{read.table}.}
+  \item{sep}{Field delimiter used in \code{read.table}, or
+     a field delimiter for lines in a text file, e.g. 'm'.}
   \item{infile}{Input file}
   \item{chunksize}{Number of lines to read at a time, for efficient I/O.}
   \item{dname}{Quoted name of a distributed data frame or matrix.}
   \item{fname}{Quoted name of a distributed file.}
-  \item{ndigs}{Number of digits in file name suffix.}
   \item{newbasename}{Quoted name of the prefix of a distributed file,
      e.g. \code{xyz} for a distributed file \code{xyz.01}, \code{xyz.02}
      etc.}
-  \item{sep}{A field delimiter for lines in a text file, e.g. 'm'.}
 }
 
 \details{
