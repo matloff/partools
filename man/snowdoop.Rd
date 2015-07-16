@@ -55,7 +55,8 @@ getnumdigs(nch)
      a field delimiter for lines in a text file, e.g. 'm'.}
   \item{infile}{Input file}
   \item{chunksize}{Number of lines to read at a time, for efficient I/O.}
-  \item{dname}{Quoted name of a distributed data frame or matrix.}
+  \item{dname}{Quoted name of a distributed data frame or matrix.  For
+     \code{filesave}, the object must have column names.}
   \item{fname}{Quoted name of a distributed file.}
   \item{newbasename}{Quoted name of the prefix of a distributed file,
      e.g. \code{xyz} for a distributed file \code{xyz.01}, \code{xyz.02}

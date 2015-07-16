@@ -212,15 +212,18 @@ filecat <- function (cls, basenm, header = FALSE)  {
 }
 
 # saves the distributed data frame/matrix d to a distributed file of the
-# specified basename; the suffix has ndigs digits, and the field
-# separator will be sep
+# specified basename; the suffix has ndigs digits, and the field #
+# separator will be sep; d must have column names
 filesave <- function(cls,dname,newbasename,ndigs,sep) {
    tmp <- paste('"',newbasename,'",',ndigs,sep='')
    cmd <- paste('myfilename <- filechunkname(',tmp,')',sep='')
    clusterExport(cls,"cmd",envir=environment())
    clusterEvalQ(cls,eval(parse(text=cmd)))
    tmp <- paste(dname,'myfilename',sep=',')
-   cmd <- paste('write.table(',tmp,',row.names=FALSE,sep="',sep,'")',sep='')
+   cnames <- colnames(get(dname))
+   clusterExport(cls,'cnames',envir=environment())
+   cmd <- paste('write.table(',tmp,
+      ',row.names=FALSE,col.names=cnames,sep="',sep,'")',sep='')
    clusterExport(cls,"cmd",envir=environment())
    clusterEvalQ(cls,docmd(cmd))
 }
@@ -283,48 +286,4 @@ fileagg <- function(ynames,xnames,
    aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
 }
 
-# get the indicated cell counts, cells defined according to the
-# variables in xnames 
-distribcounts <- function(cls,xnames,dataname) {
-   distribagg(cls,xnames[1],xnames,dataname,"length","sum")
-}
-
-# currently not in service; xtabs() call VERY slow
-# distribtable <- function(cls,xnames,dataname) {
-#    tmp <- distribagg(cls,xnames[1],xnames,dataname,"length","sum")
-#    names(tmp)[ncol(tmp)] <- "counts"
-#    xtabs(counts ~ .,data=tmp)
-# }
-
-distribrange <- function(cls,vec,na.rm=FALSE) {
-   narm <- if(na.rm) 'TRUE' else 'FALSE'  
-   narm <- paste("na.rm=",narm)
-   tmp <- paste("range(", vec, ",",narm,")",collapse = "")
-   rangeout <- clusterCall(cls,docmd,tmp)
-   vecmin <- min(geteltis(rangeout,1))
-   vecmax <- max(geteltis(rangeout,2))
-   c(vecmin,vecmax)
-}
-
-# execute the command cmd at each cluster node, typically select(), then
-# collect using rbind() at the caller
-distribgetrows <- function(cls,cmd) {
-   clusterExport(cls,'cmd',envir=environment())
-   res <- clusterEvalQ(cls,docmd(cmd))
-   tmp <- Reduce(rbind,res)
-   notallna <- function(row) any(!is.na(row))
-   tmp[apply(tmp,1,notallna),]
-}
-
-######################### misc. utilities ########################
-
-# execute the contents of a quoted command; main use is with
-# clusterEvalQ()
-docmd <- function(toexec) eval(parse(text=toexec))
-
-# extract element i of each element in the R list lst, which is a list
-# of vectors
-geteltis <- function(lst,i) {
-   get1elti <- function(lstmember) lstmember[i]
-   sapply(lst,get1elti)
-}
+# dfileagg 
