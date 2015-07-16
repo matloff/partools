@@ -300,3 +300,22 @@ dfileagg <- function(cls,fnames,ynames,xnames,
       aggregate(x = agg[, -(1:nby)], by = agg[, 1:nby, drop = FALSE], 
          FUN1)
 }
+
+# reads in the files in fnames, one at a time, naming the data tmpdata,
+# and applying
+#
+#    tmprows <- tmpdataexpr
+#
+# where tmpdataexpr is an expression involving tmpdata; rbind() combines
+# all the results for the final output
+filegetrows <- function(fnames,tmpdataexpr,header=FALSE,sep=" ") {
+   rows <- NULL
+   for (fn in fnames) {
+      tmpdata <- read.table(fn,header=header,sep=sep)
+      cmd <- paste('tmprows <- ',tmpdataexpr,sep='')
+      tmprows <- docmd(cmd)
+      rows <- rbind(rows,tmprows)
+   }
+}
+
+
