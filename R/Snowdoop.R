@@ -249,3 +249,82 @@ getnumdigs <- function(nch) {
    # floor(log10(nch)) + 1
    nchar(as.character(nch))
 }
+
+# like distribagg(), but a single R process reading in and processing
+# one file at a time; it is presumed that each file can be fit in memory
+#
+# arguments: 
+#
+#    ynames: a character vector stating the variables to be tabulated
+#    xnames: a character vector stating the variables to be used to form
+#            cells
+#    fnames: a character vector stating the files to be tabulated
+#    FUN, FUN2: functions to be applied at the first and second levels
+#               of aggregation
+fileagg <- function(ynames,xnames,
+      fnames,header=FALSE,sep=" ",FUN,FUN1=FUN) {
+   nby <- length(xnames) # number in the "by" arg to aggregate()
+   # set up aggregate() command to be run on the cluster nodes
+   ypart <- paste("cbind(",paste(ynames,collapse=","),")",sep="")
+   xpart <- paste(xnames,collapse="+")
+   forla <- paste(ypart,"~",paste(xnames,collapse="+"))
+   forla <- as.formula(forla)
+   agg <- NULL
+   for (fn in fnames) {
+       tmpdata <- read.table(fn,header=header,sep=sep)
+       tmpagg <- aggregate(forla,data=tmpdata,FUN=FUN)
+       agg <- rbind(agg,tmpagg)
+   }
+   # run the command, and combine the returned data frames into one big
+   # data frame
+   # typically a given cell will found at more than one cluster node;
+   # they must be combined, using FUN1
+   FUN1 <- get(FUN1)
+   aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
+}
+
+# get the indicated cell counts, cells defined according to the
+# variables in xnames 
+distribcounts <- function(cls,xnames,dataname) {
+   distribagg(cls,xnames[1],xnames,dataname,"length","sum")
+}
+
+# currently not in service; xtabs() call VERY slow
+# distribtable <- function(cls,xnames,dataname) {
+#    tmp <- distribagg(cls,xnames[1],xnames,dataname,"length","sum")
+#    names(tmp)[ncol(tmp)] <- "counts"
+#    xtabs(counts ~ .,data=tmp)
+# }
+
+distribrange <- function(cls,vec,na.rm=FALSE) {
+   narm <- if(na.rm) 'TRUE' else 'FALSE'  
+   narm <- paste("na.rm=",narm)
+   tmp <- paste("range(", vec, ",",narm,")",collapse = "")
+   rangeout <- clusterCall(cls,docmd,tmp)
+   vecmin <- min(geteltis(rangeout,1))
+   vecmax <- max(geteltis(rangeout,2))
+   c(vecmin,vecmax)
+}
+
+# execute the command cmd at each cluster node, typically select(), then
+# collect using rbind() at the caller
+distribgetrows <- function(cls,cmd) {
+   clusterExport(cls,'cmd',envir=environment())
+   res <- clusterEvalQ(cls,docmd(cmd))
+   tmp <- Reduce(rbind,res)
+   notallna <- function(row) any(!is.na(row))
+   tmp[apply(tmp,1,notallna),]
+}
+
+######################### misc. utilities ########################
+
+# execute the contents of a quoted command; main use is with
+# clusterEvalQ()
+docmd <- function(toexec) eval(parse(text=toexec))
+
+# extract element i of each element in the R list lst, which is a list
+# of vectors
+geteltis <- function(lst,i) {
+   get1elti <- function(lstmember) lstmember[i]
+   sapply(lst,get1elti)
+}
