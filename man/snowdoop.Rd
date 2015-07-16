@@ -1,4 +1,4 @@
-\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave,fileread,filesplitrand}
+\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave,fileread,filesplitrand,fileagg,dfileagg}
 \alias{snowdoop}
 \alias{filechunkname}
 \alias{filesort}
@@ -10,6 +10,8 @@
 \alias{filesave}
 \alias{fileread}
 \alias{filesplitrand}
+\alias{fileagg}
+\alias{dfileagg}
 
 \title{
 Snowdoop.
@@ -32,6 +34,7 @@ fileread(cls,fname,dname,ndigs,header=FALSE,sep=" ",fread=FALSE)
 filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
 linecount(infile,header=FALSE,chunksize=100000)
 getnumdigs(nch)
+fileagg(fnames,ynames,xnames,header=FALSE,sep= " ",FUN,FUN1=FUN) 
 }
 
 \arguments{
@@ -61,6 +64,10 @@ getnumdigs(nch)
   \item{newbasename}{Quoted name of the prefix of a distributed file,
      e.g. \code{xyz} for a distributed file \code{xyz.01}, \code{xyz.02}
      etc.}
+  \item{ynames}{{Vector of quoted names of variables on which ‘FUN’ is
+     to be applied.}
+  \item{xnames}{{Vector of quoted names of variables on which ‘FUN’ is
+     to be applied.
 }
 
 \details{
@@ -88,6 +95,12 @@ by the line number it had in the original file.
 
 The reverse operation to \code{filesplit} is performed by
 \code{filecat}, which converts a distributed file into a single one.
+
+The \code{fileagg} function does an out-of-memory, multifile version of
+\code{aggregate}, reading the specified files one at a time, and
+returning a grand aggregation.  The function \code{dfileagg} partitions
+the specified group of files to a \code{partools} cluster, having each
+call \code{fileagg}, and again aggregating the results.
 
 Operations such as \code{ca} need i.i.d. data. If the original file
 storage was ordered on some variable, one needs to randomize the data
