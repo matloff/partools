@@ -253,7 +253,7 @@ getnumdigs <- function(nch) {
    nchar(as.character(nch))
 }
 
-# like distribagg(), but a single R process reading in and processing
+# like aggregate(), but a single R process reading in and processing
 # one file at a time; it is presumed that each file can be fit in memory
 #
 # arguments: 
@@ -264,8 +264,8 @@ getnumdigs <- function(nch) {
 #    fnames: a character vector stating the files to be tabulated
 #    FUN, FUN2: functions to be applied at the first and second levels
 #               of aggregation
-fileagg <- function(ynames,xnames,
-      fnames,header=FALSE,sep=" ",FUN,FUN1=FUN) {
+fileagg <- function(fnames,ynames,xnames,
+      header=FALSE,sep=" ",FUN,FUN1=FUN) {
    nby <- length(xnames) # number in the "by" arg to aggregate()
    # set up aggregate() command to be run on the cluster nodes
    ypart <- paste("cbind(",paste(ynames,collapse=","),")",sep="")
@@ -286,4 +286,17 @@ fileagg <- function(ynames,xnames,
    aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
 }
 
-# dfileagg 
+# distributed wrapper for fileagg(); assigns each cluster node to handle
+# a set of files, call fileagg() on them; then combines the results
+dfileagg <- function(cls,fnames,ynames,xnames,
+      header=FALSE,sep=" ",FUN,FUN1=FUN) {
+   idxs <- splitIndices(length(fnames),length(cls))
+   fnchunks <- Map(function(idxchunk) fnames[idxchunk],idxs)
+   aggs <- clusterApply(cls,fnchunks,fileagg,ynames,xnames,
+      header=header,sep=sep,FUN=FUN,FUN1=FUN1) 
+   nby <- length(xnames)
+   agg <- Reduce(rbind, aggs)
+      FUN1 <- get(FUN1)
+      aggregate(x = agg[, -(1:nby)], by = agg[, 1:nby, drop = FALSE], 
+         FUN1)
+}
