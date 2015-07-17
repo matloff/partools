@@ -102,17 +102,21 @@ readnscramble <- function(cls,basenm,header=FALSE,sep= " ") {
    linecounts <- sapply(1:nch,
       function(i) linecount(fns[i],header=header))
    cums <- cumsum(linecounts)
-   clusterExport(cls,
-      c("basenm","linecounts","cums","fns","nch","header","sep"),
-      envir=environment())
+#    clusterExport(cls,
+#       c("basenm","linecounts","cums","fns","nch","header","sep"),
+#       envir=environment())
    totrecs <- cums[nch]
    # give the nodes their index assignments
    tmp <- sample(1:totrecs,totrecs,replace=FALSE)
    idxs <- clusterSplit(cls,tmp)
-   invisible(clusterApply(cls,idxs,readmypart))
+   # invisible(clusterApply(cls,idxs,readmypart))
+   invisible(clusterApply(cls,idxs,readmypart,
+      basenm,linecounts,cums,fns,nch,header,sep))
 }
 
-readmypart <- function(myidxs) {
+# readmypart <- function(myidxs) {
+readmypart <- function(myidxs,
+      basenm,linecounts,cums,fns,nch,header,sep) {
    mydf <- NULL
    for (i in 1:nch) {
       filechunk <- read.table(fns[i],header=header,sep=sep)
