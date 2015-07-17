@@ -1,4 +1,5 @@
-\name{snowdoop,filechunkname,filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave,fileread,filesplitrand,fileagg,dfileagg}
+\name{snowdoop,filechunkname, etc...}
+% filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave,fileread,filesplitrand,fileagg,dfileagg,filegetrows,dfilegetrows}
 \alias{snowdoop}
 \alias{filechunkname}
 \alias{filesort}
@@ -12,6 +13,8 @@
 \alias{filesplitrand}
 \alias{fileagg}
 \alias{dfileagg}
+\alias{filegetrows}
+\alias{dfilegetrows}
 
 \title{
 Snowdoop.
@@ -35,6 +38,9 @@ filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
 linecount(infile,header=FALSE,chunksize=100000)
 getnumdigs(nch)
 fileagg(fnames,ynames,xnames,header=FALSE,sep= " ",FUN,FUN1=FUN) 
+dfileagg(cls,fnames,ynames,xnames,header=FALSE,sep=" ",FUN,FUN1=FUN) 
+filegetrows(fnames,tmpdataexpr,header=FALSE,sep=" ") 
+dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ") 
 }
 
 \arguments{
@@ -61,13 +67,16 @@ fileagg(fnames,ynames,xnames,header=FALSE,sep= " ",FUN,FUN1=FUN)
   \item{dname}{Quoted name of a distributed data frame or matrix.  For
      \code{filesave}, the object must have column names.}
   \item{fname}{Quoted name of a distributed file.}
+  \item{fnames}{Character vector of file names.}
   \item{newbasename}{Quoted name of the prefix of a distributed file,
      e.g. \code{xyz} for a distributed file \code{xyz.01}, \code{xyz.02}
      etc.}
-  \item{ynames}{{Vector of quoted names of variables on which ‘FUN’ is
+  \item{ynames}{Vector of quoted names of variables on which ‘FUN’ is
      to be applied.}
-  \item{xnames}{{Vector of quoted names of variables on which ‘FUN’ is
-     to be applied.
+  \item{xnames}{Vector of quoted names of variables on which ‘FUN’ is
+     to be applied.}
+  \item{tmpdataexpr}{Expression involving a data frame
+     \code{tmpdataexpr}.  See below.}
 }
 
 \details{
@@ -101,6 +110,15 @@ The \code{fileagg} function does an out-of-memory, multifile version of
 returning a grand aggregation.  The function \code{dfileagg} partitions
 the specified group of files to a \code{partools} cluster, having each
 call \code{fileagg}, and again aggregating the results.
+
+The function \code{filegetrows} reads in the files in \code{fnames}, one
+at a time, naming the resulting in-memory data \code{tmpdata} each time.
+(It is assumed that the data fit in memory.)  The function applies the
+user command \code{tmpdataexpr} to \code{tmpdata}, producing a subset of
+\code{tmpdata}.  All of these subsets are combined using \code{rbind},
+yielding the return value.  The paired function \code{dfilegetrows} is a
+distributed wrapper for \code{filegetrows}, just as \code{dfileagg} is
+for \code{fileagg}.
 
 Operations such as \code{ca} need i.i.d. data. If the original file
 storage was ordered on some variable, one needs to randomize the data
@@ -195,6 +213,17 @@ filesave(cls,'mtc','ctm',1,',')
 fileread(cls,'ctm','ctmnew',1,header=TRUE,sep=',') 
 # check it
 clusterEvalQ(cls,ctmnew) 
+# try dfileagg() on it (not same as distribagg())
+dfileagg(cls,c('ctm.1','ctm.2'),c("mpg","disp","hp"),c("cyl","gear"),header=TRUE,sep=",","max")
+# check
+aggregate(cbind(mpg,disp,hp) ~ cyl+gear,data=mtcars,FUN=max)
+# extract the records with 4 cylinders and 4 gears (again, different
+# from distribgetrows())
+cmd <- 'tmpdata[tmpdata$cyl == 4 & tmpdata$gear == 4,]'
+dfilegetrows(cls,c('ctm.1','ctm.2'),cmd,header=TRUE,sep=',') 
+# check
+mtc[mtc$cyl == 4 & mtc$gear == 4,]
+
 
 }
 
