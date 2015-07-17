@@ -567,6 +567,54 @@ virtually identical:
 3 1886.9094 7.542760 18.35823
 \end{verbatim}
 
+\section{Dealing with Memory Limitations}
+
+The discussion so far has had two implicit assumptions:
+
+\begin{itemize}
+
+\item The number of file chunks and the number of (R {\bf parallel})
+cluster nodes are equal, and the latter is equal to the number of
+physical computing devices one has, e.g. the number of cores in a
+multicore machine or the number of network nodes in a physical clsuter.
+
+\item Each file chunk fits into the memory\footnote{Say, physical memory
+plus swap space.} of the corresponding cluster node.
+
+\end{itemize}
+
+The first assumption is not very important.  If for some reason we have
+created a distributed file with more chunks than our number of physical
+computing devices, we can still set up an R {\bf parallel} cluster with
+size equal to the number of file chunks.  Now more than one R process
+will run on at least some of the cluster nodes, albeit possibly at the
+expense of, say, an increase in virtual memory swap operations.
+
+The second assumption is the more pressing one.  For this reason, the
+package includes functions such as {\bf dfileagg()}.  The latter acts
+similarly to {\bf distribagg()}, but with a key difference:  Any
+given cluster node will read from many chunks of the distributed file,
+and will process those chunks one at a time.
+
+Consider again our flight delay data set.  As a very simple example, say
+we have a two-node physical cluster, and that each node has memory
+enough for only 1/4 of the data.  So, we break up the original data file
+to 4 pieces, {\bf yr2008.1} through {\bf yr2008.4}, and we run, say,
+
+\begin{verbatim}
+> dfileagg(cls, c("DepDelay","ArrDelay","AirTime"),
+   c("Origin","Dest"),"yr2008", FUN="max")))  
+\end{verbatim}
+
+Our first cluster node will read {\bf yr2008.1} and {\bf yr2008.2}, one
+at a time, while the second will read {\bf yr2008.3} and {\bf yr2008.4},
+again one at a time, At each node, at any given time only 1/4 of the
+data is in memory, so we don't exceed memory capacity.  But they will 
+get us the right answer, and will do so in parallel, roughly with a
+speedup factor of 2.
+
+More functions like this will be added to {\bf partools}.
+
 \end{document}
 
 
