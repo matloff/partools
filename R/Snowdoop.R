@@ -313,9 +313,19 @@ filegetrows <- function(fnames,tmpdataexpr,header=FALSE,sep=" ") {
    for (fn in fnames) {
       tmpdata <- read.table(fn,header=header,sep=sep)
       cmd <- paste('tmprows <- ',tmpdataexpr,sep='')
-      tmprows <- docmd(cmd)
+      tmprows <- eval(parse(text=cmd))
       rows <- rbind(rows,tmprows)
    }
+   rows
 }
 
-
+# distributed wrapper for fileagg(); assigns each cluster node to handle
+# a set of files, call fileagg() on them; then combines the results
+dfilegetrows <- function(cls,fnames,tmpdataexpr,
+      header=FALSE,sep=" ") {
+   idxs <- splitIndices(length(fnames),length(cls))
+   fnchunks <- Map(function(idxchunk) fnames[idxchunk],idxs)
+   rowslist <- clusterApply(cls,fnchunks,filegetrows,tmpdataexpr,
+      header=header,sep=sep) 
+   Reduce(rbind,rowslist)
+}
