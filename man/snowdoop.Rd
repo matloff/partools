@@ -1,5 +1,4 @@
 \name{snowdoop,filechunkname, etc...}
-% filesort,filesplit,readnscramble,linecount,filecat,getnumdigs,filesave,fileread,filesplitrand,fileagg,dfileagg,filegetrows,dfilegetrows}
 \alias{snowdoop}
 \alias{filechunkname}
 \alias{filesort}
