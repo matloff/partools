@@ -18,7 +18,10 @@
 
 \title{{\bf partools: a Sensible Package for Large Data Sets}}
 
-\author{Norm Matloff, with Contributions from Alex Rumbaugh}
+\author{Norm Matloff \\
+University of California, Davis \\
+\\ 
+with Contributions from Alex Rumbaugh}
 
 \begin{document}
 
@@ -614,6 +617,32 @@ get us the right answer, and will do so in parallel, roughly with a
 speedup factor of 2.
 
 More functions like this will be added to {\bf partools}.
+
+\section{What About Other R Functions and Packages, say reshape2?}
+
+It is easy to apply the {\bf partools} idiom to many R functions that
+return data frame or matrix values.  Consider for instance the {\bf
+reshape2} function {\bf melt()}.  Say we already have a distributed data
+frame {\bf ddf} at the cluster nodes.  We have two choices here:
+
+\begin{itemize}
+
+\item In keeping with the {\bf partools} philosophy, we might simply
+call {\bf melt()} at each node, say using {\bf clusterEvalQ()}, and keep
+the result distributed.
+
+\item If say we need to gather together the results of a {\bf melt()}
+operation, we could call {\bf melt()} at each node but then call the
+{\bf partools} function {\bf distribgetrows()} to collect the molten
+data into one centralized data frame.  A {\bf cast()} operation may
+require a bit more care, depending on whether the distributed object
+crosses subject ID boundaries.
+
+\end{itemize}
+
+
+
+often with a simple application of 
 
 \end{document}
 
