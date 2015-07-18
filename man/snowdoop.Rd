@@ -70,12 +70,14 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
   \item{newbasename}{Quoted name of the prefix of a distributed file,
      e.g. \code{xyz} for a distributed file \code{xyz.01}, \code{xyz.02}
      etc.}
-  \item{ynames}{Vector of quoted names of variables on which ‘FUN’ is
-     to be applied.}
-  \item{xnames}{Vector of quoted names of variables on which ‘FUN’ is
-     to be applied.}
+  \item{ynames}{Vector of quoted names of variables on which \code{FUN}
+     is to be applied.}
+  \item{xnames}{Vector of quoted names of variables to be used for cell
+     definition.}
   \item{tmpdataexpr}{Expression involving a data frame
      \code{tmpdataexpr}.  See below.}
+  \item{FUN}{First-level aggregation function.}
+  \item{FUN1}{Second-level aggregation function.}
 }
 
 \details{
