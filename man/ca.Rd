@@ -44,7 +44,7 @@ caagg(cls,ynames,xnames,dataname,FUN)
      e.g. R formula, \code{data} specification.}
   \item{glmargs}{Quoted string representing arguments to \code{glm},
      e.g. R formula, \code{data} specification, and \code{family}
-     arguments.}
+     argument.}
   \item{prcompargs}{Quoted string representing arguments to 
      \code{prcomp}.}
   \item{p}{Number of columns in data}
@@ -53,11 +53,11 @@ caagg(cls,ynames,xnames,dataname,FUN)
   \item{ncenters}{Number of clusters to find.}
   \item{cacall}{If TRUE, indicates that \code{cabase} had been called by
      \code{ca}.}
-  \item{cols}{A quoted string that evaluates to data frame or matrix.}
+  \item{cols}{A quoted string that evaluates to a data frame or matrix.}
   \item{vec}{A quoted string that evaluates to a vector.}
   \item{ynames}{A vector of quoted variable names.}
   \item{xnames}{A vector of quoted variable names.}
-  \item{dataname}{Quote name of a data frame or matrix.}
+  \item{dataname}{Quoted name of a data frame or matrix.}
   \item{probs}{As in the argument with the same name in
      \code{quantile}. Should not be 0.00 or 1.00, as asymptotic
      normality doesn't hold.}
@@ -66,7 +66,8 @@ caagg(cls,ynames,xnames,dataname,FUN)
 
 \details{Implements the ``Software Alchemy'' method for parallelizing
 statistical computations (N. Matloff, \emph{Parallel Computation for
-Data Science}, Chapman and Hall, 2015.)  This can result in substantial
+Data Science}, Chapman and Hall, 2015, research article to appear in the
+\emph{Journal of Statistical Software}.)  This can result in substantial
 speedups in computation.
 
 The data are broken into chunks, and the given estimator is applied to
@@ -100,8 +101,6 @@ function (or function elsewere in this package):
 
       \item \code{cakm}: Wrapper for \code{kmeans}.
 
-      \item \code{caprcomp}: Wrapper for \code{prcomp}.
-
       \item \code{cameans}: Wrapper for \code{colMeans}.
 
       \item \code{caquantile}: Wrapper for \code{quantile}.
@@ -134,7 +133,7 @@ whether your data is already in memory or still in a file.
    \itemize{
    
       \item \code{thts}, the results of applying the requested estimator to
-      the chunks; the estimator from chunk is in row i
+      the chunks; the estimator from chunk i is in row i
    
       \item \code{tht}, the chunk-averaged overall estimator, if requested
    
@@ -148,17 +147,14 @@ The wrapper functions return the following list elements:
    \itemize{
 
       \item \code{calm}, \code{caglm}: estimated regression coefficients
-      and their estimated covariance matricx
+      and their estimated covariance matrix
 
       \item \code{caprcomp}: \code{sdev} (square roots of the
       eigenvalues) and \code{rotation}, as with \code{prcomp};
       \code{thts} is returned as well.
 
       \item \code{cakm}: \code{centers} and \code{size}, as with
-      \code{kmeans}; note that the order of the centers may come out
-      different from that of \code{kmeans}, due to random
-      initialization; consider using \code{set.seed};
-      \code{thts} is returned as well.
+      \code{kmeans}; \code{thts} is returned as well.
 
    }
 
@@ -181,7 +177,7 @@ cls <- makeCluster(2)
 setclsinfo(cls)
 
 # generate simulated test data, as distributed data frame
-n <- 5000
+n <- 25000
 u <- matrix(nrow=n,ncol=4)
 u[,1:3] <- rnorm(3*n)
 u[,4] <- u[,1] + 2*u[,2] + u[,3]
