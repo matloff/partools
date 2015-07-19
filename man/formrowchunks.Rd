@@ -15,7 +15,7 @@
 \alias{geteltis}
 
 \title{
-Utilities for \pkg{parallel} cluster code, including ``Snowdoop.''
+Utilities for \pkg{parallel} cluster code.
 }
 
 \description{
@@ -57,9 +57,9 @@ geteltis(lst,i)
   \item{xnames}{Vector of quoted names of variables that define the
      grouping.}
   \item{dataname}{Quoted name of a distributed data frame.}
-  \item{FUN}{Quoted name of aggregation function to be used in
-     aggregation within cluster nodes.}
-  \item{FUN1}{Quoted name of aggregation function to be used in
+  \item{FUN}{Quoted name of function to be used in
+     aggregating within cluster nodes.}
+  \item{FUN1}{Quoted name of function to be used in
      aggregation between cluster nodes.}
   \item{vec}{Quoted expression that evaluates to a vector.}
   \item{na.rm}{Remove NA values.}
@@ -69,7 +69,10 @@ geteltis(lst,i)
   \item{i}{A column index}
 }
 
-\details{The function \code{formrowchunks} forms chunks of rows of
+\details{The \code{setclsinfo} function does initialization needed for
+use of the tools in the package.
+
+The function \code{formrowchunks} forms chunks of rows of
 \code{m}, corresponding to the number of worker nodes
 in the cluster \code{m}.  For any given worker, the code places its
 chunk in \code{mchunk} in the global space of the worker.
@@ -77,13 +80,13 @@ chunk in \code{mchunk} in the global space of the worker.
 A call to \code{matrixtolist} extracts the rows or columns of a matrix
 or data frame and forms an R list from them.
 
-The function \code{addlists} does this:  Say we have two lists, with
-numeric values.  We wish to form a new list, with all the keys (names)
-from the two input lists appearing in the new list.  In the case of a
-key in common to the two lists, the value in the new list will be the
-sum of the two individual values for that key.  (Here ``sum'' means the
-result of applying \code{add}.) For a key appearing in one list and not
-the other, the value in the new list will be the value in the input
+The function \code{addlists} does the following:  Say we have two lists,
+with numeric values.  We wish to form a new list, with all the keys
+(names) from the two input lists appearing in the new list.  In the case
+of a key in common to the two lists, the value in the new list will be
+the sum of the two individual values for that key.  (Here ``sum'' means
+the result of applying \code{add}.) For a key appearing in one list and
+not the other, the value in the new list will be the value in the input
 list.  
 
 The function \code{exportlibpaths}, invoked from the manager, exports
@@ -98,21 +101,22 @@ manager) node.
 
 The package's \code{distribagg} function is a distributed (and somewhat
 restricted) form of \code{aggregate}.  The special case of aggregating
-counts is handled by \code{distribcounts}.
+counts is handled by the wrapper \code{distribcounts}.
 
 The \code{distribrange} function is a distributed form of \code{range}.
 
-The \code{distribgetrows} function can be used  a distributed form of,
-for instance, \code{select}.  In the latter case, the specified rows
-will be selected at each cluster node, then \code{rbind}-ed together at
-the caller.
+The \code{distribgetrows} function is useful in a variety of situations.
+It can be used, for instance, as a distributed form of \code{select}.
+In the latter case, the specified rows will be selected at each cluster
+node, then \code{rbind}-ed together at the caller.
 
-The \code{docmd} function executes the quoted command.  Useful for
-building up complex command for remote execution.  An R \code{formula}
-will be constructed from the arguments \code{ynames} and \code{xnames},
-with the latter put on the left side of the \code{~} sign, with
-\code{cbind} for combining, and the latter put on the right side, with
-\code{+} signs as delimiters.
+The \code{docmd} function executes the quoted command, useful for
+building up complex command for remote execution.  
+
+An R \code{formula} will be constructed from the arguments \code{ynames}
+and \code{xnames}, with the latter put on the left side of the \code{~}
+sign, with \code{cbind} for combining, and the latter put on the right
+side, with \code{+} signs as delimiters.
 
 The \code{geteltis} function extracts from an R list of vectors element
 \code{i} from each.
@@ -122,12 +126,13 @@ The \code{geteltis} function extracts from an R list of vectors element
 \value{
 In the case of \code{addlists}, the return value is the new list.
 
-The \code{distribagg} function returns a data frame, the same as would a
-call to \code{aggregate}, though possibly in different row order.
+The \code{distribcat} function returns the concatenated data frame;
+\code{distribgetrows} works similarly.
 
-% The \code{distribtable} function returns an R table, the same as would a
-% call to \code{table}, though the class is the \code{"xtabs"} subclass of
-% \code{"table"}.
+The \code{distribagg} function returns a data frame, the same as would a
+call to \code{aggregate}, though possibly in different row order;
+\code{distribcounts} works similarly.
+
 }
 
 \examples{
@@ -164,16 +169,15 @@ u <- runif(10)
 v <- runif(10)
 d <- data.frame(x,y,u,v)
 distribsplit(cls,"d")
-# check that it's there at the cluster nodes
+# check that it's there at the cluster nodes, in distributed form
 clusterEvalQ(cls,d) 
 d
-# try the function
+# try the aggregation function
 distribagg(cls,c("u","v"), c("x","y"),"d","max")
 # check result
 aggregate(cbind(u,v) ~ x+y,d,max)
 
 # real data
-# don't forget to distribute
 mtc <- mtcars
 distribsplit(cls,"mtc")
 
@@ -187,6 +191,8 @@ table(mtc$cyl,mtc$gear)
 
 # extract and collect all the mtc rows in which the number of cylinders is 8
 distribgetrows(cls,'mtc[mtc$cyl == 8,]')
+# check
+mtc[mtc$cyl == 8,]
 
 }
 
