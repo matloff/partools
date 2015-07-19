@@ -20,9 +20,8 @@ Snowdoop.
 }
 
 \description{
-Snowdoop operations:
-Utilities for distributed computation, including distributed
-file storage.
+``Snowdoop'': Utilities for distributed file storage, access and 
+related operations..  
 }
 
 \usage{
@@ -59,9 +58,8 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
      determine bins for the bucket sort.}
   \item{header}{TRUE if the file chunks have headers.}
   \item{seqnums}{TRUE if the file chunks will have sequence numbers.}
-  \item{sep}{Field delimiter used in \code{read.table}, or
-     a field delimiter for lines in a text file, e.g. 'm'.}
-  \item{infile}{Input file}
+  \item{sep}{Field delimiter used in \code{read.table}.}
+  \item{infile}{Quoted input file name.}
   \item{chunksize}{Number of lines to read at a time, for efficient I/O.}
   \item{dname}{Quoted name of a distributed data frame or matrix.  For
      \code{filesave}, the object must have column names.}
@@ -82,13 +80,6 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
 
 \details{
 
-Those functions with argument \code{cls} presume that \code{setclsinfo}
-has already been called.  
-
-Note that if the user has the \code{data.table} package, further speed
-improvement may be obtained by using \code{fread} instead of
-\code{read.table}. Comments in the code show suggested changes.
-
 Use \code{filesort} to do a distributed file sort, placing the result as
 a distributed data frame/matrix in the memories of the cluster nodes.
 The first \code{nsamp} records are read from 
@@ -96,7 +87,8 @@ each file chunk.  They are merged and quantiles formed, one quantile
 range for each cluster node.  Each node then reads all the file chunks, 
 retaining the records in its assigned range, and sorts them.  This 
 results in the input file being sorted, in memory, in a distributed 
-manner across nodes, under the name \code{basenm}. 
+manner across nodes, under the name \code{basenm}.  At present, this
+utility is not very efficient.
 
 Use \code{filesplit} to convert a single file into distributed one, with
 \code{nch} chunks.  The file header, if present, will be retained in the
@@ -109,8 +101,8 @@ The reverse operation to \code{filesplit} is performed by
 The \code{fileagg} function does an out-of-memory, multifile version of
 \code{aggregate}, reading the specified files one at a time, and
 returning a grand aggregation.  The function \code{dfileagg} partitions
-the specified group of files to a \code{partools} cluster, having each
-call \code{fileagg}, and again aggregating the results.
+the specified group of files to a \code{partools} cluster, has each
+call \code{fileagg}, and again aggregates the results.
 
 The function \code{filegetrows} reads in the files in \code{fnames}, one
 at a time, naming the resulting in-memory data \code{tmpdata} each time.
@@ -170,6 +162,7 @@ filesplit(2,"m",seqnums=TRUE)
 # check it
 read.table("m.1",header=FALSE,row.names=1)
 read.table("m.2",header=FALSE,row.names=1)
+m
 
 # example of filecat(); assumes filesplit() example above already done
 # delete file m so we can make sure we are re-creating it
@@ -200,7 +193,7 @@ readnscramble(cls,"co2",header=TRUE)
 filesave(cls,'co2','co2s',1,sep=',')
 
 # example of filechunkname()
-clusterEvalQ(cls,filechunkname("x",3))  # returns "x.1", "x.2"
+clusterEvalQ(cls,filechunkname("x",3))  # returns "x.001", "x.002"
 
 # example of getnumdigs()
 getnumdigs(156)  # should be 3
