@@ -3,7 +3,7 @@ Version: 1.1.0
 Author: Norm Matloff <normmatloff@gmail.com> [aut], 
    Alex Rumbaugh <aprumbaugh@ucdavis.edu> [ctb]
 Maintainer: Norm Matloff <normmatloff@gmail.com>
-Date: 1/21/2015
+Date: 7/19/2015
 Title: Tools for the 'Parallel' Package
 Description: Miscellaneous utilities for the 'parallel' package, 
    cluster-oriented section; "Snowdoop" alternative to MapReduce;
@@ -17,4 +17,4 @@ ByteCompile: yes
 NeedsCompilation: no
 License: GPL (>= 2)
 Repository: CRAN
-Date/Publication: 2015-06-16 
+Date/Publication: 2015-07-19 
