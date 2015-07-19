@@ -21,7 +21,7 @@ Snowdoop.
 
 \description{
 ``Snowdoop'': Utilities for distributed file storage, access and 
-related operations..  
+related operations.
 }
 
 \usage{
