@@ -59,7 +59,9 @@ fault tolerance mechanisms, which are especially extensive in Spark,
 The one firm advantage of Hadoop/Spark is their use of distributed file
 systems.  Under the philosophy, ``Move the computation to the data,
 rather than {\it vice versa},'' network traffic may be greatly reduced,
-thus speeding up computation.
+thus speeding up computation.  In addition, their approach helps deal
+with the fact that Big Data sets may not fit into the memory of a single
+machine.
 
 Therefore:
 
@@ -594,10 +596,10 @@ will run on at least some of the cluster nodes, albeit possibly at the
 expense of, say, an increase in virtual memory swap operations.
 
 The second assumption is the more pressing one.  For this reason, the
-package includes functions such as {\bf dfileagg()}.  The latter acts
-similarly to {\bf distribagg()}, but with a key difference:  Any
-given cluster node will read from many chunks of the distributed file,
-and will process those chunks one at a time.
+{\bf partools} package includes functions such as {\bf dfileagg()}.  The
+latter acts similarly to {\bf distribagg()}, but with a key difference:
+Any given cluster node will read from many chunks of the distributed
+file, and will process those chunks one at a time.
 
 Consider again our flight delay data set.  As a very simple example, say
 we have a two-node physical cluster, and that each node has memory
@@ -605,8 +607,9 @@ enough for only 1/4 of the data.  So, we break up the original data file
 to 4 pieces, {\bf yr2008.1} through {\bf yr2008.4}, and we run, say,
 
 \begin{verbatim}
-> dfileagg(cls, c("DepDelay","ArrDelay","AirTime"),
-   c("Origin","Dest"),"yr2008", FUN="max")))  
+> dfileagg(cls,c('yr2008.1','yr2008.2','yr2008.3','yr2008.4',
+     c("DepDelay","ArrDelay","AirTime"),
+     c("Origin","Dest"),"yr2008", FUN="max")))  
 \end{verbatim}
 
 Our first cluster node will read {\bf yr2008.1} and {\bf yr2008.2}, one
@@ -639,10 +642,6 @@ require a bit more care, depending on whether the distributed object
 crosses subject ID boundaries.
 
 \end{itemize}
-
-
-
-often with a simple application of 
 
 \end{document}
 
