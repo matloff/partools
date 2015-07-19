@@ -27,10 +27,10 @@ with Contributions from Alex Rumbaugh}
 
 \maketitle
 
-With the advent of Big Data, the Hadoop framework became ubiquitous.
-Yet it was clear that Hadoop had major shortcomings, and recently these
-are being much more seriously discussed.\footnote{See for example ``The
-Hadoop Honeymoon is Over,'' {\it
+With the advent of Big Data, the Hadoop framework has become ubiquitous.
+Yet it was clear from the start that Hadoop had major shortcomings, and
+recently these are being much more seriously discussed.\footnote{See for
+example ``The Hadoop Honeymoon is Over,'' {\it
 https://www.linkedin.com/pulse/hadoop-honeymoon-over-martyn-jones}} This
 has resulted in a new platform, Spark, gaining popularity.  As with
 Hadoop, there is an R interface available for Spark, named SparkR. 
@@ -45,14 +45,15 @@ unfortunately retains the drawbacks of Hadoop:
 rely on Java/Scala.  This makes them difficult to install, configure and
 use for those who are not computer systems experts. 
 
+\item For a variety of reasons, even SparkR can be considerably slower
+than Plain Old R (POR).
+
 \item Although a major plus for Hadoop/Spark is fault tolerance, it is
 needed only for users working on extremely large clusters, consisting of
 hundreds or thousands of nodes. Disk failure rates are simply too low
 for fault tolerance to be an issue for many Hadoop/Snow users, who do
 not have such large
-systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy} Worse, the
-fault tolerance mechanisms, which are especially extensive in Spark,
-{\it slow down the computation}.
+systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy} 
 
 \end{itemize}
 
@@ -69,12 +70,13 @@ Therefore:
 
 It is desirable to have a package that retains the distributed-file
 nature of Hadoop/Spark  while staying fully within the simple, familiar,
-yet powerful R framework.  
+yet powerful POR framework.  
 
 The {\bf partools} package is designed to meet these goals.  It is
-intended as {\bf a simple, sensible alternative to Snow/Hadoop}.  Though
-not necessarily appropriate for all settings, for many R programmers,
-{\bf partools} may be a much better choice than {\bf Hadoop/Snow}.
+intended as {\bf a simple, sensible POR alternative to Hadoop/Spark}.
+Though not necessarily appropriate for all settings, for many R
+programmers, {\bf partools} may be a much better choice than {\bf
+Hadoop/Snow}.  
 
 \end{quote}
 
@@ -90,17 +92,18 @@ issue, one can provide it externally, say with the XtreemFS system.
 
 As you will see later, {\bf partools} can deliver some impressive
 speedups.  But there is nothing magical about this.  Instead, the value
-of the package consists of just two simple sources:
+of the package stems from just two simple sources:
 
 \begin{itemize}
 
-\item [(a)] The package follows a philosophy of forming distributed
-objects {\it and keeping using them in distributed form throughout one's
-R session.}
+\item [(a)] The package follows a Keep It Distributed philosophy:  Form
+distributed objects {\it and keep using them in distributed form
+throughout one's R session, accessing them repeatedly for one's various
+desired operations.}
 
 \item [(b)] The package consists of a number of utility functions that
 greatly facilitate creating, storing and {\it analyzing} distributed
-objects.
+objects, both in memory and on disk.
 
 \end{itemize}
 
@@ -108,6 +111,8 @@ objects.
 
 The package is based on the following very simple principles, involving
 {\it distributed files} and {\it distributed data frames/matrices}.
+We'll refer to nondistributed files and data frames/matrices as {\it
+monolithic}.
 
 \begin{itemize}
 
@@ -151,7 +156,7 @@ various cluster nodes.  This plays a key role in the software.
 
 The package consists of three main groups of functions:
 
-{\bf Distributed-file functions:}
+\subsubsection{Distributed-file functions}
 
    \begin{itemize}
 
@@ -178,7 +183,7 @@ The package consists of three main groups of functions:
 
    \end{itemize}
 
-{\bf Tabulative functions:}
+\subsubsection{Tabulative functions}
 
    \begin{itemize}
 
@@ -193,6 +198,10 @@ The package consists of three main groups of functions:
    \item {\bf distribcounts():}  Wrapper for {\bf distribagg()} to obtain
    cell counts.
 
+   \item {\bf dfileagg():}  Like {\bf distribagg()}, but file-based
+   rather than in-memory, in order to handle files that are too big to
+   fit in memory, even on a distributed basis.
+
    \item {\bf distribgetrows()}: Applies an R {\bf subset()} or similar
    filtering operation to the distributed object, and collects the
    results into a single object at the caller.
@@ -201,15 +210,17 @@ The package consists of three main groups of functions:
 
    \end{itemize}
 
-{\bf Statistical functions:}
+\subsubsection{Statistical functions}
 
 These all use the Software Alchemy (SA) method ({\it Parallel
 Computation for Data Science}, N. Matloff, Chapman and Hall, 2015) to
-parallelize statistical operations.  The idea is simple:  Apply the
+parallelize statistical operations.\footnote{More detailed presentation
+in forthcoming paper in the {\it Journal of Statistical Software}.}  
+The idea is simple:  Apply the
 given estimator to each chunk in the distributed object, and average
 over chunks.  It is proven that the resulting distributed estimator has
 the same statistical accuracy --- the same asymptotic variance --- as
-the original serial ones.\footnote{In the world of parallel computation,
+the original serial one.\footnote{In the world of parallel computation,
 the standard word for nonparallel is {\it serial}.}
 
    \begin{itemize}
@@ -235,7 +246,12 @@ the standard word for nonparallel is {\it serial}.}
 
    \end{itemize}
 
-{\bf Support functions:}
+Note that SA requires that the data be i.i.d.  If your data was stored
+in some sorted order --- in the flight date below, it was sorted by date
+--- you need to randomize it first, using one of the functions provided
+by {\bf partools} for this purpose.
+
+\subsubsection{Support functions}
 
    \begin{itemize}
 
@@ -266,8 +282,9 @@ The session was run on a 16-core machine, with a 16-node {\bf parallel}
 cluster.  Note carefully, though, that we should not expect a 16-fold
 speedup. In the world of parallel computation, one usually gets of
 speedups of considerably less than $n$ for a platform of $n$
-computational entities.  Indeed, one is often saddened to find that the
-parallel version is actually {\it slower} than the serial one!
+computational entities, in this case with $n = 16$.  Indeed, one is
+often saddened to find that the parallel version is actually {\it
+slower} than the serial one!
 
 The file, {\bf yr2008}, was first split into a distributed file, stored
 in {\bf yr2008r.01},...,{\bf yr2008r.16}, using {\bf filesplitrand()}, and
@@ -283,8 +300,8 @@ since these files are permanent, we can skip this step in future R
 sessions involving this data (if the file doesn't change).  The function
 {\bf filesplitrand()} was used instead of {\bf filesplit()} to construct
 the distributed file, in order to randomize the placement of the records
-of {\bf yr2008} across cluster nodes.  Random arrangement of the rows is
-required for SA.
+of {\bf yr2008} across cluster nodes.  As noted earlier, random
+arrangement of the rows is required for SA.
 
 In order to run timing comparisons, the full file was also read into
 memory at the cluster manager:
@@ -330,11 +347,11 @@ The serial version was much slower.
 So, the results of {\bf distribagg()} did indeed match those of {\bf
 aggregate()}, but did so more than 15 times faster!
 
-Remember, the key philosophy of {\bf partools} is to create distributed
-objects and then keep using them repeatedly in distributed form.
-However, in some cases, we may wish to collect a distributed result into
-a monolithic object, especially if the result is small.  This is done in
-the next example:
+Remember, the Keep It Distributed  philosophy of {\bf partools} is to
+create distributed objects and then keep using them repeatedly in
+distributed form.  However, in some cases, we may wish to collect a
+distributed result into a monolithic object, especially if the result is
+small.  This is done in the next example:
 
 Say we wish to do a filter operation, extracting the data on all the
 Sunday evening flights, and collect it into one place.   Here is the
@@ -353,16 +370,19 @@ distributed object:
 > sundayeved <- distribgetrows(cls,'with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,])')
 \end{verbatim}
 
+What {\bf distribgetrows()} does is produce a data frame at each cluster
+node, per the user's instructions, then combine them together at the
+caller via R's {\bf rbind()}.  A simple concept, yet quite versatile.
+
 As another example, say we are investigating data completeness.  We may
 wish to flag all records having an inordinate number of NA values.  As I
 first step, we may wish to add a column to our data frame, indicating
-how many NA values are in each row.  If we did not have the advantage of
-distributed computation, here is how long it would take for our flight
-delay data:
+how many NA values there are in each row.  If we did not have the
+advantage of distributed computation, here is how long it would take for
+our flight delay data:
 
 \begin{verbatim}
-> sumna            
-function(x) sum(is.na(x))
+> sumna <- function(x) sum(is.na(x))
 > system.time(yr2008$n1 <- apply(yr2008[,c(5,7,8,11:16,19:21)],1,sumna))
    user  system elapsed
 268.463   0.773 269.542
@@ -381,11 +401,11 @@ parallel} package function {\bf clusterEvalQ()}:
 The speedup here was about 16, fully utilizing all 16 cores.
 
 Ordinarily, we would continue that NA analysis on a distributed basis,
-in keeping with the {\bf partools} philosophy of setting up distributed
-objects and then repeatedly dealing with them on a distributed basis.
-If our subsequent operations continue to have time complexity linear in
-the number of records processes, we should continue to get speedups of
-about 16.
+in accord with the {\bf partools} Keep It Distributed philosophy of
+setting up distributed objects and then repeatedly dealing with them on
+a distributed basis.  If our subsequent operations continue to have time
+complexity linear in the number of records processes, we should continue
+to get speedups of about 16.
 
 On the other hand, we may wish to gather together all the records have 8
 or more NA values.  In the nonparallel context, it would take some time:
@@ -405,8 +425,8 @@ In the distributed manner, it is slightly faster:
 \end{verbatim}
 
 The speedup is less here, as the resulting data must travel from the
-cluster nodes to the cluster manager. In this case, this is just a
-memory-to-memory transfer rather than across a netwrok, as we are on a
+cluster nodes to the cluster manager. In our case here, this is just a
+memory-to-memory transfer rather than across a network, as we are on a
 multicore machine, but it still takes time.  If the number of records
 satisfying the filtering condition had been smaller than the 136246 we
 had here, the speedup factor would have been greater.
@@ -438,8 +458,9 @@ Coefficients:
  13.414   0.691  18.396 
 \end{verbatim}
 
-Linear regression is very hard to parallelize, so the speedup of more than
-4 here is nice.  Coefficient estimates were virtually identical.
+Linear regression is very hard to parallelize, so the speedup factor of
+more than 4 here is nice.  Coefficient estimates were virtually
+identical.
 
 Next, principal components.  Since R's {\bf prcomp()} does not handle NA
 values for nonformula specifications, let's do that separately first:
@@ -599,7 +620,8 @@ The second assumption is the more pressing one.  For this reason, the
 {\bf partools} package includes functions such as {\bf dfileagg()}.  The
 latter acts similarly to {\bf distribagg()}, but with a key difference:
 Any given cluster node will read from many chunks of the distributed
-file, and will process those chunks one at a time.
+file, and will process those chunks one at a time, never exceeding
+memory constraints.
 
 Consider again our flight delay data set.  As a very simple example, say
 we have a two-node physical cluster, and that each node has memory
@@ -607,9 +629,9 @@ enough for only 1/4 of the data.  So, we break up the original data file
 to 4 pieces, {\bf yr2008.1} through {\bf yr2008.4}, and we run, say,
 
 \begin{verbatim}
-> dfileagg(cls,c('yr2008.1','yr2008.2','yr2008.3','yr2008.4',
+> dfileagg(cls,c('yr2008.1','yr2008.2','yr2008.3','yr2008.4'),
      c("DepDelay","ArrDelay","AirTime"),
-     c("Origin","Dest"),"yr2008", FUN="max")))  
+     c("Origin","Dest"),"yr2008", FUN="max")
 \end{verbatim}
 
 Our first cluster node will read {\bf yr2008.1} and {\bf yr2008.2}, one
@@ -621,7 +643,7 @@ speedup factor of 2.
 
 More functions like this will be added to {\bf partools}.
 
-\section{What About Other R Functions and Packages, say reshape2?}
+\section{What About Other R Functions and Packages, say reshape2/tidyr?}
 
 It is easy to apply the {\bf partools} idiom to many R functions that
 return data frame or matrix values.  Consider for instance the {\bf
@@ -630,15 +652,15 @@ frame {\bf ddf} at the cluster nodes.  We have two choices here:
 
 \begin{itemize}
 
-\item In keeping with the {\bf partools} philosophy, we might simply
-call {\bf melt()} at each node, say using {\bf clusterEvalQ()}, and keep
-the result distributed.
+\item In accord with the Keep It Distributed {\bf partools} philosophy,
+we might simply call {\bf melt()} at each node, say using {\bf
+clusterEvalQ()}, and keep the result distributed.
 
 \item If say we need to gather together the results of a {\bf melt()}
 operation, we could call {\bf melt()} at each node but then call the
 {\bf partools} function {\bf distribgetrows()} to collect the molten
-data into one centralized data frame.  A {\bf cast()} operation may
-require a bit more care, depending on whether the distributed object
+data into one centralized data frame.  A {\bf cast()} operation would
+requires a bit more care, depending on whether the distributed object
 crosses subject ID boundaries.
 
 \end{itemize}
