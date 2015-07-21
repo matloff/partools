@@ -11,7 +11,7 @@ Description: Miscellaneous utilities for the 'parallel' package,
    "Software Alchemy" method for parallelizing most statistical methods,
    presented in N. Matloff, Parallel Computation for Data Science,
    Chapman and Hall, 2015.  Includes a debugging aid.
-Depends: parallel,stats
+Depends: parallel,stats,utils
 Suggests: data.table
 ByteCompile: yes
 NeedsCompilation: no

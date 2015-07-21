@@ -1,5 +1,5 @@
 
-import(parallel,stats)
+import(parallel,stats,utils)
 
 export(dbs,writemgrscreen,writewrkrscreens,killdebug,dbsmsgstart,dbsmsg,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,linecount,
