@@ -1,9 +1,9 @@
-Package: partools
-Version: 1.1.0
+Package: partools,stats
+Version: 1.1.1
 Author: Norm Matloff <normmatloff@gmail.com> [aut], 
    Alex Rumbaugh <aprumbaugh@ucdavis.edu> [ctb]
 Maintainer: Norm Matloff <normmatloff@gmail.com>
-Date: 7/19/2015
+Date: 2015-07-20
 Title: Tools for the 'Parallel' Package
 Description: Miscellaneous utilities for the 'parallel' package, 
    cluster-oriented section; "Snowdoop" alternative to MapReduce;
