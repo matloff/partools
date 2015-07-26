@@ -185,14 +185,20 @@ setclsinfo(cls)
 n <- 25000
 p <- 2
 tmp <- matrix(rnorm((p+1)*n),nrow=n)
-u <- tmp[,1:p] %*% rep(1,p) + tmp[,p+1]
+u <- tmp[,1:p]  # "X" values
+# add a "Y" col
+u <- cbind(u,u %*% rep(1,p) + tmp[,p+1])
 # now in u, cols 1,2 are the "X" variables, and col 3 is "Y", 
 # with regress coefs (0,1,1), with tmp[,p+1] being the error term
 distribsplit(cls,"u")  # form distributed d.f.
 # apply the function
-calm(cls,"u[,3] ~ u[,1]+u[,2]")$tht
+#### calm(cls,"u[,3] ~ u[,1]+u[,2]")$tht
+calm(cls,"V3 ~ .,data=u")$tht
 # check; results should be approximately the same
 lm(u[,4] ~ u[,1]+u[,2])
+# without the wrapper
+ovf <- function() lm(V3 ~ .,data=z168)
+ca(cls,u,ovf,estf=coef,estcovf=vcov)$tht
 
 # Census data on programmers and engineers; include a quadratic term for
 # age, due to nonmonotone relation to income
