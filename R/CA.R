@@ -7,10 +7,12 @@
 
 ############################## ca() ################################
 
+# wrapper for cabase(), in case the data is not already distributed
+
 # arguments:
 #
 #    cls: 'parallel' cluster
-#    z:  data (data.frame, matrix or vector)
+#    z:  (non-distributed) data (data.frame, matrix or vector)
 #    ovf:  overall statistical function, say glm()
 #    estf:  function to extract the point estimate (possibly
 #           vector-valued) from the output of ovf(), e.g.
@@ -18,50 +20,57 @@
 #    estcovf:  if provided, function to extract the estimated 
 #              covariance matrix of the output of estf(), e.g.
 #              vcov() for glm()
-#    conv2mat:  if TRUE, convert z to a matrix (useful if ovf() requires
-#               matrix input)
 #    findmean:  if TRUE, output the average of the estimates from the
 #               chunks; otherwise, output the estimates themselves
+#    scramble:  randomize the order of z befee distributing
 # 
 # value:
 #
 #    R list, consisting of the estimates from the chunks, thts, and if
 #    requested, their average tht and its estimated covariance matrix 
 #    thtcov
-#
-ca <- function(cls,z,ovf,estf,estcovf=NULL,conv2mat=TRUE,findmean=TRUE) {
-   if (conv2mat) {
-      if (is.data.frame(z)) z <- as.matrix(z)
-      if (is.vector(z)) z <- matrix(z,ncol=1)
-   }
-   z168 <- z
-   distribsplit(cls,"z168")
-   cabase(cls,ovf,estf,estcovf,findmean,cacall=TRUE) 
+
+ca <- function(cls,z,ovf,estf,estcovf=NULL,findmean=TRUE,
+         scramble=FALSE) {
+   if (is.vector(z)) z <- data.frame(z)
+   cabase(cls,ovf,estf,estcovf,findmean,cacall=TRUE,z=z,scramble=scramble) 
 }
 
 ############################## cabase() ##############################
 
+# serves as a manager for the Software Alchemy method, arranging for the
+# estimates to be computed at each data chunk, gathering the results,
+# averaging them etc.
+
+# other than the case cacall = TRUE, ca() is not directly aware of the
+# data chunks, e.g. their names, sizes etc.; it merely calls the
+# user-supplied ovf(), which does that work
+
 # arguments:
-#
-# value:
 #
 #    as in ca() above, except:
 #
-#    cacall: TRUE if cabase() was invoked by ca()
-#
-# if cacall is FALSE, then the distributed data is not explicitly
-# accessed, only via ovf(); however, it is assumed that the data has
-# been created using distribsplit() or filesplit()
+#    cacall: TRUE if cabase() was invoked by ca() 
+#    z: if cacall is TRUE, the (non-distributed) data frame; the
+#       data will be distributed among the cluster nodes, under the name
+#       "z168"
+#    scramble: if this and cacall are TRUE, randomize z before
+#              distributing
 #
 # value: 
 #
 #    as in ca() above
-#
-cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,cacall=FALSE) {
+
+cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,
+             cacall=FALSE,z=NULL,scramble=FALSE) {
+   if (cacall) {
+      z168 <- z
+      distribsplit(cls,'z168',scramble=scramble)
+   }
    clusterExport(cls,c("ovf","estf","estcovf"),envir=environment())
    # apply the "theta hat" function, e.g. glm(), and extract the
    # apply the desired statistical method at each chunk
-   ovout <- if (cacall) clusterEvalQ(cls,ovf(z168)) else
+   ovout <- ### if (cacall) clusterEvalQ(cls,ovf(z168)) else
                         clusterEvalQ(cls,ovf()) 
    # theta-hats, with the one for chunk i in row i
    thts <- t(sapply(ovout,estf))
