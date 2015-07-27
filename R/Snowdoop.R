@@ -23,7 +23,7 @@ filechunkname <- function (basenm, ndigs,nodenum=NULL)
 # chunk written to file outname (plus suffix based on node number) in
 # the node's global space
 filesort <- function(cls,basenm,ndigs,colnum,
-      outname,nsamp=1000,header=FALSE,sep=" ",fread=FALSE) 
+      outname,nsamp=1000,header=FALSE,sep=" ",usefread=FALSE) 
 {
    clusterEvalQ(cls,library(partools))
    setclsinfo(cls)
@@ -31,12 +31,8 @@ filesort <- function(cls,basenm,ndigs,colnum,
       header=header,sep=sep,nsamp) 
    samp <- Reduce(c,samps)
    bds <- getbounds(samp,length(cls))
-   if (fread) {
-     clusterEvalQ(cls,library(data.table))
-     clusterEvalQ(cls,myfread <- fread)
-   } else {clusterEvalQ(cls,myfread <- read.table)}
    invisible(clusterApply(cls,bds,mysortedchunk,
-      basenm,ndigs,colnum,outname,header,sep))
+      basenm,ndigs,colnum,outname,header,sep,usefread))
 }
 
 getsample <- function(basenm,ndigs,colnum,
@@ -58,17 +54,25 @@ getbounds <- function(samp,numnodes) {
    bds
 }
 
-mysortedchunk <-
-      function(mybds,basenm,ndigs,colnum,outname,header,sep) {
+mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,
+                    header,sep,usefread) {
    pte <- getpte()
    me <- pte$myid
    ncls <- pte$ncls
    mylo <- mybds[1]
    myhi <- mybds[2]
+   if (usefread) {
+      require(data.table)
+      ### myfread <- fread
+   } ### else myfread <- read.table
    for (i in 1:ncls) {
-      tmp <-
-         myfread(filechunkname(basenm,ndigs,i),header=header,sep=sep)
-      # tmp <- freadfilechunkname(basenm,ndigs,i),header=header,sep)
+      if (usefread) {
+         tmp <- 
+            fread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
+      } else
+         tmp <- 
+            read.table(filechunkname(basenm,ndigs,i),header=header,sep=sep)
+      ### tmp <- myfread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
       tmpcol <- tmp[,colnum]
       if (me == 1) {
          tmp <- tmp[tmpcol <= myhi,] 
@@ -234,8 +238,9 @@ filesave <- function(cls,dname,newbasename,ndigs,sep) {
 
 # reads in a distributed file with prefix fname, producing a distributed
 # data frame dname
-fileread <- function(cls,fname,dname,ndigs,header=FALSE,sep=" ",fread=FALSE) {
-   if (fread) {
+fileread <- function(cls,fname,dname,ndigs,
+               header=FALSE,sep=" ",usefread=FALSE) {
+   if (usefread) {
      clusterEvalQ(cls,library(data.table))
      clusterEvalQ(cls,myfread <- fread)
    } else {clusterEvalQ(cls,myfread <- read.table)}
