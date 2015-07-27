@@ -63,17 +63,17 @@ mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,
    myhi <- mybds[2]
    if (usefread) {
       require(data.table)
-      ### myfread <- fread
-   } ### else myfread <- read.table
+      myfread <- fread
+   } else myfread <- read.table
    for (i in 1:ncls) {
-      if (usefread) {
-         tmp <- as.data.frame(
-            fread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
-            )
-      } else
-         tmp <- 
-            read.table(filechunkname(basenm,ndigs,i),header=header,sep=sep)
-      ### tmp <- myfread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
+##       if (usefread) {
+##          tmp <- as.data.frame(
+##             fread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
+##             )
+##       } else
+##          tmp <- 
+##             read.table(filechunkname(basenm,ndigs,i),header=header,sep=sep)
+      tmp <- myfread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
       tmpcol <- tmp[,colnum]
       if (me == 1) {
          tmp <- tmp[tmpcol <= myhi,] 
