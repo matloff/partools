@@ -175,8 +175,8 @@ read.table("m",row.names=1)
 # make test distributed input file
 m1 <- matrix(c(5,12,13,3,4,5,8,8,8,1,2,3,6,5,4),byrow=TRUE,ncol=3)
 m2 <- matrix(c(0,22,88,44,5,5,2,6,10,7,7,7),byrow=TRUE,ncol=3)
-write.table(m1,"m.1")
-write.table(m2,"m.2")
+write.table(m1,"m.1",row.names=FALSE)
+write.table(m2,"m.2",row.names=FALSE)
 # sort on column 2 and check result
 filesort(cls,"m",1,2,"msort",nsamp=3,header=TRUE)
 clusterEvalQ(cls,msort)  # data should be sorted on V2
