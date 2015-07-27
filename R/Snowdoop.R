@@ -67,8 +67,9 @@ mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,
    } ### else myfread <- read.table
    for (i in 1:ncls) {
       if (usefread) {
-         tmp <- 
+         tmp <- as.data.frame(
             fread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
+            )
       } else
          tmp <- 
             read.table(filechunkname(basenm,ndigs,i),header=header,sep=sep)
