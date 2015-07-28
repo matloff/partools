@@ -20,9 +20,13 @@ formrowchunks <- function(cls,m,mchunkname,scramble=FALSE) {
    nr <- nrow(m)
    idxs <- if (!scramble) 1:nr else sample(1:nr,nr,replace=FALSE)
    rcs <- clusterSplit(cls,idxs)
-   getrowchunk <- function(rc) 
-      assign(mchunkname,m[rc,],envir=.GlobalEnv)
-   invisible(clusterApply(cls,rcs,getrowchunk))
+   rowchunks <- lapply(rcs, function(rc) m[rc,])
+#    getrowchunk <- function(rc) 
+#       assign(mchunkname,m[rc,],envir=.GlobalEnv)
+#    invisible(clusterApply(cls,rcs,getrowchunk))
+   invisible(clusterApply(cls,rowchunks,
+      function(chunk) 
+         assign(mchunkname,chunk,envir=.GlobalEnv)))
 }
 
 # extracts rows (rc=1) or columns (rc=2) of a matrix, producing a list
