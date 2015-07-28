@@ -63,7 +63,7 @@ mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,
    myhi <- mybds[2]
    if (usefread) {
       require(data.table)
-      myfread <- fread
+      myfread <- data.table::fread
    } else myfread <- read.table
    for (i in 1:ncls) {
       tmp <- myfread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
@@ -236,7 +236,7 @@ fileread <- function(cls,fname,dname,ndigs,
                header=FALSE,sep=" ",usefread=FALSE) {
    if (usefread) {
      clusterEvalQ(cls,library(data.table))
-     clusterEvalQ(cls,myfread <- fread)
+     clusterEvalQ(cls,myfread <- data.table::fread)
    } else {clusterEvalQ(cls,myfread <- read.table)}
    fnameq <- paste("'",fname,"'",sep="")
    tmp <- paste(fnameq,ndigs,sep=',')
