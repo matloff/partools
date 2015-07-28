@@ -63,6 +63,7 @@ setclsinfo <- function(cls) {
 
 # returns a pointer to partoolsenv
 getpte <- function() {
+   # get("partoolsenv",envir=.GlobalEnv)
    get("partoolsenv",envir=.GlobalEnv)
 }
 
