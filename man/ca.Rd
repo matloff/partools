@@ -36,8 +36,6 @@ caagg(cls,ynames,xnames,dataname,FUN)
      vector-valued) from the output of \code{ovf}.}
   \item{estcovf}{If provided, function to extract the estimated 
      covariance matrix of the output of \code{estf}}.
-  \item{conv2mat}{If TRUE, convert data frame input to a matrix 
-     (needed for some cases of 'ovf').}
   \item{findmean}{If TRUE, output the average of the estimates from the
      chunks; otherwise, output only the estimates themselves.}
   \item{lmargs}{Quoted string representing arguments to \code{lm},
