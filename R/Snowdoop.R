@@ -62,12 +62,12 @@ mysortedchunk <- function(mybds,basenm,ndigs,colnum,outname,
    mylo <- mybds[1]
    myhi <- mybds[2]
    if (usefread) {
-      require(data.table)
+      requireNamespace('data.table')
       myfread <- data.table::fread
    } else myfread <- read.table
    for (i in 1:ncls) {
       tmp <- myfread(filechunkname(basenm,ndigs,i),header=header,sep=sep) 
-      tmpcol <- tmp[,colnum]
+      tmpcol <- tmp[,colnum,drop=FALSE]
       if (me == 1) {
          tmp <- tmp[tmpcol <= myhi,] 
       } else if (me == ncls) {
