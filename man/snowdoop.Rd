@@ -53,7 +53,7 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
      assumed that this data column is free of NAs.}
   \item{outname}{Quoted name for the chunks of sorted output.}
   \item{usefread}{If true, use \code{fread} instead of \code{read.table};
-     generally much faster if \code{data.table} package is installed.}
+     generally much faster; requires \code{data.table} package.}
   \item{nsamp}{Number of records to sample in each file chunk to
      determine bins for the bucket sort.}
   \item{header}{TRUE if the file chunks have headers.}
