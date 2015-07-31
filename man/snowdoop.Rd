@@ -80,16 +80,6 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
 
 \details{
 
-Use \code{filesort} to do a distributed file sort, placing the result as
-a distributed data frame/matrix in the memories of the cluster nodes.
-The first \code{nsamp} records are read from 
-each file chunk.  They are merged and quantiles formed, one quantile
-range for each cluster node.  Each node then reads all the file chunks, 
-retaining the records in its assigned range, and sorts them.  This 
-results in the input file being sorted, in memory, in a distributed 
-manner across nodes, under the name \code{basenm}.  At present, this
-utility is not very efficient.
-
 Use \code{filesplit} to convert a single file into distributed one, with
 \code{nch} chunks.  The file header, if present, will be retained in the
 chunks. If \code{seqnums} is TRUE, each line in a chunk will be preceded
@@ -112,6 +102,16 @@ user command \code{tmpdataexpr} to \code{tmpdata}, producing a subset of
 yielding the return value.  The paired function \code{dfilegetrows} is a
 distributed wrapper for \code{filegetrows}, just as \code{dfileagg} is
 for \code{fileagg}.
+
+Use \code{filesort} to do a distributed file sort, placing the result as
+a distributed data frame/matrix in the memories of the cluster nodes.
+The first \code{nsamp} records are read from 
+each file chunk.  They are merged and quantiles formed, one quantile
+range for each cluster node.  Each node then reads all the file chunks, 
+retaining the records in its assigned range, and sorts them.  This 
+results in the input file being sorted, in memory, in a distributed 
+manner across nodes, under the name \code{outname}.  At present, this
+utility is not very efficient.
 
 Operations such as \code{ca} need i.i.d. data. If the original file
 storage was ordered on some variable, one needs to randomize the data
