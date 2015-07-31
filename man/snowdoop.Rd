@@ -26,7 +26,8 @@ related operations.
 
 \usage{
 filechunkname(basenm,ndigs,nodenum=NULL)
-filesort(cls,basenm,ndigs,colnum,outname,nsamp = 1000,header = FALSE,sep=" ",usefread=FALSE)
+filesort(cls,basenm,ndigs,colnum,outname,nsamp = 1000,
+   header = FALSE,sep=" ",usefread=FALSE)
 filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
 filecat(cls, basenm, header = FALSE)  
 readnscramble(cls,basenm,header=FALSE,sep= " ")
