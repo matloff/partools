@@ -171,6 +171,17 @@ filecat(cls,"m")
 # check that file m is back
 read.table("m",row.names=1)
 
+# example of filesave(), fileread()
+# make test distributed data frame
+clusterEvalQ(cls,x <- data.frame(u = runif(5),v = runif(5)))
+# apply filesave()
+filesave(cls,'x','xfile',1,' ')
+# check it
+fileread(cls,'xfile','xx',1,header=TRUE,sep=' ')
+clusterEvalQ(cls,xx)
+clusterEvalQ(cls,x)
+
+
 # example of filesort()
 # make test distributed input file
 m1 <- matrix(c(5,12,13,3,4,5,8,8,8,1,2,3,6,5,4),byrow=TRUE,ncol=3)
