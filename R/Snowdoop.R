@@ -214,20 +214,26 @@ filecat <- function (cls, basenm, header = FALSE)  {
 }
 
 # saves the distributed data frame/matrix d to a distributed file of the
-# specified basename; the suffix has ndigs digits, and the field #
+# specified basename; the suffix has ndigs digits, and the field 
 # separator will be sep; d must have column names
 filesave <- function(cls,dname,newbasename,ndigs,sep) {
+   # what will the new file be called at each node?
    tmp <- paste('"',newbasename,'",',ndigs,sep='')
    cmd <- paste('myfilename <- filechunkname(',tmp,')',sep='')
    clusterExport(cls,"cmd",envir=environment())
    clusterEvalQ(cls,eval(parse(text=cmd)))
+   # start building the write.table() call
    tmp <- paste(dname,'myfilename',sep=',')
-   cnames <- colnames(get(dname))
-   clusterExport(cls,'cnames',envir=environment())
-   cmd <- paste('write.table(',tmp,
+   # what will the column names be for the new files?
+   clusterEvalQ(cls,eval(parse(text=cmd)))
+   cncmd <- paste('colnames(',dname,')',sep='')
+   clusterExport(cls,"cncmd",envir=environment())
+   cnames <- clusterEvalQ(cls,cnames <- eval(parse(text=cncmd)))[[1]]
+   # now finish pasting the write.table() command, and run it
+   writecmd <- paste('write.table(',tmp,
       ',row.names=FALSE,col.names=cnames,sep="',sep,'")',sep='')
-   clusterExport(cls,"cmd",envir=environment())
-   clusterEvalQ(cls,docmd(cmd))
+   clusterExport(cls,"writecmd",envir=environment())
+   clusterEvalQ(cls,docmd(writecmd))
 }
 
 # reads in a distributed file with prefix fname, producing a distributed
