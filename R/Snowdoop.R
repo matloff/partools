@@ -228,12 +228,12 @@ filesave <- function(cls,dname,newbasename,ndigs,sep) {
    clusterEvalQ(cls,eval(parse(text=cmd)))
    cncmd <- paste('colnames(',dname,')',sep='')
    clusterExport(cls,"cncmd",envir=environment())
-   cnames <- clusterEvalQ(cls,cnames <- eval(parse(text=cncmd)))[[1]]
+   clusterEvalQ(cls,cnames <- eval(parse(text=cncmd)))[[1]]
    # now finish pasting the write.table() command, and run it
    writecmd <- paste('write.table(',tmp,
       ',row.names=FALSE,col.names=cnames,sep="',sep,'")',sep='')
    clusterExport(cls,"writecmd",envir=environment())
-   clusterEvalQ(cls,docmd(writecmd))
+   clusterEvalQ(cls,eval(parse(text=writecmd)))
 }
 
 # reads in a distributed file with prefix fname, producing a distributed
