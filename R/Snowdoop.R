@@ -241,7 +241,7 @@ filesave <- function(cls,dname,newbasename,ndigs,sep) {
 fileread <- function(cls,fname,dname,ndigs,
                header=FALSE,sep=" ",usefread=FALSE) {
    if (usefread) {
-     clusterEvalQ(cls,library(data.table))
+     clusterEvalQ(cls,requireNamespace('data.table'))
      clusterEvalQ(cls,myfread <- data.table::fread)
    } else {clusterEvalQ(cls,myfread <- read.table)}
    fnameq <- paste("'",fname,"'",sep="")
@@ -250,7 +250,6 @@ fileread <- function(cls,fname,dname,ndigs,
    clusterExport(cls,"cmd",envir=environment())
    clusterEvalQ(cls,eval(parse(text=cmd)))
    tmp <- paste(dname,"<- myfread(mychunk,header=",header,",sep='")
-   # tmp <- paste(dname,"<- fread(mychunk,header=",header,",sep='")
    cmd <- paste(tmp,sep,"')",sep="")
    clusterExport(cls,"cmd",envir=environment())
    invisible(clusterEvalQ(cls,eval(parse(text=cmd))))
