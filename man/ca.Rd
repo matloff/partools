@@ -180,7 +180,7 @@ cls <- makeCluster(2)
 setclsinfo(cls)
 
 # generate simulated test data, as distributed data frame
-n <- 25000
+n <- 10000
 p <- 2
 tmp <- matrix(rnorm((p+1)*n),nrow=n)
 u <- tmp[,1:p]  # "X" values
@@ -230,6 +230,8 @@ distribsplit(cls,"pe")
 z1 <- cakm(cls,'pe',3,3); z1$size; z1$centers 
 # check algorithm unstable
 z1$thts  # looks unstable
+
+stopCluster(cls)
 
 }
 

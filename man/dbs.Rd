@@ -102,6 +102,8 @@ dbs(2,src="x.R",ftn="f")
 # now type in manager window:
 clusterEvalQ(cls,f(5))
 # the 2 worker windows are now in the browser, ready for debugging
+
+stopCluster(cls)
 }
 }
 

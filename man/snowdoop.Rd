@@ -230,6 +230,8 @@ dfilegetrows(cls,c('ctm.1','ctm.2'),cmd,header=TRUE,sep=',')
 # check
 mtc[mtc$cyl == 4 & mtc$gear == 4,]
 
+stopCluster(cls)
+
 
 }
 

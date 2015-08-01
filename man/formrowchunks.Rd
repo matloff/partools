@@ -194,6 +194,8 @@ distribgetrows(cls,'mtc[mtc$cyl == 8,]')
 # check
 mtc[mtc$cyl == 8,]
 
+stopCluster(cls)
+
 }
 
 \author{
