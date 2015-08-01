@@ -76,6 +76,13 @@ dbs <- function(nwrkrs,xterm=NULL,src=NULL,ftn=NULL) {
       " SNOWLIB=/usr/local/lib/R/library TIMEOUT=2592000 METHODS=TRUE",sep="")
    writewrkrscreens(rcmd)
    writewrkrscreens("parallel:::.slaveRSOCK()")
+   # make sure we are all in the same directory
+   mydir <- getwd()
+   paste('setwd("',mydir,'")',sep='')
+   setmydir <- paste('setwd("',mydir,'")',sep='')
+   writemgrscreen(setmydir)  # mgr screen now in this directory
+   wsetmydir <- paste('clusterEvalQ(cls,',setmydir,')',sep='')
+   writemgrscreen(wsetmydir)  # wrk screens now in this directory
    if (!is.null(src)) {
       tmp <- paste("clusterEvalQ(cls,source('",src,"'))",sep="")
       writemgrscreen(tmp)
