@@ -211,9 +211,9 @@ killdebug<- function() {
 # "quick and dirty" debugging, by printing to a file; node 1 prints
 # messages to the file dbs.001, node 2 to dbs.002 etc.
 
+# initialize
 dbsmsgstart <- function(cls) {
    ncls <- length(cls)
-   # ndigs <- ceiling(log10(ncls))
    ndigs <- getnumdigs(ncls)
    for (i in 1:length(cls))
       cat("\n",file=filechunkname("dbs",ndigs,i),"\n")
@@ -221,9 +221,15 @@ dbsmsgstart <- function(cls) {
 
 dbsmsg <- function(msg) {
    pte <- getpte()
-   # ndigs <- ceiling(log10(pte$ncls))
    ndigs <- getnumdigs(pte$ncls)
    fn <- filechunkname("dbs",ndigs)
    cat(msg,file=fn,append=TRUE,"\n")
 }
-              
+
+dbsdump <- function() {
+   pte <- getpte()
+   ndigs <- getnumdigs(pte$ncls)
+   fn <- filechunkname("last.dump",ndigs)
+   cmd <- paste('dump.frames("',fn,'",to.file=TRUE)',sep='')
+   eval(parse(text=cmd))
+}

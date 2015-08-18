@@ -1,7 +1,8 @@
 Package: partools
-Version: 1.1.3
-Author: Norm Matloff <normmatloff@gmail.com> [aut], 
-   Alex Rumbaugh <aprumbaugh@ucdavis.edu> [ctb]
+Version: 1.1.4
+Author: Norm Matloff <normmatloff@gmail.com> [cre,aut], with
+   contributions by Alex Rumbaugh <aprumbaugh@ucdavis.edu> and
+   Hadley Wickham <h.wickham@gmail.com>
 Maintainer: Norm Matloff <normmatloff@gmail.com>
 Title: Tools for the 'Parallel' Package
 Description: Miscellaneous utilities for the 'parallel' package, 

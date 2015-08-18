@@ -1,7 +1,8 @@
 
 import(parallel,stats,utils)
 
-export(dbs,writemgrscreen,writewrkrscreens,killdebug,dbsmsgstart,dbsmsg,
+export(writemgrscreen,writewrkrscreens,killdebug,
+          dbs,dbsmsgstart,dbsmsg,dbsdump,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,linecount,
       readnscramble,getnumdigs,filesave,fileread,filesplitrand,fileagg,
       dfileagg,filegetrows,dfilegetrows,
