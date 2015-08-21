@@ -19,9 +19,7 @@
 \title{{\bf partools: a Sensible Package for Large Data Sets}}
 
 \author{Norm Matloff \\
-University of California, Davis \\
-\\ 
-with Contributions from Alex Rumbaugh}
+University of California, Davis} 
 
 \begin{document}
 
