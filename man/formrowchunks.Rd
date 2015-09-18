@@ -92,7 +92,7 @@ list.
 The function \code{exportlibpaths}, invoked from the manager, exports
 the manager's R search path to the workers.
 
-The function \code{distribcat} splits a data frame \code{dfname} into
+The function \code{distribsplit} splits a data frame \code{dfname} into
 approximately  equal-sized chunks of rows, placing the chunks on the
 cluster nodes, as global variables of the same name. The opposite action
 is taken by \code{distribcat}, coalsecing variables of the given name in
