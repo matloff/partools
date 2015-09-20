@@ -9,5 +9,7 @@ export(writemgrscreen,writewrkrscreens,killdebug,
    distribsplit,distribcat,distribagg,distribrange,
       distribcounts,distribgetrows,docmd,geteltis,
    ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,
-   setclsinfo,filechunkname,exportlibpaths,filesplit)
+   setclsinfo,filechunkname,exportlibpaths,filesplit,
+   parpdist
+   )
  
