@@ -26,7 +26,7 @@ related operations.
 
 \usage{
 filechunkname(basenm,ndigs,nodenum=NULL)
-filesort(cls,basenm,ndigs,colnum,outname,nsamp = 1000,
+filesort(cls,infilenm,ndigs,colnum,outname,nsamp = 1000,
    header = FALSE,sep=" ",usefread=FALSE)
 filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
 filecat(cls, basenm, header = FALSE)  
@@ -46,6 +46,7 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
   \item{cls}{A cluster for the \pkg{parallel} package.}
   \item{nch}{Number of chunks for the file split.}
   \item{basenm}{A chunked file name, minus suffix.}
+  \item{infile}{Name of a nonchunked file.}
   \item{ndigs}{Number of digits in the chunked file name suffix.}
   \item{nodenum}{If non-NULL, get the name of the file chunk of cluster node
      \code{nodenum}; otherwise, get the name for the chunk associated
@@ -104,13 +105,13 @@ yielding the return value.  The paired function \code{dfilegetrows} is a
 distributed wrapper for \code{filegetrows}, just as \code{dfileagg} is
 for \code{fileagg}.
 
-Use \code{filesort} to do a distributed file sort, placing the result as
-a distributed data frame/matrix in the memories of the cluster nodes.
-The first \code{nsamp} records are read from 
-each file chunk.  They are merged and quantiles formed, one quantile
-range for each cluster node.  Each node then reads all the file chunks, 
-retaining the records in its assigned range, and sorts them.  This 
-results in the input file being sorted, in memory, in a distributed 
+Use \code{filesort} to do a file sort, with the input file being either
+distributed or ordinary, placing the result as a distributed data
+frame/matrix in the memories of the cluster nodes.  The first
+\code{nsamp} records are read from the file, and are used to form one
+quantile range for each cluster node.  Each node then reads the input
+file, retaining the records in its assigned range, and sorts them.  This
+results in the input file being sorted, in memory, in a distributed
 manner across nodes, under the name \code{outname}.  At present, this
 utility is not very efficient.
 
@@ -195,6 +196,11 @@ clusterEvalQ(cls,msort)  # data should be sorted on V2
 # check by comparing to input
 m1
 m2
+m <- rbind(m1,m2)
+write.table(m,"m",row.names=FALSE)
+clusterEvalQ(cls,rm(msort))
+filesort(cls,"m",2,"msort",infiledst=FALSE,nsamp=3,header=TRUE)
+clusterEvalQ(cls,msort)  # data should be sorted on V2
 
 # example of readnscramble()
 co2 <- head(CO2,25) 
