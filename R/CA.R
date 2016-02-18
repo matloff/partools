@@ -2,12 +2,10 @@
 # chunks averaging, aka Software Alchemy, method (N. Matloff, "Parallel
 # Computation for Data Science," Chapman and Hall, 2015)
 
-# use cabase() if already have a distributed data frame; otherwise, use
-# the ca() wrapper
-
 ############################## ca() ################################
 
-# wrapper for cabase(), in case the data is not already distributed
+# wrapper for cabase(), e.g. for case where the data is not already
+# distributed
 
 # arguments:
 #
@@ -22,7 +20,7 @@
 #              vcov() for glm()
 #    findmean:  if TRUE, output the average of the estimates from the
 #               chunks; otherwise, output the estimates themselves
-#    scramble:  randomize the order of z befee distributing
+#    scramble:  randomize the order of z before distributing
 # 
 # value:
 #
@@ -64,7 +62,7 @@ ca <- function(cls,z,ovf,estf,estcovf=NULL,findmean=TRUE,
 cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,
              cacall=FALSE,z=NULL,scramble=FALSE) {
    if (cacall) {
-      z168 <- z
+      z168 <- z  # needed for CRAN issue
       distribsplit(cls,'z168',scramble=scramble)
    }
    clusterExport(cls,c("ovf","estf","estcovf"),envir=environment())
@@ -84,28 +82,33 @@ cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,
       # dimensionality of theta
       lth <- length(thts[1,])
       # since the chunk sizes will differ by a negligible amount, 
-      # so set equal weights
-      wts <- rep(1 / length(cls), length(cls))
-      # compute mean (leave open for restoring weights in future
-      # version)
-      tht <- rep(0.0,lth)
-      for (i in 1:length(cls)) {
-         wti <- wts[i]
-         tht <- tht + wti * thts[i,]
-      }
+      # so use equal weights; commented-out code below allowed for
+      # varying weights
+      ## wts <- rep(1 / length(cls), length(cls))
+      ## # compute mean (leave open for restoring weights in future
+      ## # version)
+      ## tht <- rep(0.0,lth)
+      ## for (i in 1:length(cls)) {
+      ##    wti <- wts[i]
+      ##    tht <- tht + wti * thts[i,]
+      ## }
+      tht <- colMeans(thts)
       attr(tht,"p") <- attr(thts[1,],"p")
       res$tht <- tht
-      # compute estimated covariance matrix, if requested
-      # (code structured to possibly add empirical cov est later)
+      # compute estimated covariance matrix; if requested, this will be
+      # done from outputs of the calls on the chunks, e.g. from vcov();
+      # otherwise, compute the matrix empirically
+      nchunks <- length(cls)
       if (!is.null(estcovf)) {
          thtcov <- matrix(0,nrow=lth,ncol=lth)
-         for (i in 1:length(cls)) {
-            wti <- wts[i]
-            summand <- wti^2 * estcovf(ovout[[i]]) 
+         for (i in 1:nchunks) {
+            summand <- estcovf(ovout[[i]]) 
             thtcov <- thtcov + summand
          }
-         res$thtcov <- thtcov
-      } 
+         res$thtcov <- (thtcov / nchunks) / nchunks
+      } else {
+         res$thtcov <- cov(thts) / nchunks
+      }
    }
    clusterEvalQ(cls,rm(ovf))
    res
