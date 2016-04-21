@@ -125,16 +125,15 @@ distribcat <- function(cls,dfname) {
 # return value: aggregate()-style data frame, with column of cell counts
 # appended at the end
 
-#    distribagg(cls,"x=d, by=list(d$x,d$y)","max",2)
-
 distribagg <- function(cls,ynames,xnames,dataname,FUN,FUN1=FUN) {
    nby <- length(xnames) # number in the "by" arg to aggregate()
    # set up aggregate() command to be run on the cluster nodes
    ypart <- paste("cbind(",paste(ynames,collapse=","),")",sep="")
    xpart <- paste(xnames,collapse="+")
-   forla <- paste(ypart,"~",paste(xnames,collapse="+"))
+   # the formula
+   frmla <- paste(ypart,"~",paste(xnames,collapse="+"))
    remotecmd <-
-      paste("aggregate(",forla,",data=",dataname,",",FUN,")",sep="")
+      paste("aggregate(",frmla,",data=",dataname,",",FUN,")",sep="")
    clusterExport(cls,"remotecmd",envir=environment())
    # run the command, and combine the returned data frames into one big
    # data frame
@@ -151,6 +150,18 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUN1=FUN) {
 distribcounts <- function(cls,xnames,dataname) {
    distribagg(cls,xnames[1],xnames,dataname,"length","sum")
 }
+
+sumlength <- function(a) c(sum(a),length(a))
+
+# get the indicated cell means of the variables in ynames,
+# cells defined according to the variables in xnames 
+distribmeans <- function(cls,ynames,xnames,dataname) {
+   clusterExport(cls,c('sumlength','addab'),envir=environment())
+   da <- distribagg(cls,ynames,xnames,dataname,
+      FUN='sumlength',FUN1='sum')
+da
+}
+
 
 # currently not in service; xtabs() call VERY slow
 # distribtable <- function(cls,xnames,dataname) {
