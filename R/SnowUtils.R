@@ -125,7 +125,7 @@ distribcat <- function(cls,dfname) {
 # return value: aggregate()-style data frame, with column of cell counts
 # appended at the end
 
-distribagg <- function(cls,ynames,xnames,dataname,FUN,FUN1=FUN) {
+distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
    nby <- length(xnames) # number in the "by" arg to aggregate()
    # set up aggregate() command to be run on the cluster nodes
    ypart <- paste("cbind(",paste(ynames,collapse=","),")",sep="")
@@ -142,6 +142,14 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUN1=FUN) {
    # typically a given cell will found at more than one cluster node;
    # they must be combined, using FUN1
    FUN1 <- get(FUN1)
+   # if FUN returns a vector rather than a scalar, some "columns" of agg
+   # will be matrices; need to expand
+   if (FUNdim > 1) {
+      tmp  <- agg[,1:nby]
+      for (i in 1:(ncol(agg)-nby))
+         tmp <- cbind(tmp,agg[,2+i])
+      agg <- tmp
+   }
    aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
 }
 
@@ -158,8 +166,15 @@ sumlength <- function(a) c(sum(a),length(a))
 distribmeans <- function(cls,ynames,xnames,dataname) {
    clusterExport(cls,c('sumlength','addab'),envir=environment())
    da <- distribagg(cls,ynames,xnames,dataname,
-      FUN='sumlength',FUN1='sum')
-da
+      FUN='sumlength',FUNdim=2,FUN1='sum')
+   nx <- length(xnames)
+   tmp <- da[,1:nx]
+   day <- da[,-(1:nx)]
+   ny <- length(ynames)
+   for (i in 1:ny) {
+      tmp <- cbind(tmp,day[,2*i-1] / day[,2*i])
+   }
+   tmp
 }
 
 
