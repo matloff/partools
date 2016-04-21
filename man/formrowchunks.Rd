@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,geteltis}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,geteltis,distribmeans}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -11,6 +11,7 @@
 \alias{distribrange}
 \alias{distribcounts}
 \alias{distribgetrows}
+\alias{distribmeans}
 \alias{docmd}
 \alias{geteltis}
 
@@ -31,9 +32,10 @@ getpte()
 exportlibpaths(cls)
 distribsplit(cls,dfname,scramble=FALSE)
 distribcat(cls,dfname) 
-distribagg(cls,ynames,xnames,dataname,FUN,FUN1) 
+distribagg(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) 
 distribrange(cls,vec,na.rm=FALSE) 
 distribcounts(cls,xnames,dataname)
+distribmeans(cls,ynames,xnames,dataname)
 distribgetrows(cls,cmd)
 docmd(toexec) 
 geteltis(lst,i)
@@ -42,7 +44,7 @@ geteltis(lst,i)
 \arguments{
   \item{cls}{A cluster for the \pkg{parallel} package.}
   \item{scramble}{If TRUE, randomize the row order in the resulting data
-  frame.}
+     frame.}
   \item{rc}{Set to 1 for rows, other for columns.}
   \item{m}{A matrix or data frame.}
   \item{mchunkname}{Quoted name to be given to the created chunks.}
@@ -59,6 +61,7 @@ geteltis(lst,i)
   \item{dataname}{Quoted name of a distributed data frame.}
   \item{FUN}{Quoted name of function to be used in
      aggregating within cluster nodes.}
+  \item{FUNdim}{Number of elements in the return value of \code{FUN}.}
   \item{FUN1}{Quoted name of function to be used in
      aggregation between cluster nodes.}
   \item{vec}{Quoted expression that evaluates to a vector.}
@@ -100,8 +103,14 @@ the cluster nodes into one grand data frame as the calling (i.e.
 manager) node.
 
 The package's \code{distribagg} function is a distributed (and somewhat
-restricted) form of \code{aggregate}.  The special case of aggregating
-counts is handled by the wrapper \code{distribcounts}.
+restricted) form of \code{aggregate}.  The latter is called to each
+distributed chunk with the function \code{FUN}.  The manager collects
+the results and calls \code{FUN1}.
+
+The special cases of aggregating counts and means is handled by the
+wrappers \code{distribcounts} and \code{distribmeans}.  In each case,
+cells are defined by \code{xnames}, and aggregation done first within
+workers and then across workers. 
 
 The \code{distribrange} function is a distributed form of \code{range}.
 
@@ -188,6 +197,9 @@ aggregate(cbind(mpg,disp,hp) ~ cyl+gear,data=mtcars,FUN=max)
 distribcounts(cls,c("cyl","gear"),"mtc")
 # check
 table(mtc$cyl,mtc$gear)
+
+# find mean mpg, hp for each cyl/gear combination
+distribmeans(cls,c('mpg','hp'),c('cyl','gear'),'mtc')
 
 # extract and collect all the mtc rows in which the number of cylinders is 8
 distribgetrows(cls,'mtc[mtc$cyl == 8,]')

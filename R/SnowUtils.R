@@ -142,12 +142,14 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
    # typically a given cell will found at more than one cluster node;
    # they must be combined, using FUN1
    FUN1 <- get(FUN1)
-   # if FUN returns a vector rather than a scalar, some "columns" of agg
-   # will be matrices; need to expand
+   # if FUN returns a vector rather than a scalar, the "columns" of agg
+   # associated with ynames will be matrices; need to expand so that
+   # have real columns
    if (FUNdim > 1) {
-      tmp  <- agg[,1:nby]
+      # note: names will be destroyed
+      tmp  <- agg[,1:nby,drop=FALSE]
       for (i in 1:(ncol(agg)-nby))
-         tmp <- cbind(tmp,agg[,2+i])
+         tmp <- cbind(tmp,agg[,nby+i])
       agg <- tmp
    }
    aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
@@ -164,7 +166,7 @@ sumlength <- function(a) c(sum(a),length(a))
 # get the indicated cell means of the variables in ynames,
 # cells defined according to the variables in xnames 
 distribmeans <- function(cls,ynames,xnames,dataname) {
-   clusterExport(cls,c('sumlength','addab'),envir=environment())
+   clusterExport(cls,'sumlength',envir=environment())
    da <- distribagg(cls,ynames,xnames,dataname,
       FUN='sumlength',FUNdim=2,FUN1='sum')
    nx <- length(xnames)
@@ -174,6 +176,8 @@ distribmeans <- function(cls,ynames,xnames,dataname) {
    for (i in 1:ny) {
       tmp <- cbind(tmp,day[,2*i-1] / day[,2*i])
    }
+   tmp <- as.data.frame(tmp)
+   names(tmp) <- c(xnames,ynames)
    tmp
 }
 
