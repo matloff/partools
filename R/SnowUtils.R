@@ -164,20 +164,22 @@ distribcounts <- function(cls,xnames,dataname) {
 sumlength <- function(a) c(sum(a),length(a))
 
 # get the indicated cell means of the variables in ynames,
-# cells defined according to the variables in xnames 
-distribmeans <- function(cls,ynames,xnames,dataname) {
+# cells defined according to the variables in xnames; if saveni is TRUE,
+# then add one column 'yni', giving the number of Y values in this cell
+distribmeans <- function(cls,ynames,xnames,dataname,saveni=FALSE) {
    clusterExport(cls,'sumlength',envir=environment())
    da <- distribagg(cls,ynames,xnames,dataname,
       FUN='sumlength',FUNdim=2,FUN1='sum')
    nx <- length(xnames)
    tmp <- da[,1:nx]
-   day <- da[,-(1:nx)]
+   day <- da[,-(1:nx)]  # Y values in da
    ny <- length(ynames)
    for (i in 1:ny) {
       tmp <- cbind(tmp,day[,2*i-1] / day[,2*i])
    }
+   if (saveni) tmp$yni <- day[,2]
    tmp <- as.data.frame(tmp)
-   names(tmp) <- c(xnames,ynames)
+   names(tmp) <- c(xnames,ynames,'yni')
    tmp
 }
 
