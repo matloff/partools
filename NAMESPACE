@@ -7,7 +7,7 @@ export(writemgrscreen,writewrkrscreens,killdebug,
       readnscramble,getnumdigs,filesave,fileread,filesplitrand,fileagg,
       dfileagg,filegetrows,dfilegetrows,
    distribsplit,distribcat,distribagg,distribrange,
-      distribcounts,distribgetrows,docmd,geteltis,
+      distribcounts,distribgetrows,docmd,geteltis,distribmeans,
    ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,
    setclsinfo,filechunkname,exportlibpaths,filesplit,
    parpdist
