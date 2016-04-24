@@ -177,9 +177,11 @@ distribmeans <- function(cls,ynames,xnames,dataname,saveni=FALSE) {
    for (i in 1:ny) {
       tmp <- cbind(tmp,day[,2*i-1] / day[,2*i])
    }
-   if (saveni) tmp$yni <- day[,2]
    tmp <- as.data.frame(tmp)
-   names(tmp) <- c(xnames,ynames,'yni')
+   if (saveni) {
+      tmp$yni <- day[,2]
+      names(tmp) <- c(xnames,ynames,'yni')
+   }
    tmp
 }
 
