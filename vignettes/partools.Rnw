@@ -41,8 +41,10 @@ unfortunately retains the drawbacks of Hadoop:
 
 \item Spark still relies on a MapReduce paradigm, featuring a {\it
 shuffle} (systemwide sort) operation after each pass of the data.  This
-can be quite slow.\footnote{Low-Rank Matrix Factorizations
-at Scale: Spark for Scientific Data Analytics, Alex Gittens, MMDS 2016.}
+can be quite slow.\footnote{See ``Low-Rank Matrix Factorizations
+at Scale: Spark for Scientific Data Analytics,'' Alex Gittens, MMDS 2016
+in the C context, and ``Size of Datasets for Analytics and Implications
+for R,'' Szilard Pafka, useR! 2016, in the R context.}
 
 \item Thus SparkR can be considerably slower than Plain Old R (POR).
 
@@ -214,7 +216,7 @@ The package consists of three main groups of functions:
 
    \end{itemize}
 
-\subsubsection{Statistical functions}
+\subsubsection{Statistical/Machine Learning functions}
 
 These all use the Software Alchemy (SA) method ({\it Parallel
 Computation for Data Science}, N. Matloff, Chapman and Hall, 2015) to
@@ -513,7 +515,9 @@ times were small.  And now the PCA runs:
 \end{verbatim}
 
 Thus, more than a 6-fold speedup here.  Agreement of the component
-standard deviations is good. 
+standard deviations is good.\footnote{Note that the last component,
+i.e.\ the eighth one, is minuscule is statistically  0.  Again, SA gives
+results that are statistically equivalent to the serial ones.}
 
 Next, let's find the {\it interquartile range} for several columns.
 This is a robust measure of dispersion, defined at the difference
@@ -663,27 +667,27 @@ speedup factor of 2.
 
 More functions like this will be added to {\bf partools}.
 
-\section{What About Other R Functions and Packages, say reshape2/tidyr?}
-
-It is easy to apply the {\bf partools} idiom to many R functions that
-return data frame or matrix values.  Consider for instance the {\bf
-reshape2} function {\bf melt()}.  Say we already have a distributed data
-frame {\bf ddf} at the cluster nodes.  We have two choices here:
-
-\begin{itemize}
-
-\item In accord with the Keep It Distributed {\bf partools} philosophy,
-we might simply call {\bf melt()} at each node, say using {\bf
-clusterEvalQ()}, and keep the result distributed.
-
-\item If say we need to gather together the results of a {\bf melt()}
-operation, we could call {\bf melt()} at each node but then call the
-{\bf partools} function {\bf distribgetrows()} to collect the molten
-data into one centralized data frame.  A {\bf cast()} operation would
-requires a bit more care, depending on whether the distributed object
-crosses subject ID boundaries.
-
-\end{itemize}
+% \section{What About Other R Functions and Packages, say reshape2/tidyr?}
+% 
+% It is easy to apply the {\bf partools} idiom to many R functions that
+% return data frame or matrix values.  Consider for instance the {\bf
+% reshape2} function {\bf melt()}.  Say we already have a distributed data
+% frame {\bf ddf} at the cluster nodes.  We have two choices here:
+% 
+% \begin{itemize}
+% 
+% \item In accord with the Keep It Distributed {\bf partools} philosophy,
+% we might simply call {\bf melt()} at each node, say using {\bf
+% clusterEvalQ()}, and keep the result distributed.
+% 
+% \item If say we need to gather together the results of a {\bf melt()}
+% operation, we could call {\bf melt()} at each node but then call the
+% {\bf partools} function {\bf distribgetrows()} to collect the molten
+% data into one centralized data frame.  A {\bf cast()} operation would
+% requires a bit more care, depending on whether the distributed object
+% crosses subject ID boundaries.
+% 
+% \end{itemize}
 
 \end{document}
 
