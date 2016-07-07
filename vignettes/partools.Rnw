@@ -26,11 +26,11 @@ University of California, Davis}
 \maketitle
 
 With the advent of Big Data, the Hadoop framework has become ubiquitous.
-Yet it was clear from the start that Hadoop had major shortcomings, and
-recently these are being much more seriously discussed.\footnote{See for
-example ``The Hadoop Honeymoon is Over,'' {\it
-https://www.linkedin.com/pulse/hadoop-honeymoon-over-martyn-jones}} This
-has resulted in a new platform, Spark, gaining popularity.  As with
+Yet it was clear from the start that Hadoop had major shortcomings in
+performance, and recently these are being much more seriously
+discussed.\footnote{See for example ``The Hadoop Honeymoon is Over,''
+{\it https://www.linkedin.com/pulse/hadoop-honeymoon-over-martyn-jones}}
+This has resulted in a new platform, Spark, gaining popularity.  As with
 Hadoop, there is an R interface available for Spark, named SparkR. 
 
 Spark overcomes one of Hadoop's major problems, which is the lack of
@@ -39,12 +39,16 @@ unfortunately retains the drawbacks of Hadoop:
 
 \begin{itemize}
 
+\item Spark still relies on a MapReduce paradigm, featuring a {\it
+shuffle} (systemwide sort) operation after each pass of the data.  This
+can be quite slow.\footnote{Low-Rank Matrix Factorizations
+at Scale: Spark for Scientific Data Analytics, Alex Gittens, MMDS 2016.}
+
+\item Thus SparkR can be considerably slower than Plain Old R (POR).
+
 \item Hadoop/Spark have a complex, rather opaque infrastructure, and
 rely on Java/Scala.  This makes them difficult to install, configure and
 use for those who are not computer systems experts. 
-
-\item For a variety of reasons, even SparkR can be considerably slower
-than Plain Old R (POR).
 
 \item Although a major plus for Hadoop/Spark is fault tolerance, it is
 needed only for users working on extremely large clusters, consisting of
@@ -58,7 +62,7 @@ systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy}
 The one firm advantage of Hadoop/Spark is their use of distributed file
 systems.  Under the philosophy, ``Move the computation to the data,
 rather than {\it vice versa},'' network traffic may be greatly reduced,
-thus speeding up computation.  In addition, their approach helps deal
+thus speeding up computation.  In addition, this approach helps deal
 with the fact that Big Data sets may not fit into the memory of a single
 machine.
 
@@ -74,13 +78,13 @@ The {\bf partools} package is designed to meet these goals.  It is
 intended as {\bf a simple, sensible POR alternative to Hadoop/Spark}.
 Though not necessarily appropriate for all settings, for many R
 programmers, {\bf partools} may be a much better choice than {\bf
-Hadoop/Snow}.  
+Hadoop/Spark}.  
 
 \end{quote}
 
 Since {\bf partools} uses the portion of the R {\bf parallel} package
 derived from the package {\bf snow}, and because it is meant as an
-alternative to Hadoop, we informally refer to {\bf partools} as
+alternative to Hadoop/Spark, we informally refer to {\bf partools} as
 Snowdoop.
 
 The package does not provide fault tolerance of its own.  If this is an
@@ -97,11 +101,13 @@ of the package stems from just two simple sources:
 \item [(a)] The package follows a Keep It Distributed philosophy:  Form
 distributed objects {\it and keep using them in distributed form
 throughout one's R session, accessing them repeatedly for one's various
-desired operations.}
+desired operations --- and avoiding operations that collect data from
+the worker nodes to the manager node.}
 
 \item [(b)] The package consists of a number of utility functions that
-greatly facilitate creating, storing and {\it analyzing} distributed
-objects, both in memory and on disk.
+greatly facilitate creating and storing and distributed
+objects, both in memory and on disk, and distributed applications such
+as for regression and classification.
 
 \end{itemize}
 
@@ -213,13 +219,24 @@ The package consists of three main groups of functions:
 These all use the Software Alchemy (SA) method ({\it Parallel
 Computation for Data Science}, N. Matloff, Chapman and Hall, 2015) to
 parallelize statistical operations.\footnote{More detailed presentation
-in forthcoming paper in the {\it Journal of Statistical Software}.}  
-The idea is simple:  Apply the
-given estimator to each chunk in the distributed object, and average
-over chunks.  It is proven that the resulting distributed estimator has
-the same statistical accuracy --- the same asymptotic variance --- as
-the original serial one.\footnote{In the world of parallel computation,
-the standard word for nonparallel is {\it serial}.}
+in forthcoming paper in the {\it Journal of Statistical Software}.}  The
+idea is simple:  Apply the given estimator to each chunk in the
+distributed object, and average over chunks.  It is proven that the
+resulting distributed estimator has the same statistical accuracy ---
+the same asymptotic variance --- as the original serial one.\footnote{In
+the world of parallel computation, the standard word for nonparallel is
+{\it serial}.}
+
+A variant, suitable in many regression and classification algorithms,
+retains the chunk output in the result, rather than performing an
+avereging process.  Consider for instance the use of LASSO for
+regression.  Each chunk may settle on a different subset of the
+predictor variables, so it would not make sense to average the estimated
+coefficient vectors.  Instead, the predictor subsets and corresponding
+coefficients are retained in the SA output.  When one is faced with
+predicting the response variable for a new data point, a prediction is
+calculated from each chunk, and those predictions are averaged to obtain
+the final prediction for the new point.
 
    \begin{itemize}
 
@@ -276,13 +293,13 @@ about 7 million records.  This is large enough to illustrate speedup
 due to parallelism, but small enough that we won't have to wait really
 long amounts of time in our sample session here.  
 
-The session was run on a 16-core machine, with a 16-node {\bf parallel}
-cluster.  Note carefully, though, that we should not expect a 16-fold
-speedup. In the world of parallel computation, one usually gets of
-speedups of considerably less than $n$ for a platform of $n$
-computational entities, in this case with $n = 16$.  Indeed, one is
-often saddened to find that the parallel version is actually {\it
-slower} than the serial one!
+The session was run on a 16-core machine, with a 16-node R virtual
+cluster in the sense of the R {\bf parallel} package.  carefully,
+though, that we should not expect a 16-fold speedup. In the world of
+parallel computation, one usually gets of speedups of considerably less
+than $n$ for a platform of $n$ computational entities, in this case with
+$n = 16$.  Indeed, one is often saddened to find that the parallel
+version is actually {\it slower} than the serial one!
 
 The file, {\bf yr2008}, was first split into a distributed file, stored
 in {\bf yr2008r.01},...,{\bf yr2008r.16}, using {\bf filesplitrand()}, and
@@ -307,6 +324,10 @@ memory at the cluster manager:
 \begin{verbatim}
 > yr2008 <- read.csv("yr2008")
 \end{verbatim}
+
+(In practice, though, this would not be done, i.e.\ we would not have
+{\it both} distributed {\it and} monotlithic versions of the data at the
+same time.
 
 The first operation run involved the package's distributed version of
 R's {\bf aggregate()}.  Here we want to tabulate departure delay,
@@ -365,7 +386,8 @@ yr2008}.  Here is how we would achieve the same effect from the
 distributed object:
 
 \begin{verbatim}
-> sundayeved <- distribgetrows(cls,'with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,])')
+> sundayeved <- 
+   distribgetrows(cls,'with(yr2008,yr2008[DayOfWeek==1 & DepTime > 1800,])')
 \end{verbatim}
 
 What {\bf distribgetrows()} does is produce a data frame at each cluster
@@ -610,7 +632,7 @@ plus swap space.} of the corresponding cluster node.
 The first assumption is not very important.  If for some reason we have
 created a distributed file with more chunks than our number of physical
 computing devices, we can still set up an R {\bf parallel} cluster with
-size equal to the number of file chunks.  Now more than one R process
+size equal to the number of file chunks.  Then more than one R process
 will run on at least some of the cluster nodes, albeit possibly at the
 expense of, say, an increase in virtual memory swap operations.
 
