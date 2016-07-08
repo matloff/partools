@@ -155,6 +155,18 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
    aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
 }
 
+# dtagg() is similar to distribagg(), but working on data.table(); it
+# does a distributed analog of R's aggregate(), but using data.table
+# objects and syntax
+
+# arguments:
+
+#    dtobj: a data.table object in distributed form
+
+### dtagg <- function() {
+### 
+### }
+
 # get the indicated cell counts, cells defined according to the
 # variables in xnames 
 distribcounts <- function(cls,xnames,dataname) {
