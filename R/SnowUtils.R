@@ -9,7 +9,7 @@
 # arguments:
 #
 # cls: a 'parallel' cluster
-# m: a matrix or data frame
+# m: a matrix, data frame or data.table
 # mchunkname: name to be given to the chunks of m at the cluster nodes
 # scramble: if TRUE, randomly assign rows of the data frame to the chunks; 
 #           otherwsie, the first rows go to the first chunk, the next set
@@ -88,7 +88,7 @@ exportlibpaths <- function(cls) {
 # full object
 distribsplit <- function(cls,dfname,scramble=FALSE) {
    dfr <- get(dfname,envir=sys.parent())
-   dfr <- as.data.frame(dfr)
+   if(!is.data.table(dfr)) dfr <- as.data.frame(dfr)
    formrowchunks(cls,dfr,dfname,scramble)
 }
 
