@@ -1,5 +1,5 @@
 Package: partools
-Version: 1.1.4
+Version: 1.1.5
 Author: Norm Matloff <normmatloff@gmail.com> [cre,aut], with
    contributions by Alex Rumbaugh <aprumbaugh@ucdavis.edu> and
    Hadley Wickham <h.wickham@gmail.com>
@@ -11,8 +11,8 @@ Description: Miscellaneous utilities for the 'parallel' package,
    "Software Alchemy" method for parallelizing most statistical methods,
    presented in N. Matloff, Parallel Computation for Data Science,
    Chapman and Hall, 2015.  Includes a debugging aid.
-Depends: parallel,stats,utils
-Suggests: data.table
+Depends: parallel,stats,utils,data.table
+Suggests: 
 ByteCompile: yes
 NeedsCompilation: no
 License: GPL (>= 2)
