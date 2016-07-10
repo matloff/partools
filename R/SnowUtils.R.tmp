@@ -109,10 +109,11 @@ distribcat <- function(cls,dfname) {
 #    ynames: names of variables on which FUN is to be applied
 #    xnames: names of variables that define the grouping
 #    dataname: quoted name of the data frame or data.table
-#    FUN: quoted name(s) of aggregation function(s) to be used in 
-#         aggregation within cluster nodes; in the case of a data.table, 
-#         this will be a vector of function names, of the same length as
-#         ynames
+#    FUN: quoted name of aggregation function to be used in 
+#         aggregation within cluster nodes; for a data frame,
+#         this function has a single argument; in the case of 
+#         a data.table, this will be a function with the 
+#         same number of arguments as the length as ynames
 #    FUN1: quoted name of the aggregation function to be used in 
 #          aggregation between cluster nodes
 
@@ -130,13 +131,14 @@ distribcat <- function(cls,dfname) {
 distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
    isdt <- is.data.frame(get(dfname,envir=sys.parent()))
    if (isdt) {
-      remotecmd <- paste(dataname,'[.(',sep='')
+      remotecmd <- paste(dataname,'[,.(',FUN,'(',sep='')
       ny <- length(ynames)
       for (i in 1:ny) {
-         pystrcat(remotecmd,FUN[i],'(',ynames[i],')')
-         if (i < ny) pystrcat(remotecmd,',') else
-            pystrcat(remotecmd,')')
+         ipstrcat(remotecmd,FUN[i],'(',ynames[i],')')
+         if (i < ny) ipstrcat(remotecmd,',')) else
+            ipstrcat(remotecmd,')')
       }
+      ipstrcat(remotecmd,',by=',xnames,')')
    } else {
         nby <- length(xnames) # number in the "by" arg to aggregate()
         # set up aggregate() command to be run on the cluster nodes
@@ -255,7 +257,7 @@ geteltis <- function(lst,i) {
 # assigning back to str1 (at least in name, if not memory location), in
 # the spirit of string.append() in Python
 
-pystrcat <- defmacro(str1,DOTS,sep='',
+ipstrcat <- defmacro(str1,DOTS,sep='',
    expr = (for(str in list(...))
       str1 <- paste(str1,str,sep=sep)))
    
