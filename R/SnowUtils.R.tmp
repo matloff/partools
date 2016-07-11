@@ -109,11 +109,11 @@ distribcat <- function(cls,dfname) {
 #    ynames: names of variables on which FUN is to be applied
 #    xnames: names of variables that define the grouping
 #    dataname: quoted name of the data frame or data.table
-#    FUN: quoted name of aggregation function to be used in 
+#    FUN: quoted name(s) of aggregation function to be used in 
 #         aggregation within cluster nodes; for a data frame,
 #         this function has a single argument; in the case of 
-#         a data.table, this will be a function with the 
-#         same number of arguments as the length as ynames
+#         a data.table, this will be a vector of length the 
+#         same as the length of ynames (or recycling will be used)
 #    FUN1: quoted name of the aggregation function to be used in 
 #          aggregation between cluster nodes
 
@@ -129,15 +129,25 @@ distribcat <- function(cls,dfname) {
 # appended at the end
 
 distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
+   ncellvars <- length(xnames) # number of cell-specification variables
+   nagg <- length(ynames) # number of variables to tabulate
+   if (length(FUN) < nagg) FUN <- rep_len(FUN,nagg)
    isdt <- is.data.table(get(dataname,envir=sys.parent()))
    if (isdt) {
-      remotecmd <- paste(dataname,'[,',FUN,'(',sep='')
+      remotecmd <- paste(dataname,'[,.(',sep='')
+      for (i in 1:nagg) {
+         ipstrcat(remotecmd,FUN[i],'(',ynames[i],')')
+         if (i == nagg) ipstrcat(remotecmd,')')
+         ipstrcat(remotecmd,',') 
+      }
       xns <- xnames
-      for (i in 1:length((xns)))
-         xns[i] <- paste('"',xns[i],'"',sep='')
-      ipstrcat(remotecmd,ynames,'),by=c(',xns,')]',innersep=',')
+      quotemark <- '"'
+      for (i in 1:length(xns)) {
+         xns[i] <- paste(quotemark,xns[i],quotemark,sep='')
+      }
+      ipstrcat(remotecmd,'by=c(',xns,')]',innersep=',')
+        browser()
    } else {
-        nby <- length(xnames) # number in the "by" arg to aggregate()
         # set up aggregate() command to be run on the cluster nodes
         ypart <- paste("cbind(",paste(ynames,collapse=","),")",sep="")
         xpart <- paste(xnames,collapse="+")
@@ -150,7 +160,6 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
         # run the command, and combine the returned data frames into one big
         # data frame
         aggs <- clusterEvalQ(cls,docmd(remotecmd))
-        browser()
         agg <- Reduce(rbind,aggs)
         # typically a given cell will found at more than one cluster node;
         # they must be combined, using FUN1
@@ -160,12 +169,12 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
         # have real columns
         if (FUNdim > 1) {
            # note: names will be destroyed
-           tmp  <- agg[,1:nby,drop=FALSE]
-           for (i in 1:(ncol(agg)-nby))
-              tmp <- cbind(tmp,agg[,nby+i])
+           tmp  <- agg[,1:ncellvars,drop=FALSE]
+           for (i in 1:(ncol(agg)-ncellvars))
+              tmp <- cbind(tmp,agg[,ncellvars+i])
            agg <- tmp
         }
-   aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
+   aggregate(x=agg[,-(1:ncellvars)],by=agg[,1:ncellvars,drop=FALSE],FUN1)
 }
 
 # dtagg() is similar to distribagg(), but working on data.table(); it
