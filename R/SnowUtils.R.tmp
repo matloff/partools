@@ -129,16 +129,13 @@ distribcat <- function(cls,dfname) {
 # appended at the end
 
 distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
-   isdt <- is.data.frame(get(dfname,envir=sys.parent()))
+   isdt <- is.data.table(get(dataname,envir=sys.parent()))
    if (isdt) {
-      remotecmd <- paste(dataname,'[,.(',FUN,'(',sep='')
-      ny <- length(ynames)
-      for (i in 1:ny) {
-         ipstrcat(remotecmd,FUN[i],'(',ynames[i],')')
-         if (i < ny) ipstrcat(remotecmd,',')) else
-            ipstrcat(remotecmd,')')
-      }
-      ipstrcat(remotecmd,',by=',xnames,')')
+      remotecmd <- paste(dataname,'[,',FUN,'(',sep='')
+      xns <- xnames
+      for (i in 1:length((xns)))
+         xns[i] <- paste('"',xns[i],'"',sep='')
+      ipstrcat(remotecmd,ynames,'),by=c(',xns,')]',innersep=',')
    } else {
         nby <- length(xnames) # number in the "by" arg to aggregate()
         # set up aggregate() command to be run on the cluster nodes
@@ -148,10 +145,12 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
         frmla <- paste(ypart,"~",paste(xnames,collapse="+"))
         remotecmd <-
            paste("aggregate(",frmla,",data=",dataname,",",FUN,")",sep="")
+   }
         clusterExport(cls,"remotecmd",envir=environment())
         # run the command, and combine the returned data frames into one big
         # data frame
         aggs <- clusterEvalQ(cls,docmd(remotecmd))
+        browser()
         agg <- Reduce(rbind,aggs)
         # typically a given cell will found at more than one cluster node;
         # they must be combined, using FUN1
@@ -166,7 +165,6 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
               tmp <- cbind(tmp,agg[,nby+i])
            agg <- tmp
         }
-   }
    aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
 }
 
@@ -255,9 +253,20 @@ geteltis <- function(lst,i) {
 
 # in-place string concatenation; appends the strings in ... to str1,
 # assigning back to str1 (at least in name, if not memory location), in
-# the spirit of string.append() in Python
+# the spirit of string.append() in Python; here DOTS is one of more
+# expressions separated by commas, with each expression being either a
+# string or a vector of strings; within a vector, innersep is used as a
+# separator, while between vectors it is outersep
 
-ipstrcat <- defmacro(str1,DOTS,sep='',
-   expr = (for(str in list(...))
-      str1 <- paste(str1,str,sep=sep)))
+ipstrcat <- defmacro(str1,DOTS,outersep='',innersep='',expr = (
+      for (str in list(...)) {
+         lstr <- length(str)
+         tmp <- str[1]
+         if (lstr > 1) 
+            for (i in 2:lstr) 
+               tmp <- paste(tmp,str[i],sep=innersep)
+         str1 <- paste(str1,tmp,sep=outersep)
+      }
+   )
+)
    
