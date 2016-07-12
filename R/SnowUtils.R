@@ -1,4 +1,5 @@
 
+
 # general "Snow" (the part of 'parallel' adapted from the old Snow)
 # utilities, some used in Snowdoop but generally applicable
 
@@ -108,9 +109,12 @@ distribcat <- function(cls,dfname) {
 #    cls: cluster
 #    ynames: names of variables on which FUN is to be applied
 #    xnames: names of variables that define the grouping
-#    dataname: quoted name of the data frame
-#    FUN: quoted name of aggregation function to be used in aggregation
-#         within cluster nodes
+#    dataname: quoted name of the data frame or data.table
+#    FUN: quoted name(s) of aggregation function to be used in 
+#         aggregation within cluster nodes; for a data frame,
+#         this function has a single argument; in the case of 
+#         a data.table, this will be a vector of length the 
+#         same as the length of ynames (or recycling will be used)
 #    FUN1: quoted name of the aggregation function to be used in 
 #          aggregation between cluster nodes
 
@@ -126,17 +130,36 @@ distribcat <- function(cls,dfname) {
 # appended at the end
 
 distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
-   nby <- length(xnames) # number in the "by" arg to aggregate()
-   # set up aggregate() command to be run on the cluster nodes
-   ypart <- paste("cbind(",paste(ynames,collapse=","),")",sep="")
-   xpart <- paste(xnames,collapse="+")
-   # the formula
-   frmla <- paste(ypart,"~",paste(xnames,collapse="+"))
-   remotecmd <-
-      paste("aggregate(",frmla,",data=",dataname,",",FUN,")",sep="")
+   ncellvars <- length(xnames) # number of cell-specification variables
+   nagg <- length(ynames) # number of variables to tabulate
+   if (length(FUN) < nagg) FUN <- rep_len(FUN,nagg)
+   isdt <- is.data.table(get(dataname,envir=sys.parent()))
+   if (isdt) {
+      remotecmd <- paste(dataname,'[,.(',sep='')
+      for (i in 1:nagg) {
+         ipstrcat(remotecmd,FUN[i],'(',ynames[i],')')
+         if (i == nagg) ipstrcat(remotecmd,')')
+         ipstrcat(remotecmd,',') 
+      }
+      xns <- xnames
+      quotemark <- '"'
+      for (i in 1:length(xns)) {
+         xns[i] <- paste(quotemark,xns[i],quotemark,sep='')
+      }
+      ipstrcat(remotecmd,'by=c(',xns,')]',innersep=',')
+   } else {
+        # set up aggregate() command to be run on the cluster nodes
+        ypart <- paste("cbind(",paste(ynames,collapse=","),")",sep="")
+        xpart <- paste(xnames,collapse="+")
+        # the formula
+        frmla <- paste(ypart,"~",paste(xnames,collapse="+"))
+        remotecmd <-
+           paste("aggregate(",frmla,",data=",dataname,",",FUN,")",sep="")
+   }
    clusterExport(cls,"remotecmd",envir=environment())
    # run the command, and combine the returned data frames into one big
    # data frame
+   browser()
    aggs <- clusterEvalQ(cls,docmd(remotecmd))
    agg <- Reduce(rbind,aggs)
    # typically a given cell will found at more than one cluster node;
@@ -147,12 +170,13 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
    # have real columns
    if (FUNdim > 1) {
       # note: names will be destroyed
-      tmp  <- agg[,1:nby,drop=FALSE]
-      for (i in 1:(ncol(agg)-nby))
-         tmp <- cbind(tmp,agg[,nby+i])
+      tmp  <- agg[,1:ncellvars,drop=FALSE]
+      for (i in 1:(ncol(agg)-ncellvars))
+         tmp <- cbind(tmp,agg[,ncellvars+i])
       agg <- tmp
    }
-   aggregate(x=agg[,-(1:nby)],by=agg[,1:nby,drop=FALSE],FUN1)
+   if (isdt) agg <- as.data.frame(agg)
+   aggregate(x=agg[,-(1:ncellvars)],by=agg[,1:ncellvars,drop=FALSE],FUN1)
 }
 
 # dtagg() is similar to distribagg(), but working on data.table(); it
@@ -237,3 +261,23 @@ geteltis <- function(lst,i) {
    get1elti <- function(lstmember) lstmember[i]
    sapply(lst,get1elti)
 }
+
+# in-place string concatenation; appends the strings in ... to str1,
+# assigning back to str1 (at least in name, if not memory location), in
+# the spirit of string.append() in Python; here DOTS is one of more
+# expressions separated by commas, with each expression being either a
+# string or a vector of strings; within a vector, innersep is used as a
+# separator, while between vectors it is outersep
+
+ipstrcat <- defmacro(str1,DOTS,outersep='',innersep='',expr = (
+      for (str in list(...)) {
+         lstr <- length(str)
+         tmp <- str[1]
+         if (lstr > 1) 
+            for (i in 2:lstr) 
+               tmp <- paste(tmp,str[i],sep=innersep)
+         str1 <- paste(str1,tmp,sep=outersep)
+      }
+   )
+)
+   
