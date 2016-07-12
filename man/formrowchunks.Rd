@@ -38,6 +38,8 @@ distribrange(cls,vec,na.rm=FALSE)
 distribcounts(cls,xnames,dataname)
 distribmeans(cls,ynames,xnames,dataname)
 distribgetrows(cls,cmd)
+distribisdt(cls,dataname) 
+
 docmd(toexec) 
 geteltis(lst,i)
 }
@@ -59,10 +61,13 @@ geteltis(lst,i)
      is to be applied.}
   \item{xnames}{Vector of quoted names of variables that define the
      grouping.}
-  \item{dataname}{Quoted name of a distributed data frame.}
-  \item{FUN}{Quoted name of function to be used in
-     aggregating within cluster nodes.}
-  \item{FUNdim}{Number of elements in the return value of \code{FUN}.}
+  \item{dataname}{Quoted name of a distributed data frame or data.table.}
+  \item{FUN}{Quoted name of a single-argument function to be used in
+     aggregating within cluster nodes.  If \code{dataname} is the name
+     of a data.table, \code{FUN} must be a vector of function names, of
+     length equal to that of \code{ynames}.}
+  \item{FUNdim}{Number of elements in the return value of \code{FUN}.
+     Must be 1 for data.tables.}
   \item{FUN1}{Quoted name of function to be used in
      aggregation between cluster nodes.}
   \item{vec}{Quoted expression that evaluates to a vector.}
