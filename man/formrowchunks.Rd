@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,geteltis,distribmeans}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,geteltis,distribmeans,distribisdt}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -13,6 +13,7 @@
 \alias{distribgetrows}
 \alias{distribmeans}
 \alias{docmd}
+\alias{distribisdt}
 \alias{geteltis}
 
 \title{
@@ -53,7 +54,7 @@ geteltis(lst,i)
   \item{add}{``Addition'' function, which could be summation,
      concatenation and so on.}
   \item{dfname}{Quoted name of a data frame, either centralized or
-  distributed.} 
+     distributed.} 
   \item{ynames}{Vector of quoted names of variables on which \code{FUN} 
      is to be applied.}
   \item{xnames}{Vector of quoted names of variables that define the
