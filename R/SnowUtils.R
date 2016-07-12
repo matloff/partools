@@ -129,12 +129,20 @@ distribcat <- function(cls,dfname) {
 # return value: aggregate()-style data frame, with column of cell counts
 # appended at the end
 
+# currently cannot have FUNdim > 1 for data.tables;  duplicate ynames;
+#
+# distribagg(cls,c('mpg','mpg','disp','disp','hp','hp'),
+#             c('cyl','gear'),'mtc1',
+#             FUN=c('sum','length'))
+# doesn't matter here 
+
 distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
    ncellvars <- length(xnames) # number of cell-specification variables
    nagg <- length(ynames) # number of variables to tabulate
-   if (length(FUN) < nagg) FUN <- rep_len(FUN,nagg)
    isdt <- is.data.table(get(dataname,envir=sys.parent()))
    if (isdt) {
+      if (FUNdim > 1) stop('at present FUNdim must be 1 for data.tables')
+      # if (length(FUN) < nagg) FUN <- rep_len(FUN,nagg*length(FUN))
       remotecmd <- paste(dataname,'[,.(',sep='')
       for (i in 1:nagg) {
          ipstrcat(remotecmd,FUN[i],'(',ynames[i],')')
@@ -159,7 +167,6 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
    clusterExport(cls,"remotecmd",envir=environment())
    # run the command, and combine the returned data frames into one big
    # data frame
-   browser()
    aggs <- clusterEvalQ(cls,docmd(remotecmd))
    agg <- Reduce(rbind,aggs)
    # typically a given cell will found at more than one cluster node;
@@ -179,22 +186,10 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
    aggregate(x=agg[,-(1:ncellvars)],by=agg[,1:ncellvars,drop=FALSE],FUN1)
 }
 
-# dtagg() is similar to distribagg(), but working on data.table(); it
-# does a distributed analog of R's aggregate(), but using data.table
-# objects and syntax
-
-# arguments:
-
-#    dtobj: a data.table object in distributed form
-
-### dtagg <- function() {
-### 
-### }
-
 # get the indicated cell counts, cells defined according to the
 # variables in xnames 
 distribcounts <- function(cls,xnames,dataname) {
-   distribagg(cls,xnames[1],xnames,dataname,"length","sum")
+   distribagg(cls,xnames[1],xnames,dataname,"length",FUN1="sum")
 }
 
 sumlength <- function(a) c(sum(a),length(a))
@@ -204,8 +199,15 @@ sumlength <- function(a) c(sum(a),length(a))
 # then add one column 'yni', giving the number of Y values in this cell
 distribmeans <- function(cls,ynames,xnames,dataname,saveni=FALSE) {
    clusterExport(cls,'sumlength',envir=environment())
-   da <- distribagg(cls,ynames,xnames,dataname,
-      FUN='sumlength',FUNdim=2,FUN1='sum')
+   isdt <- is.data.table(get(dataname,envir=sys.parent()))
+   if (!isdt) {
+      da <- distribagg(cls,ynames,xnames,dataname,
+         FUN='sumlength',FUNdim=2,FUN1='sum')
+   } else {
+      da <- distribagg(cls,rep(ynames,each=2),
+         xnames,dataname,
+         FUN=rep(c('sum','length'),length((ynames))),FUN1='sum')
+   }
    nx <- length(xnames)
    tmp <- da[,1:nx]
    day <- da[,-(1:nx)]  # Y values in da
