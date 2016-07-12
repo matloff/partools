@@ -182,7 +182,10 @@ distribagg <- function(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) {
          tmp <- cbind(tmp,agg[,ncellvars+i])
       agg <- tmp
    }
-   if (isdt) agg <- as.data.frame(agg)
+   if (isdt) {
+      agg <- as.data.frame(agg)
+      names(agg)[-(1:ncellvars)] <- ynames
+   }
    aggregate(x=agg[,-(1:ncellvars)],by=agg[,1:ncellvars,drop=FALSE],FUN1)
 }
 
@@ -220,6 +223,7 @@ distribmeans <- function(cls,ynames,xnames,dataname,saveni=FALSE) {
       tmp$yni <- day[,2]
       names(tmp) <- c(xnames,ynames,'yni')
    }
+   names(tmp)[-(1:nx)] <- ynames
    tmp
 }
 
