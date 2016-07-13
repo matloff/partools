@@ -219,8 +219,7 @@ sumlength <- function(a) c(sum(a),length(a))
 # then add one column 'yni', giving the number of Y values in this cell
 distribmeans <- function(cls,ynames,xnames,dataname,saveni=FALSE) {
    clusterExport(cls,'sumlength',envir=environment())
-   isdt <- clusterEvalQ(cls,
-      is.data.table(get(dataname,envir=sys.parent())))[[1]]
+   isdt <- distribisdt(cls,dataname)
    if (!isdt) {
       da <- distribagg(cls,ynames,xnames,dataname,
          FUN='sumlength',FUNdim=2,FUN1='sum')
