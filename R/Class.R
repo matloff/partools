@@ -27,6 +27,7 @@ caclassfit <- function(cls,fitcmd) {
 #             class returned by the fitting algorithm, e.g. by rpart()
 #    newdata: data to be predicted
 #    yidx: index, if any, of the class variable in newdata
+#    ...: additional parameters specific to the given algorithm
 
 # value:
 
@@ -42,12 +43,12 @@ caclassfit <- function(cls,fitcmd) {
 #             classification 
 #       confusion:  if yidx non-NULL, confusion matrix
 
-caclasspred <- function(cls,fitobjs,newdata,yidx=NULL) {
+caclasspred <- function(cls,fitobjs,newdata,yidx=NULL,...) {
    res <- list()
    class(res) <- 'caclasspred'
    newdatax <- newdata[,-yidx]
    chunkpreds <- lapply(fitobjs, function(fitobj)
-      as.numeric(predict(fitobj,newdatax,type='class')))
+      as.numeric(predict(fitobj,newdatax,...)))
    res$predmat <- Reduce(rbind,chunkpreds)
    res$preds <- apply(res$predmat,2,vote)
    allsame <- function(u) all(u == u[1])
