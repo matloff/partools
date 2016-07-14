@@ -7,7 +7,7 @@
 \title{Software Alchemy for Nonparametric Classification}
 
 \description{
-Parallelization of most nonparametric classification algorithms. 
+Parallelization of most nonparametric classification and regression algorithms. 
 }
 
 \usage{
@@ -19,7 +19,7 @@ re_code(x)
 
 \arguments{
   \item{cls}{A cluster run under the \pkg{parallel} package.}
-  \item{fitcmd}{A string containing a classifier-fitting command to be
+  \item{fitcmd}{A string containing a model-fitting command to be
      run on each cluster node.  This will typically include
      specification of the distributed data set.}
   \item{fitobjs}{An R list of objects returned by the \code{fitcmd}
@@ -36,11 +36,11 @@ re_code(x)
 \details{This should work for almost any classification code that has a
 ``fit'' function and a \code{predict} method.
 
-The method assumes that the base estimator is asymptotically normal, and
-assumes i.i.d. data.  If your data set had been stored in some sorted
-order, it must be randomized first, say using the \code{scramble} option
-in \code{distribsplit} or by calling \code{readnscramble}, depending on
-whether your data is already in memory or still in a file.
+The method assumes i.i.d. data.  If your data set had been stored in
+some sorted order, it must be randomized first, say using the
+\code{scramble} option in \code{distribsplit} or by calling
+\code{readnscramble}, depending on whether your data is already in
+memory or still in a file.
 
 It is assumed that class labels are 1,2,...  If not, use
 \code{re_code}.
@@ -82,16 +82,17 @@ setclsinfo(cls)
 
 data(prgeng)
 prgeng$occ <- re_code(prgeng$occ)
-head(prgeng)
 prgeng$bs <- as.integer(prgeng$educ == 13)
 prgeng$ms <- as.integer(prgeng$educ == 14)
 prgeng$phd <- as.integer(prgeng$educ == 15)
 prgeng$sex <- prgeng$sex - 1
 pe <- prgeng[,c(1,7,8,9,12,13,14,5)]
-pe$occ <- as.factor(pe$occ)   # needed!
+pe$occ <- as.factor(pe$occ)   # needed for rpart!
 distribsplit(cls,'pe')
+clusterEvalQ(cls,library(rpart))
 fit <- caclassfit(cls,"rpart(occ ~ .,data=pe)")
-predout <- caclasspred(cls,fit,pe,8,type='class')
+predout <- caclasspred(fit,pe,8,type='class')
+predout$acc  # 0.27 
 
 stopCluster(cls)
 
