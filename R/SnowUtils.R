@@ -91,6 +91,23 @@ distribsplit <- function(cls,dfname,scramble=FALSE) {
    dfr <- get(dfname,envir=sys.parent())
    if(!is.data.table(dfr)) dfr <- as.data.frame(dfr)
    formrowchunks(cls,dfr,dfname,scramble)
+   for (j in 1:ncol(dfr)) {
+      mdj <- mode(dfr[,j])
+      if (mdj == 'character') 
+         warning('character column converted to factor') else
+      if (mdj == 'factor') {
+         usubj <- dfname
+         ipstrcat(usubj,'[,')
+         ipstrcat(usubj,as.character(j))
+         ipstrcat(usubj,']')
+         remotecmd <- usubj
+         ipstrcat(remotecmd,' <- ')
+         ipstrcat(remotecmd,'as.factor(')
+         ipstrcat(remotecmd,usubj)
+         ipstrcat(remotecmd,')')
+         clusterEvalQ(cls,docmd(remotecmd))
+      }
+   }
 }
 
 # collects a distributed matrix/data frame specified by dfname at
