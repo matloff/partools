@@ -10,7 +10,7 @@ export(writemgrscreen,writewrkrscreens,killdebug,
       distribcounts,distribgetrows,docmd,geteltis,distribmeans,
       distribisdt,
    ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,
-   caclassfit,caclasspred,vote,
+   caclassfit,caclasspred,vote,re_code,
    setclsinfo,filechunkname,exportlibpaths,filesplit,
    parpdist
    )
