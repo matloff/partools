@@ -1,7 +1,20 @@
 
 
-# wrapper to do distributed fit 
+# distributed fit/predict for most nonparametric classfication models
 
+# note:  class labels are assumed to be consecutive, starting from 1;
+# use re_code() if this is not the case
+
+# takes an integer-valued vector x and recodes its values to 1,2,...
+re_code <- function(x) {
+   tx <- table(x)
+   newcodes <- 1:length(tx)
+   names(newcodes) <- names(tx)
+   tmp <- as.character(x)
+   newcodes[tmp]
+}
+
+# caclassfit()
 
 # arguments:
 
@@ -20,9 +33,10 @@ caclassfit <- function(cls,fitcmd) {
    clusterEvalQ(cls,fit <- docmd(fitcmd))
 }
 
+# caclasspred()
+
 # arguments:
 
-#    cls: an R 'parallel' cluster
 #    fitobjs: output of a call to caclassfit(); an R list of elements of
 #             class returned by the fitting algorithm, e.g. by rpart()
 #    newdata: data to be predicted
@@ -43,7 +57,7 @@ caclassfit <- function(cls,fitcmd) {
 #             classification 
 #       confusion:  if yidx non-NULL, confusion matrix
 
-caclasspred <- function(cls,fitobjs,newdata,yidx=NULL,...) {
+caclasspred <- function(fitobjs,newdata,yidx=NULL,...) {
    res <- list()
    class(res) <- 'caclasspred'
    newdatax <- newdata[,-yidx]
