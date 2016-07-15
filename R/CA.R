@@ -64,12 +64,12 @@ cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,
    if (cacall) {
       z168 <- z  # needed for CRAN issue
       distribsplit(cls,'z168',scramble=scramble)
-   }
+   } else clusterEvalQ(cls,z168 <- NULL)
    clusterExport(cls,c("ovf","estf","estcovf"),envir=environment())
    # apply the "theta hat" function, e.g. glm(), and extract the
    # apply the desired statistical method at each chunk
    ovout <- ### if (cacall) clusterEvalQ(cls,ovf(z168)) else
-                        clusterEvalQ(cls,ovf()) 
+                        clusterEvalQ(cls,ovf(z168)) 
    # theta-hats, with the one for chunk i in row i
    thts <- t(sapply(ovout,estf))
    if (is.vector(thts)) thts <- matrix(thts,ncol=1)
