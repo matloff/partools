@@ -5,14 +5,14 @@ Author: Norm Matloff <normmatloff@gmail.com> [cre,aut], with
    Hadley Wickham <h.wickham@gmail.com>
 Maintainer: Norm Matloff <normmatloff@gmail.com>
 Title: Tools for the 'Parallel' Package
-Description: Miscellaneous utilities for the 'parallel' package, 
-   cluster-oriented section; "Snowdoop" alternative to MapReduce;
-   file splitting and distributed operations such as sort and aggregate.
+Description: Miscellaneous utilities for parallelizing large
+   computations.  Alternative to MapReduce.
+   File splitting and distributed operations such as sort and aggregate.
    "Software Alchemy" method for parallelizing most statistical methods,
    presented in N. Matloff, Parallel Computation for Data Science,
    Chapman and Hall, 2015.  Includes a debugging aid.
-Depends: parallel,stats,utils,data.table,gtools
-Suggests: 
+Depends: parallel,stats,utils,gtools
+Suggests: data.table
 ByteCompile: yes
 NeedsCompilation: no
 License: GPL (>= 2)
