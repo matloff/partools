@@ -79,8 +79,6 @@ caclasspred <- function(fitobjs,newdata,yidx=NULL,...) {
 # them
 vote <- function(preds) {
    tpreds <- table(preds)
-   tmp <- which(tpreds == max(tpreds))
-   whichmostfreq <- as.numeric(names(tmp))
-   sample(whichmostfreq,1)
+   as.numeric(names(which.max(tpreds)))
 }
 
