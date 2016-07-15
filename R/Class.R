@@ -29,6 +29,8 @@ re_code <- function(x) {
 #    running 'fitcmd' on the i-th chunk of the distributed data
 
 caclassfit <- function(cls,fitcmd) {
+   if (length(cls) <= 2) 
+      warning('cluster size should be greater than 2 for good performance')
    clusterExport(cls,'fitcmd',envir=environment())
    clusterEvalQ(cls,fit <- docmd(fitcmd))
 }

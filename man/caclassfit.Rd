@@ -92,7 +92,7 @@ distribsplit(cls,'pe')
 clusterEvalQ(cls,library(rpart))
 fit <- caclassfit(cls,"rpart(occ ~ .,data=pe)")
 predout <- caclasspred(fit,pe,8,type='class')
-predout$acc  # 0.27 
+predout$acc  # 0.36 
 
 stopCluster(cls)
 
