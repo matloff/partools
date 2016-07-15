@@ -195,7 +195,6 @@ aggregate(cbind(u,v) ~ x+y,d,max)
 # real data
 mtc <- mtcars
 distribsplit(cls,"mtc")
-rm(mtc)  # dramatize the point that we are analyzing the dist. object
 
 distribagg(cls,c("mpg","disp","hp"),c("cyl","gear"),"mtc","max")
 # check
