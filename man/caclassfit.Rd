@@ -4,10 +4,10 @@
 \alias{vote}
 \alias{re_code}
 
-\title{Software Alchemy for Nonparametric Classification}
+\title{Software Alchemy for Machine Learning}
 
 \description{
-Parallelization of most nonparametric classification and regression algorithms. 
+Parallelization of machine learning algorithms. 
 }
 
 \usage{
