@@ -195,7 +195,7 @@ calm(cls,"V3 ~ .,data=u")$tht
 # check; results should be approximately the same
 lm(u[,3] ~ u[,1]+u[,2])
 # without the wrapper
-ovf <- function() lm(V3 ~ .,data=z168)
+ovf <- function(dummy=NULL) lm(V3 ~ .,data=z168)
 ca(cls,u,ovf,estf=coef,estcovf=vcov)$tht
 
 # Census data on programmers and engineers; include a quadratic term for

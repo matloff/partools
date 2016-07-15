@@ -79,7 +79,7 @@ The \code{caclasspred} function returns an R list with these components:
 # set up 'parallel' cluster
 cls <- makeCluster(2)
 setclsinfo(cls)
-
+# data prep
 data(prgeng)
 prgeng$occ <- re_code(prgeng$occ)
 prgeng$bs <- as.integer(prgeng$educ == 13)
@@ -88,7 +88,9 @@ prgeng$phd <- as.integer(prgeng$educ == 15)
 prgeng$sex <- prgeng$sex - 1
 pe <- prgeng[,c(1,7,8,9,12,13,14,5)]
 pe$occ <- as.factor(pe$occ)   # needed for rpart!
+# go
 distribsplit(cls,'pe')
+library(rpart)
 clusterEvalQ(cls,library(rpart))
 fit <- caclassfit(cls,"rpart(occ ~ .,data=pe)")
 predout <- caclasspred(fit,pe,8,type='class')
