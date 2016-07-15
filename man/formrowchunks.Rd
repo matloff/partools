@@ -212,6 +212,13 @@ distribgetrows(cls,'mtc[mtc$cyl == 8,]')
 # check
 mtc[mtc$cyl == 8,]
 
+# same for data.tables
+mtc <- as.data.table(mtc)
+setkey(mtc,cyl)
+distribsplit(cls,'mtc')
+distribcounts(cls,c("cyl","gear"),"mtc")
+distribmeans(cls,c('mpg','hp'),c('cyl','gear'),'mtc')
+
 stopCluster(cls)
 
 }
