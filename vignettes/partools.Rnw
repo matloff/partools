@@ -25,7 +25,16 @@ University of California, Davis}
 
 \maketitle
 
-With the advent of Big Data, the Hadoop framework has become ubiquitous.
+The {\bf partools} package is a general framework for parallel
+processing of large data sets and/or highly-computational algorithms.
+It is the ``un-MapReduce,'' avoiding that paradigm while retaining the
+philosophy of highly-distributed memory objects and files of Hadoop and
+Spark.
+
+\section{Motivation}
+
+With the advent of Big Data, the Hadoop framework became ubiquitous in
+the years following its birth in 2006.
 Yet it was clear from the start that Hadoop had major shortcomings in
 performance, and recently these are being much more seriously
 discussed.\footnote{See for example ``The Hadoop Honeymoon is Over,''
@@ -216,29 +225,7 @@ The package consists of three main groups of functions:
 
    \end{itemize}
 
-\subsubsection{Statistical/Machine Learning functions}
-
-These all use the Software Alchemy (SA) method ({\it Parallel
-Computation for Data Science}, N. Matloff, Chapman and Hall, 2015) to
-parallelize statistical operations.\footnote{More detailed presentation
-in forthcoming paper in the {\it Journal of Statistical Software}.}  The
-idea is simple:  Apply the given estimator to each chunk in the
-distributed object, and average over chunks.  It is proven that the
-resulting distributed estimator has the same statistical accuracy ---
-the same asymptotic variance --- as the original serial one.\footnote{In
-the world of parallel computation, the standard word for nonparallel is
-{\it serial}.}
-
-A variant, suitable in many regression and classification algorithms,
-retains the chunk output in the result, rather than performing an
-avereging process.  Consider for instance the use of LASSO for
-regression.  Each chunk may settle on a different subset of the
-predictor variables, so it would not make sense to average the estimated
-coefficient vectors.  Instead, the predictor subsets and corresponding
-coefficients are retained in the SA output.  When one is faced with
-predicting the response variable for a new data point, a prediction is
-calculated from each chunk, and those predictions are averaged to obtain
-the final prediction for the new point.
+\subsection{Classical Computational Functions}
 
    \begin{itemize}
 
@@ -263,12 +250,20 @@ the final prediction for the new point.
 
    \end{itemize}
 
-Note that SA requires that the data be i.i.d.  If your data was stored
-in some sorted order --- in the flight date below, it was sorted by date
---- you need to randomize it first, using one of the functions provided
-by {\bf partools} for this purpose.
+\subsection{Modern Statistical/Machine Learning Functions}
 
-\subsubsection{Support functions}
+   \begin{itemize}
+
+   \item {\bf caclassfit():} Wrapper to do distributed fitting of a
+   multiclass classification method such as random forests ({\bf rpart} 
+   package) or SVM ({\bf e1071} package).
+
+   \item {\bf caclasspred} Does prediction on new data from the output
+   of {\bf caclassfit()}.
+
+   \end{itemize}
+
+\subsection{Support Functions}
 
    \begin{itemize}
 
@@ -284,6 +279,37 @@ by {\bf partools} for this purpose.
    \item {\bf dbs(), dbsmsg(), etc.:}  Debugging aids.
 
    \end{itemize}
+
+\subsection{Software Alchemy}
+
+All the functions with names beginning with ``ca'' use the Software
+Alchemy (SA) method ({\it Parallel Computation for Data Science}, N.
+Matloff, Chapman and Hall, 2015) to parallelize statistical
+operations.\footnote{More detailed presentation in forthcoming paper in
+the {\it Journal of Statistical Software}.}  The idea is simple:  Apply
+the given estimator to each chunk in the distributed object, and average
+over chunks.  It is proven that the resulting distributed estimator has
+the same statistical accuracy --- the same asymptotic variance --- as
+the original serial one.\footnote{In the world of parallel computation,
+the standard word for nonparallel is {\it serial}.}
+
+A variant, suitable in many regression and classification algorithms,
+retains the chunk output in the result, rather than performing an
+avereging process.  Consider for instance the use of LASSO for
+regression.\footnote{Not currently available in the package, but easily
+coded under its framework.} Each chunk may settle on a different subset
+of the predictor variables, so it would not make sense to average the
+estimated coefficient vectors.  Instead, the predictor subsets and
+corresponding coefficients are retained in the SA output.  When one is
+faced with predicting the response variable for a new data point, a
+prediction is calculated from each chunk, and those predictions are
+averaged to obtain the final prediction for the new point.  In a
+classification context, voting is used.
+
+Note that SA requires that the data be i.i.d.  If your data was stored
+in some sorted order --- in the flight date below, it was sorted by date
+--- you need to randomize it first, using one of the functions provided
+by {\bf partools} for this purpose.
 
 \section{Sample Session}
 
@@ -616,6 +642,50 @@ virtually identical:
 2  561.1148 6.785409 15.63038
 3 1886.9094 7.542760 18.35823
 \end{verbatim}
+
+\section{Statistical/Machine Learning Example}
+
+Here we apply random forests to the UC Irvine forest cover type data,
+which has 590,000 records of 55 variables.  The last variable is the co
+ver type, coded 1 through 7.  The machine used was quad core with
+hyperthreading level of 2.  (Some output not shown.)
+
+\begin{verbatim}
+> library(rpart)
+> cls <- makeCluster(8)
+> setclsinfo(cls)
+> clusterEvalQ(cls,library(rpart))
+> cvr <-
+    read.csv('~/Research/DataSets/ForestCover/CovTypeFull.csv',header=F)
+> cvr$V55 <- as.factor(cvr$V55)  # rpart requires
+> trnidxs <- sample(1:580000,290000)  # form training and test sets
+> trn <- cvr[trnidxs,]
+> tst <- cvr[-trnidxs,]
+> distribsplit(cls,'trn')
+> system.time(fit <- caclassfit(cls,'rpart(V55 ~ .,data=trn,xval=25)'))
+   user  system elapsed
+  0.126   0.005  25.294
+> # system.time(predout <- caclasspred(fit,tst,10,type='class'))
+> system.time(predout <- caclasspred(fit,tst,55,type='class'))
+   user  system elapsed
+ 26.132   0.910  27.045
+> predout$acc
+[1] 0.6692542
+> system.time(fitser <- rpart(V55 ~ .,data=trn,xval=25))
+   user  system elapsed
+ 87.699   0.143  87.850
+> # system.time(predoutser <- predict(fitser,tst[,-10],type='class'))
+> system.time(predoutser <- predict(fitser,tst[,-55],type='class'))
+   user  system elapsed
+  0.302   0.101   0.403
+> mean(predoutser == tst[,55])
+[1] 0.6691202
+\end{verbatim}
+
+So, SA more than tripled the fitting speed, with the same accuracy.
+Prediction using SA is relatively slow, due to the voting process, but
+arguably this is not an issue in a production setting, and in any case,
+SA was substantially faster even in total fitting plus prediction time.
 
 \section{Dealing with Memory Limitations}
 
