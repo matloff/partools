@@ -75,7 +75,7 @@ The \code{caclasspred} function returns an R list with these components:
 }
 
 \examples{
-
+\dontrun{
 # set up 'parallel' cluster
 cls <- makeCluster(2)
 setclsinfo(cls)
@@ -97,7 +97,7 @@ predout <- caclasspred(fit,pe,8,type='class')
 predout$acc  # 0.36 
 
 stopCluster(cls)
-
+}
 }
 
 \author{
