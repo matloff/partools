@@ -64,6 +64,7 @@ caclasspred <- function(fitobjs,newdata,yidx=NULL,...) {
    chunkpreds <- lapply(fitobjs, function(fitobj)
       as.numeric(predict(fitobj,newdatax,...)))
    res$predmat <- Reduce(rbind,chunkpreds)
+   if (length(cls) == 1) matrix(res$predmat,nrow=1)
    res$preds <- apply(res$predmat,2,vote)
    allsame <- function(u) all(u == u[1])
    res$consensus <- mean(apply(res$predmat,2,allsame))
