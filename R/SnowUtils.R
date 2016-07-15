@@ -309,15 +309,29 @@ geteltis <- function(lst,i) {
 # string or a vector of strings; within a vector, innersep is used as a
 # separator, while between vectors it is outersep
 
-ipstrcat <- defmacro(str1,DOTS,outersep='',innersep='',expr = (
-      for (str in list(...)) {
-         lstr <- length(str)
-         tmp <- str[1]
-         if (lstr > 1) 
-            for (i in 2:lstr) 
-               tmp <- paste(tmp,str[i],sep=innersep)
-         str1 <- paste(str1,tmp,sep=outersep)
-      }
-   )
-)
-   
+# generaed from gtools code:
+# ipstrcat <- defmacro(str1,DOTS,outersep='',innersep='',expr = (
+#       for (str in list(...)) {
+#          lstr <- length(str)
+#          tmp <- str[1]
+#          if (lstr > 1) 
+#             for (i in 2:lstr) 
+#                tmp <- paste(tmp,str[i],sep=innersep)
+#          str1 <- paste(str1,tmp,sep=outersep)
+#       }
+#    )
+# )
+
+ipstrcat <- function (str1 = stop("str1 not supplied"), ..., outersep = "", 
+    innersep = "") 
+{
+    tmp <- substitute((for (str in list(...)) {
+        lstr <- length(str)
+        tmp <- str[1]
+        if (lstr > 1) for (i in 2:lstr) tmp <- paste(tmp, str[i], 
+            sep = innersep)
+        str1 <- paste(str1, tmp, sep = outersep)
+    }))
+    eval(tmp, parent.frame())
+}
+

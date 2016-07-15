@@ -26,7 +26,6 @@ name. Finds all the distances from rows in \code{x} to rows in
 
 
 \examples{
-
 # set up 'parallel' cluster
 cls <- makeCluster(2)
 setclsinfo(cls)
@@ -34,7 +33,6 @@ setclsinfo(cls)
 x <- matrix(runif(20),nrow=5)
 y <- matrix(runif(32),nrow=8)
 # 2 calls should have identical resultsW
-library(pdist)
 pdist(x,y,cls)@dist
 parpdist(x,y,cls)@dist
 

@@ -26,8 +26,8 @@ related operations.
 
 \usage{
 filechunkname(basenm,ndigs,nodenum=NULL)
-filesort(cls,infilenm,ndigs,colnum,outname,nsamp = 1000,
-   header = FALSE,sep=" ",usefread=FALSE)
+filesort(cls,infilenm,colnum,outdfnm,infiledst=FALSE,
+   ndigs=0,nsamp=1000,header=FALSE,sep="",usefread=FALSE)
 filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
 filecat(cls, basenm, header = FALSE)  
 readnscramble(cls,basenm,header=FALSE,sep= " ")
@@ -51,6 +51,9 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
   \item{nodenum}{If non-NULL, get the name of the file chunk of cluster node
      \code{nodenum}; otherwise, get the name for the chunk associated
      with this node.}
+  \item{infilenm}{Name of input file (without suffix, if distributed).}
+  \item{outdfnm}{Name of output file (without suffix).}
+  \item{infiledst}{If TRUE, infilenm is distributed.}
   \item{colnum}{Column number on which the sort will be done.  It is
      assumed that this data column is free of NAs.}
   \item{outname}{Quoted name for the chunks of sorted output.}
