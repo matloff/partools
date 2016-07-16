@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,geteltis,distribmeans,distribisdt}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,geteltis,distribmeans,distribisdt,ipstrcat}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -15,6 +15,7 @@
 \alias{docmd}
 \alias{distribisdt}
 \alias{geteltis}
+\alias{ipstrcat}
 
 \title{
 Utilities for \pkg{parallel} cluster code.
@@ -36,12 +37,12 @@ distribcat(cls,dfname)
 distribagg(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN) 
 distribrange(cls,vec,na.rm=FALSE) 
 distribcounts(cls,xnames,dataname)
-distribmeans(cls,ynames,xnames,dataname)
+distribmeans(cls,ynames,xnames,dataname,saveni=FALSE)
 distribgetrows(cls,cmd)
 distribisdt(cls,dataname) 
-
 docmd(toexec) 
 geteltis(lst,i)
+ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
 }
 
 \arguments{
@@ -51,6 +52,7 @@ geteltis(lst,i)
   \item{rc}{Set to 1 for rows, other for columns.}
   \item{m}{A matrix or data frame.}
   \item{mchunkname}{Quoted name to be given to the created chunks.}
+  \item{scramble}{If TRUE, permute data rows first.}
   \item{lst1}{An R list.}
   \item{lst2}{An R list.}
   \item{add}{``Addition'' function, which could be summation,
@@ -62,6 +64,7 @@ geteltis(lst,i)
   \item{xnames}{Vector of quoted names of variables that define the
      grouping.}
   \item{dataname}{Quoted name of a distributed data frame or data.table.}
+  \item{saveni}{If TRUE, save the chunk sizes.}
   \item{FUN}{Quoted name of a single-argument function to be used in
      aggregating within cluster nodes.  If \code{dataname} is the name
      of a data.table, \code{FUN} must be a vector of function names, of
@@ -76,6 +79,12 @@ geteltis(lst,i)
   \item{toexec}{Quoted string containing command to be executed.}
   \item{lst}{An R list of vectors.}
   \item{i}{A column index}
+  \item{str1}{A character string.}
+  \item{DOTS}{Synonym for ... }
+  \item{outersep}{Separator, e.g. a comma, between strings specified in
+  ...}
+  \item{innersep}{Separator, e.g. a comma, within string vectors specified in
+  ...}
 }
 
 \details{The \code{setclsinfo} function does initialization needed for

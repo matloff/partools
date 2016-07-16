@@ -194,7 +194,7 @@ m2 <- matrix(c(0,22,88,44,5,5,2,6,10,7,7,7),byrow=TRUE,ncol=3)
 write.table(m1,"m.1",row.names=FALSE)
 write.table(m2,"m.2",row.names=FALSE)
 # sort on column 2 and check result
-filesort(cls,"m",1,2,"msort",nsamp=3,header=TRUE)
+filesort(cls,"m",2,"msort",ndigs=1,nsamp=3,header=TRUE)
 clusterEvalQ(cls,msort)  # data should be sorted on V2
 # check by comparing to input
 m1
