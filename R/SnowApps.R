@@ -18,7 +18,7 @@ parpdist <- function(x,y,cls) {
    nx <- nrow(x)
    ichunks <- formrowchunks(cls,x,'tmpx')
    clusterExport(cls,'y',envir=environment())
-   clusterEvalQ(cls,require(pdist))
+   # clusterEvalQ(cls,require(pdist))
    dists <- clusterEvalQ(cls,pdist(tmpx,y)@dist)
    tmp <- Reduce(c,dists)
    new("pdist", dist = tmp, n = nrow(x), p = nrow(y))

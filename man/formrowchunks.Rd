@@ -52,7 +52,6 @@ ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
   \item{rc}{Set to 1 for rows, other for columns.}
   \item{m}{A matrix or data frame.}
   \item{mchunkname}{Quoted name to be given to the created chunks.}
-  \item{scramble}{If TRUE, permute data rows first.}
   \item{lst1}{An R list.}
   \item{lst2}{An R list.}
   \item{add}{``Addition'' function, which could be summation,
