@@ -61,6 +61,9 @@ ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
      distributed.} 
   \item{ynames}{Vector of quoted names of variables on which \code{FUN} 
      is to be applied.}
+
+  \item{...}{One of more vectors of character strings, where the vectors
+     are typically of length 1.}
   \item{xnames}{Vector of quoted names of variables that define the
      grouping.}
   \item{dataname}{Quoted name of a distributed data frame or data.table.}
@@ -80,7 +83,6 @@ ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
   \item{lst}{An R list of vectors.}
   \item{i}{A column index}
   \item{str1}{A character string.}
-  \item{DOTS}{Synonym for ... }
   \item{outersep}{Separator, e.g. a comma, between strings specified in
   ...}
   \item{innersep}{Separator, e.g. a comma, within string vectors specified in

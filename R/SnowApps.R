@@ -15,10 +15,9 @@
 #    full distance matrix, as pdist object
 
 parpdist <- function(x,y,cls) {
-   require(pdist)
    nx <- nrow(x)
    ichunks <- formrowchunks(cls,x,'tmpx')
-   clusterExport(cls,'y',env=environment())
+   clusterExport(cls,'y',envir=environment())
    clusterEvalQ(cls,require(pdist))
    dists <- clusterEvalQ(cls,pdist(tmpx,y)@dist)
    tmp <- Reduce(c,dists)

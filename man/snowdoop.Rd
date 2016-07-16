@@ -56,7 +56,6 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
   \item{infiledst}{If TRUE, infilenm is distributed.}
   \item{colnum}{Column number on which the sort will be done.  It is
      assumed that this data column is free of NAs.}
-  \item{outname}{Quoted name for the chunks of sorted output.}
   \item{usefread}{If true, use \code{fread} instead of \code{read.table};
      generally much faster; requires \code{data.table} package.}
   \item{nsamp}{Number of records to sample in each file chunk to
@@ -64,7 +63,6 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
   \item{header}{TRUE if the file chunks have headers.}
   \item{seqnums}{TRUE if the file chunks will have sequence numbers.}
   \item{sep}{Field delimiter used in \code{read.table}.}
-  \item{infile}{Quoted input file name.}
   \item{chunksize}{Number of lines to read at a time, for efficient I/O.}
   \item{dname}{Quoted name of a distributed data frame or matrix.  For
      \code{filesave}, the object must have column names.}
@@ -115,7 +113,7 @@ frame/matrix in the memories of the cluster nodes.  The first
 quantile range for each cluster node.  Each node then reads the input
 file, retaining the records in its assigned range, and sorts them.  This
 results in the input file being sorted, in memory, in a distributed
-manner across nodes, under the name \code{outname}.  At present, this
+manner across nodes, under the specifid name.  At present, this
 utility is not very efficient.
 
 Operations such as \code{ca} need i.i.d. data. If the original file

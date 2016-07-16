@@ -28,6 +28,8 @@ re_code(x)
   \code{caclassfit}.}
   \item{yidx}{If provided, index of the true class values in
      \code{newdata}, typically in a cross-validation setting.}
+  \item{...}{Arguments to be passed to the underlying prediction
+     function for the given method, e.g. \code{predict.rpart}.}
   \item{preds}{A vector of predicted classes, from which the "winner"
      will be selected by voting.}
   \item{x}{A vector of integers, in this context class codes.}
