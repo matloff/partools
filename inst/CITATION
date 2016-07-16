@@ -1,0 +1,20 @@
+bibentry(bibtype = "Article",
+  title        = "Software Alchemy: Turning Complex Statistical Computations into Embarrassingly-Parallel Ones",
+  author       = person(given = "Norman",
+                        family = "Matloff",
+                        email = "matloff@cs.ucdavis.edu"),
+  journal      = "Journal of Statistical Software",
+  year         = "2016",
+  volume       = "71",
+  number       = "4",
+  pages        = "1--15",
+  doi          = "10.18637/jss.v071.i04",
+
+  header       = "To cite partools in publications use:",
+  textVersion  =
+  paste("Norman Matloff (2016).",
+        "Software Alchemy: Turning Complex Statistical Computations into Embarrassingly-Parallel Ones.",
+        "Journal of Statistical Software, 71(4), 1-15.",
+        "doi:10.18637/jss.v071.i04")
+)
+

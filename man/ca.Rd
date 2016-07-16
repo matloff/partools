@@ -235,6 +235,14 @@ stopCluster(cls)
 
 }
 
+\references{
+
+N. Matloff N (2016). "Software Alchemy: Turning Complex Statistical
+Computations into Embarrassingly-Parallel Ones." \emph{Journal of Statistical
+Software}, \bold{71(4)}, 1-15.
+
+}
+
 \author{
 Norm Matloff
 }
