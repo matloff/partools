@@ -107,7 +107,7 @@ makemysortedchunk <- function(mybds,infilenm,ndigs,colnum,outdfnm,
       }
    }
    sortedmchunk <- mychunk[order(mychunk[,colnum]),]
-   assign(outdfnm,sortedmchunk,envir=.GlobalEnv)  # write to global at worker
+   assign(outdfnm,sortedmchunk,envir=.GlobalEnv)
 }
 
 # grab for this node's bin from this chunk of the file (the whole file,
@@ -172,7 +172,7 @@ readmypart <- function(myidxs,
       tmp <- tmp[tmp <= linecounts[i]]
       mydf <- rbind(mydf,filechunk[tmp,])
    }
-   assign(basenm,mydf,envir=.GlobalEnv)  # write to global at worker
+   assign(basenm,mydf,envir=.GlobalEnv)
 }
 
 # split a file basenm into nch approximately equal-sized chunks, with

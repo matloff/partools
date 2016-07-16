@@ -25,7 +25,7 @@ formrowchunks <- function(cls,m,mchunkname,scramble=FALSE) {
 #    getrowchunk <- function(rc) 
 #       assign(mchunkname,m[rc,],envir=.GlobalEnv)
 #    invisible(clusterApply(cls,rcs,getrowchunk))
-   invisible(clusterApply(cls,rowchunks,  # write to global at worker node
+   invisible(clusterApply(cls,rowchunks,
       function(chunk) 
          assign(mchunkname,chunk,envir=.GlobalEnv)))
 }
@@ -116,7 +116,7 @@ distribsplit <- function(cls,dfname,scramble=FALSE) {
 distribcat <- function(cls,dfname) {
    toexec <- paste("clusterEvalQ(cls,",dfname,")")
    tmp <- eval(parse(text=toexec))
-   Reduce(rbind,tmp)
+   assign(dfname,Reduce(rbind,tmp),pos=.GlobalEnv)
 }
 
 # distributed version of aggregate()

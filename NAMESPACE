@@ -1,6 +1,8 @@
 
 import(parallel,stats,utils,data.table,pdist)
 
+importFrom("methods", "new")
+
 export(writemgrscreen,writewrkrscreens,killdebug,
           dbs,dbsmsgstart,dbsmsg,dbsdump,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,linecount,
