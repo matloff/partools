@@ -7,10 +7,17 @@
 #    ddf: name of a distributed data frame
 #    xcols: column numbers of ddf of X matrix
 #    ycol: column number of ddf of Y vector
+#    type: type of analysis
 #    outfl: name of output file
 
-calars <- function(cls,ddf,xcols,ycol) {
+calars <- function(cls,ddf,xcols,ycol,type='lasso',outfl=NULL) {
+   clusterExport(cls,c('xcols','ycol'),envir=environment())
+   cmd <- paste('x <- as.matrix(',ddf,'[,xcols])',sep='')
+   clusterExport(cls,'cmd',envir=environment())
+   clusterEvalQ(cls,x <- docmd(cmd))
 
+   # clusterEvalQ(cls,y <- ddf[,ycol])
+   # clusterEvalQ(cls,larsout <- lars(x,y,type))
 }
 
 
