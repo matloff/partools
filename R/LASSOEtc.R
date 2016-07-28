@@ -12,12 +12,20 @@
 
 calars <- function(cls,ddf,xcols,ycol,type='lasso',outfl=NULL) {
    clusterExport(cls,c('xcols','ycol'),envir=environment())
-   cmd <- paste('x <- as.matrix(',ddf,'[,xcols])',sep='')
-   clusterExport(cls,'cmd',envir=environment())
-   clusterEvalQ(cls,x <- docmd(cmd))
+   cmd <- paste('x <<- as.matrix(',ddf,'[,xcols])',sep='')
+#    clusterExport(cls,'cmd',envir=environment())
+#    clusterEvalQ(cls,x <- docmd(cmd))
+   doremotecmd(cls,cmd)
 
    # clusterEvalQ(cls,y <- ddf[,ycol])
    # clusterEvalQ(cls,larsout <- lars(x,y,type))
+}
+
+# executes the command in the string cmd at the worker nodes of the
+# cluster
+doremotecmd <- function(cls,cmd) {
+   clusterExport(cls,'cmd',envir=environment())
+   clusterEvalQ(cls,docmd(cmd))
 }
 
 
