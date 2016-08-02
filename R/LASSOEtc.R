@@ -12,13 +12,10 @@
 
 calars <- function(cls,ddf,xcols,ycol,type='lasso',outfl=NULL) {
    clusterExport(cls,c('xcols','ycol'),envir=environment())
-   cmd <- paste('x <<- as.matrix(',ddf,'[,xcols])',sep='')
-#    clusterExport(cls,'cmd',envir=environment())
-#    clusterEvalQ(cls,x <- docmd(cmd))
+   cmd <- paste('x <<- as.matrix(',ddf,'[,',xcols,'])',sep='')
    doremotecmd(cls,cmd)
-
-   # clusterEvalQ(cls,y <- ddf[,ycol])
-   # clusterEvalQ(cls,larsout <- lars(x,y,type))
+   cmd <- paste('y <<- as.matrix(',ddf,'[,',ycol,'])',sep='')
+   doremotecmd(cls,cmd)
 }
 
 # executes the command in the string cmd at the worker nodes of the
@@ -31,8 +28,8 @@ doremotecmd <- function(cls,cmd) {
 
 ##  data(prgeng) 
 ##  pe <- prgeng 
-##  x <- pe[,c(1,6,8)] 
-##  y <- pe$wageinc 
-##  xx <- cbind(x,matrix(rnorm(nrow(pe)*500),ncol=500)) 
-##  system.time(o1 <- lars(xx,y)) 
+distribsplit(cls,'pe') 
+clusterEvalQ(cls,head(pe)) 
+calars(cls,'pe',c(1,7),8) 
+clusterEvalQ(cls,head(x)) 
 
