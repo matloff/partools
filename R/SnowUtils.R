@@ -92,7 +92,7 @@ distribsplit <- function(cls,dfname,scramble=FALSE) {
    if(!is.data.table(dfr)) dfr <- as.data.frame(dfr)
    formrowchunks(cls,dfr,dfname,scramble)
    for (j in 1:ncol(dfr)) {
-      mdj <- mode(dfr[,j])
+      mdj <- mode(dfr[[j]])
       if (mdj == 'character') 
          warning('character column converted to factor') else
       if (mdj == 'factor') {
