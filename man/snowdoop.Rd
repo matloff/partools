@@ -3,13 +3,14 @@
 \alias{filechunkname}
 \alias{filesort}
 \alias{filesplit}
+\alias{filesplitrand}
+\alias{fileshuffle}
 \alias{filecat}
 \alias{readnscramble}
 \alias{linecount}
 \alias{getnumdigs}
 \alias{filesave}
 \alias{fileread}
-\alias{filesplitrand}
 \alias{fileagg}
 \alias{dfileagg}
 \alias{filegetrows}
@@ -29,12 +30,13 @@ filechunkname(basenm,ndigs,nodenum=NULL)
 filesort(cls,infilenm,colnum,outdfnm,infiledst=FALSE,
    ndigs=0,nsamp=1000,header=FALSE,sep="",usefread=FALSE)
 filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
+filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
+fileshuffle(inbasename, nout, outbasename, header = FALSE)
+linecount(infile,header=FALSE,chunksize=100000)
 filecat(cls, basenm, header = FALSE)  
 readnscramble(cls,basenm,header=FALSE,sep= " ")
 filesave(cls,dname,newbasename,ndigs,sep)
 fileread(cls,fname,dname,ndigs,header=FALSE,sep=" ",usefread=FALSE)
-filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
-linecount(infile,header=FALSE,chunksize=100000)
 getnumdigs(nch)
 fileagg(fnames,ynames,xnames,header=FALSE,sep= " ",FUN,FUN1=FUN) 
 dfileagg(cls,fnames,ynames,xnames,header=FALSE,sep=" ",FUN,FUN1=FUN) 
@@ -118,12 +120,29 @@ utility is not very efficient.
 
 Operations such as \code{ca} need i.i.d. data. If the original file
 storage was ordered on some variable, one needs to randomize the data
-first, using \code{readnscramble}.  It produces a distributed data
-frame/matrix under the name \code{basenm}.  Note that a record in chunk
-\code{i} of the distributed file will likely end up in chunk \code{j} in
-the distributed data frame/matrix, with \code{j} different from
-\code{i}.  If you wish to directly produce a randomized distributed file 
-from a monolithic one, use \code{filesplitrand}.
+first.  There are several options:
+
+   \itemize{
+
+      \item \code{readnscramble}:  This produces a distributed data 
+      frame/matrix under the name \code{basenm}.  Note that a record in chunk
+      \code{i} of the distributed file will likely end up in chunk \code{j} 
+      in the distributed data frame/matrix, with \code{j} different from
+      \code{i}.  
+
+      \item \code{filesplitrand}: Use this you wish to directly produce a
+      randomized distributed file from a monolithic one.  It will read
+      the file into memory, chunk it at the cluster nodes, each of which
+      will save its chunk to disk.
+
+      \item \code{fileshuffle}: If you need to avoid reading big files 
+      into memory, use this.  You must run \code{filesplit} first, and
+      then run \code{fileshuffle} several times for a good shuffle.
+
+      Note that this function is also useful if your cluster size
+      changes.  A distributed file of m chunks can now be converted to
+      one with n chunks, either more or fewer than before.
+   }
 
 If you wish to use this same randomized data in a future session, you
 can save it as a distributed file by calling \code{filesave}. Of course,
@@ -205,11 +224,17 @@ clusterEvalQ(cls,msort)  # data should be sorted on V2
 
 # example of readnscramble()
 co2 <- head(CO2,25) 
-write.table(co2,"co2",row.names=FALSE) 
-filesplit(2,"co2",header=TRUE) 
-readnscramble(cls,"co2",header=TRUE)
-# save the scrambled version
+write.table(co2,"co2",row.names=FALSE)  # creates file 'co2'
+filesplit(2,"co2",header=TRUE)  # creates files 'co2.1', 'co2.2'
+readnscramble(cls,"co2",header=TRUE)  # now have distrib. d.f.
+# save the scrambled version to disk
 filesave(cls,'co2','co2s',1,sep=',')
+
+# example of fileshuffle()
+# make test file, 'test'
+cat('a','bc','def','i','j','k',file='test',sep='\n')
+filesplit(2,'test')  # creates files 'test.1','test.2'
+fileshuffle('test',2,'testa')  # creates shuffled files 'testa.1','testa.2'
 
 # example of filechunkname()
 clusterEvalQ(cls,filechunkname("x",3))  # returns "x.001", "x.002"

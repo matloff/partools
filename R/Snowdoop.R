@@ -217,17 +217,26 @@ filesplitrand <- function(cls,fname,newbasename,ndigs,header=FALSE,sep) {
 # same aim as filesplitrand(), but without ever reading more than one
 # record at a time into memory 
 #
+# assumes that filesplit() has been run first
+#
 # if one has a file f and wishes to divide it into chunks with random
 # order of records, one might call filesplit() first, then fileshuffle()
 # several times in succession
+#
+# the number of output files need not be the same as the number inputs
+# thus enabling adaptation to expansion or contraction of the
+# computation cluster
 
-# infiles gives the input file names; newbasename is as in
-# filesplitrand() and filesplit() above; nout is the desired number of
-# output files, and outbasename is the prefix for the output file names;
-# header is as in filesplit, but it is assumed (but not checked) that
-# all input files have the same header
+# arguments:
 
-fileshuffle <- function(infiles,nout,outbasename,header=FALSE) {
+#    inbasename: basename of the input files, e.g. x for x.1, x.2, ...
+#    nout: number of output files
+#    outbasename: basename of the output files
+#    header: if TRUE, it is assumed (but not checked) that 
+#            all input files have the same header
+
+fileshuffle <- function(inbasename,nout,outbasename,header=FALSE) {
+   infiles <- getinfiles(inbasename)
    nin <- length(infiles)
    incons <- list(length=nin)
    # set up connections for the input files
@@ -267,6 +276,17 @@ fileshuffle <- function(infiles,nout,outbasename,header=FALSE) {
          return()
       }
    }
+}
+
+# gather the names of all the files with names starting with bn + '.'
+getinfiles <- function(bn) {
+   d <- dir()
+   bnpoint <- paste(bn,'.',sep='')
+   lbn1 <- nchar(bnpoint)
+   startswith <- function(di) 
+      substr(di,1,lbn1) == bnpoint
+   tmp <- startswith(d)
+   d[tmp]
 }
 
 # get the number of lines in the file 
