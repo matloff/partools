@@ -66,10 +66,11 @@ caagg(cls,ynames,xnames,dataname,FUN)
 
 \details{Implements the ``Software Alchemy'' (SA) method for
 parallelizing statistical computations (N. Matloff, \emph{Parallel
-Computation for Data Science}, Chapman and Hall, 2015, research article
-to appear in the \emph{Journal of Statistical Software}.)  This can
-result in substantial speedups in computation, as well as address limits
-on physical memory.
+Computation for Data Science}, Chapman and Hall, 2015, with further
+details in N. Matloff, Software Alchemy: Turning Complex Statistical
+Computations into Embarrassingly-Parallel Ones, \emph{Journal of
+Statistical Software}, 2016.)  This can result in substantial speedups
+in computation, as well as address limits on physical memory.
 
 The method involves breaking the data into chunks, and then applying the
 given estimator to each one.  The results are averaged, and an estimated
@@ -81,15 +82,20 @@ done, say via \code{distribsplit} or \code{readnscramble}.
 Note that in \code{cabase}, the data object is not specified explicitly
 in the argument list.  This is done through the function \code{ovf}.
 
-Key point:  The SA estimator is statistically equivalent to the
+Key point:  \emph{The SA estimator is statistically equivalent to the
 original, nonparallel one, in the sense that they have the SAME
 asymptotic statistical accuracy.  Neither the non-SA nor the SA
-estimator is "better" than the other, and usually they will be quite
+estimator is "better" than the other}, and usually they will be quite
 close to each other anyway.  Since we would use SA only with large data
 sets anyway (otherwise, parallel computation would not be needed for
 speed), the asymptotic aspect should not be an issue.  In other words,
 with SA we achieve the same statistical accuracy while possibly
 attaining much faster computation.
+
+It is vital to keep in mind that \emph{The memory space issue can be
+just as important as run time}.  Even if the problem is run on many
+cores, if the total memory space needed exceeds that of the machine,
+the run may fail.
 
 Wrapper functions, applying SA to the corresponding R
 function (or function elsewere in this package):
