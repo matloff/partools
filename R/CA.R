@@ -71,7 +71,9 @@ cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,
    ovout <- ### if (cacall) clusterEvalQ(cls,ovf(z168)) else
                         clusterEvalQ(cls,ovf(z168)) 
    # theta-hats, with the one for chunk i in row i
-   thts <- t(sapply(ovout,estf))
+   # thts <- t(sapply(ovout,estf))
+   tmp <- lapply(ovout, estf)
+   thts <- Reduce(rbind,tmp)
    if (is.vector(thts)) thts <- matrix(thts,ncol=1)
    # res will be the returned result of this function
    res <- list()
