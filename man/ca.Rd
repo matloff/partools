@@ -1,4 +1,4 @@
-\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg}
+\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,caknn,caknnpred}
 \alias{ca}
 \alias{cabase}
 \alias{calm}
@@ -8,6 +8,8 @@
 \alias{cameans}
 \alias{caquantile}
 \alias{caagg}
+\alias{caknn}
+\alias{caknnpred}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -26,6 +28,8 @@ cakm(cls,mtdf,ncenters,p)
 cameans(cls,cols,na.rm=FALSE) 
 caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE) 
 caagg(cls,ynames,xnames,dataname,FUN)
+caknn(cls, yname, xname, k)
+caknnpred(cls, predpts)
 }
 
 \arguments{

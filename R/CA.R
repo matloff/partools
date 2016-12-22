@@ -154,11 +154,24 @@ caglm <- function(cls,glmargs) {
 #    y: distributed Y vector
 #    x: distributed X matrix/df
 #    k: number of nearest neighbors
-#    xdpresent: preprocessx() has already been run at the nodes
 # value:
 #    xd, kout are left there at the nodes for future use
-caknn <- function(cls,yname,xname,k,xdpresent=FALSE) {
+caknn <- function(cls,yname,xname,k) {
    clusterEvalQ(cls,library(regtools))
+   # check whether the old xd is present and appears reusable (not
+   # totally failsafe)
+   tmp <- clusterEvalQ(cls,grep('xd',ls()))[[1]]
+   xdpresent <- FALSE
+   if (length(tmp) > 0) {
+      oldkmax <- clusterEvalQ(cls,xd$kmax)[[1]]
+      if (oldkmax >= k)  {
+         oldnrows <- clusterEvalQ(cls,nrow(xd$idxs))
+         oldnrow <- sum(unlist(oldnrows))
+         cmd <- paste('nrow(',xn,')',sep='')
+         currnrow <- docmd(cmd)
+         if (oldnrow == currnrow) xdpresent <- TRUE
+      }
+   }
    if (!xdpresent) {
       cmd <- paste('xd <<- preprocessx(',xname,',',k,')',sep='')
       doclscmd(cls,cmd)
