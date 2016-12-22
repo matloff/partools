@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,geteltis,distribmeans,distribisdt,ipstrcat}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,doclscmd,geteltis,distribmeans,distribisdt,ipstrcat}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -13,6 +13,7 @@
 \alias{distribgetrows}
 \alias{distribmeans}
 \alias{docmd}
+\alias{doclscmd}
 \alias{distribisdt}
 \alias{geteltis}
 \alias{ipstrcat}
@@ -41,6 +42,7 @@ distribmeans(cls,ynames,xnames,dataname,saveni=FALSE)
 distribgetrows(cls,cmd)
 distribisdt(cls,dataname) 
 docmd(toexec) 
+doclscmd(cls,toexec) 
 geteltis(lst,i)
 ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
 }
@@ -136,7 +138,8 @@ In the latter case, the specified rows will be selected at each cluster
 node, then \code{rbind}-ed together at the caller.
 
 The \code{docmd} function executes the quoted command, useful for
-building up complex command for remote execution.  
+building up complex command for remote execution.  The \code{doclscmd}
+function does that directly.
 
 An R \code{formula} will be constructed from the arguments \code{ynames}
 and \code{xnames}, with the latter put on the left side of the \code{~}

@@ -237,6 +237,15 @@ z1 <- cakm(cls,'pe',3,3); z1$size; z1$centers
 # check algorithm unstable
 z1$thts  # looks unstable
 
+pe <- prgeng 
+pe$ms <- as.integer(pe$educ == 14) 
+pe$phd <- as.integer(pe$educ == 16) 
+pe <- pe[,c(1,7,8,9,12,13)] 
+distribsplit(cls,'pe',scramble=TRUE)
+caknn(cls,'pe[,3]','pe[,-3]',50) 
+# re-predict Case 1, about 59300
+caknnpred(cls,as.matrix(pe[1,-3])) 
+
 stopCluster(cls)
 
 }
