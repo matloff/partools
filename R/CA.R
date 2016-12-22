@@ -105,6 +105,10 @@ cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,
          thtcov <- matrix(0,nrow=lth,ncol=lth)
          for (i in 1:nchunks) {
             summand <- estcovf(ovout[[i]]) 
+            if (any(dim(thtcov) != dim(summand))) {
+               printf('dimension mismatch')
+               stop('likely cause is constant variable in some chunk')
+            }
             thtcov <- thtcov + summand
          }
          res$thtcov <- (thtcov / nchunks) / nchunks
@@ -119,11 +123,9 @@ cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,
 # ca() wrapper for lm()
 #
 # arguments:
-#
 #    cls: cluster
 #    lmargs: quoted string representing arguments to lm()
 #            e.g. "weight ~ height + age, data-mlb"
-#
 # value: Software Alchemy estimate, statistically equivalent to direct
 #    nonparallel call to lm(); R list is value of ca() 
 #
@@ -144,6 +146,38 @@ caglm <- function(cls,glmargs) {
       docmd(tmp)
    }
    cabase(cls,ovf,coef,vcov)
+}
+
+# ca() wrapper for knnest(); 
+# arguments:
+#    cls: cluster
+#    y: distributed Y vector
+#    x: distributed X matrix/df
+#    k: number of nearest neighbors
+#    xdpresent: preprocessx() has already been run at the nodes
+# value:
+#    xd, kout are left there at the nodes for future use
+caknn <- function(cls,yname,xname,k,xdpresent=FALSE) {
+   clusterEvalQ(cls,library(regtools))
+   if (!xdpresent) {
+      cmd <- paste('xd <<- preprocessx(',xname,',',k,')',sep='')
+      doclscmd(cls,cmd)
+   }
+   cmd <- paste('kout <<- knnest(',yname,',xd,',k,')',sep='')
+   doclscmd(cls,cmd)
+}
+
+# kNN predict
+# arguments:
+#    predpts: matrix/df of X values at which to find est. reg. ftn.
+# value:
+#    est. reg. ftn. value at those points
+# assumes kout present at the nodes
+caknnpred <- function(cls,predpts) {
+   clusterEvalQ(cls,library(regtools))
+   clusterExport(cls,'predpts',envir=environment())
+   predys <- doclscmd(cls,'predy <<- predict(kout,predpts)')
+   mean(unlist(predys))
 }
 
 # ca() wrapper for prcomp()

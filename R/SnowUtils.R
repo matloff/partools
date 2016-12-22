@@ -295,6 +295,13 @@ distribgetrows <- function(cls,cmd) {
 # clusterEvalQ()
 docmd <- function(toexec) eval(parse(text=toexec))
 
+# execute the contents of a quoted command at the cluster nodes
+doclscmd <- function(cls,toexec) {
+   clusterExport(cls,'toexec',envir=environment())
+   clusterEvalQ(cls,dotoexec())
+}
+dotoexec <- function() docmd(toexec)
+   
 # extract element i of each element in the R list lst, which is a list
 # of vectors
 geteltis <- function(lst,i) {

@@ -4,21 +4,18 @@
 # arguments:
 
 #    cls: 'parallel' cluster
-#    ddf: quoted name of a distributed data frame
-#    xcols: quoted column numbers of ddf of X matrix
-#    ycol: column number of ddf of Y vector
-#    type: type of analysis
+#    larscmd:  a call to lars(), quoted
 #    outfl: name of output file
 
 # calars <- function(cls,ddf,xcols,ycol,type='lasso',outfl=NULL) {
 calars <- function(cls,larscmd,outfl=NULL) {
-#    clusterExport(cls,c('xcols','ycol'),envir=environment())
-#    cmd <- paste('x <- as.matrix(',ddf,'[,',xcols,'])',sep='')
-#    doremotecmd(cls,cmd)
-#    cmd <- paste('y <- as.matrix(',ddf,'[,',ycol,'])',sep='')
-#    doremotecmd(cls,cmd)
    cmd <- paste('larsout <- ',larscmd,sep='')
-   doremotecmd(cls,cmd)
+   # larsouts <- doremotecmd(cls,cmd)
+   larsouts <- doclscmd(cls,cmd)
+   if (!is.null(outfl)) 
+   
+   
+   save(larscmd,file=outfl)
 }
 
 # executes the command in the string cmd at the worker nodes of the
