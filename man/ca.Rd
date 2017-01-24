@@ -28,7 +28,7 @@ cakm(cls,mtdf,ncenters,p)
 cameans(cls,cols,na.rm=FALSE) 
 caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE) 
 caagg(cls,ynames,xnames,dataname,FUN)
-caknn(cls, yname, xname, k)
+caknn(cls, yname, k, xname='')
 caknnpred(cls, predpts)
 }
 
@@ -59,6 +59,11 @@ caknnpred(cls, predpts)
      before distributing.}
   \item{cols}{A quoted string that evaluates to a data frame or matrix.}
   \item{vec}{A quoted string that evaluates to a vector.}
+  \item{yname}{A quoted variable name, for the Y vector.}
+  \item{k}{Number of nearest neighbors.}
+  \item{xname}{A quoted variable name, for the X matrix/data frame.  If
+     empty, it is assumed that \code{preprocessx} has already been run on
+     the nodes; if nonempty, that function is run on this X data.}
   \item{ynames}{A vector of quoted variable names.}
   \item{xnames}{A vector of quoted variable names.}
   \item{dataname}{Quoted name of a data frame or matrix.}
@@ -246,9 +251,9 @@ pe$ms <- as.integer(pe$educ == 14)
 pe$phd <- as.integer(pe$educ == 16) 
 pe <- pe[,c(1,7,8,9,12,13)] 
 distribsplit(cls,'pe',scramble=TRUE)
-caknn(cls,'pe[,3]','pe[,-3]',50) 
-# re-predict Case 1, about 59300
-caknnpred(cls,as.matrix(pe[1,-3])) 
+kout <- caknn(cls,'pe[,3]',50,'pe[,-3]') 
+# about 39305, 70525 
+caknnpred(cls,pe[c(3,8),-3])
 
 stopCluster(cls)
 

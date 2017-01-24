@@ -153,21 +153,15 @@ caglm <- function(cls,glmargs) {
 #    cls: cluster
 #    yname: name of distributed Y vector
 #    k: number of nearest neighbors
-#    xdatapresent: xdata (output of preprocessx()) present at the
-#                  nodes?; if not, it will be created
+#    xname: name of distributed X matrix/data frame, to which
+#           preprocessx() will be applied, producing a global variable
+#           xdata; if '', then sdata is assumed already present
 # value:
 #    none at caller; xdata, kout are left there at the nodes 
 #    for future use
-caknn <- function(cls,yname,k,xdatapresent=FALSE) {
+caknn <- function(cls,yname,k,xname='') {
    clusterEvalQ(cls,library(regtools))
-   if (xdatapresent) {
-      # is it really there?
-      tmp <- unlist(clusterEvalQ(cls,exists('xdata')))
-      if (!all(tmp)) stop('xdata not present')
-      # kmax large enough?
-      kmax <- clusterEvalQ(cls,xdata$kmax)[[1]]
-      if (kmax < k) stop('xdata$kmax too small for this k')
-   } else {
+   if (xname != '') {
       # run preprocessx() to generate xdata
       cmd <- paste('xdata <<- preprocessx(',xname,',',k,')',sep='')
       doclscmd(cls,cmd)
@@ -185,12 +179,14 @@ caknn <- function(cls,yname,k,xdatapresent=FALSE) {
 #    est. reg. ftn. value at those points
 # assumes kout present at the nodes
 caknnpred <- function(cls,predpts) {
+   if (!is.matrix(predpts)) 
+      predpts <- as.matrix(predpts)
    clusterEvalQ(cls,library(regtools))
    if (!is.null(predpts))
       clusterExport(cls,'predpts',envir=environment())
    predys <- doclscmd(cls,'predy <<- predict(kout,predpts)')
-   browser()
-   mean(unlist(predys))
+   predys <- Reduce(rbind,predys)
+   colMeans(predys)
 }
 
 # ca() wrapper for prcomp()
