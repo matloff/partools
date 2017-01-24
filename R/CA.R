@@ -151,45 +151,45 @@ caglm <- function(cls,glmargs) {
 # ca() wrapper for knnest(); 
 # arguments:
 #    cls: cluster
-#    y: distributed Y vector
-#    x: distributed X matrix/df
+#    yname: name of distributed Y vector
 #    k: number of nearest neighbors
+#    xdatapresent: xdata (output of preprocessx()) present at the
+#                  nodes?; if not, it will be created
 # value:
-#    xd, kout are left there at the nodes for future use
-caknn <- function(cls,yname,xname,k) {
+#    none at caller; xdata, kout are left there at the nodes 
+#    for future use
+caknn <- function(cls,yname,k,xdatapresent=FALSE) {
    clusterEvalQ(cls,library(regtools))
-   # check whether the old xd is present and appears reusable (not
-   # totally failsafe)
-   tmp <- clusterEvalQ(cls,grep('xd',ls()))[[1]]
-   xdpresent <- FALSE
-   if (length(tmp) > 0) {
-      oldkmax <- clusterEvalQ(cls,xd$kmax)[[1]]
-      if (oldkmax >= k)  {
-         oldnrows <- clusterEvalQ(cls,nrow(xd$idxs))
-         oldnrow <- sum(unlist(oldnrows))
-         cmd <- paste('nrow(',xn,')',sep='')
-         currnrow <- docmd(cmd)
-         if (oldnrow == currnrow) xdpresent <- TRUE
-      }
-   }
-   if (!xdpresent) {
-      cmd <- paste('xd <<- preprocessx(',xname,',',k,')',sep='')
+   if (xdatapresent) {
+      # is it really there?
+      tmp <- unlist(clusterEvalQ(cls,exists('xdata')))
+      if (!all(tmp)) stop('xdata not present')
+      # kmax large enough?
+      kmax <- clusterEvalQ(cls,xdata$kmax)[[1]]
+      if (kmax < k) stop('xdata$kmax too small for this k')
+   } else {
+      # run preprocessx() to generate xdata
+      cmd <- paste('xdata <<- preprocessx(',xname,',',k,')',sep='')
       doclscmd(cls,cmd)
    }
-   cmd <- paste('kout <<- knnest(',yname,',xd,',k,')',sep='')
+   cmd <- paste('kout <<- knnest(',yname,',xdata,',k,')',sep='')
    doclscmd(cls,cmd)
 }
 
 # kNN predict
 # arguments:
-#    predpts: matrix/df of X values at which to find est. reg. ftn.
+#    predpts: matrix/df of X values at which to find est. reg. ftn.;
+#             if NULL, it is assumed that predpts already exists at the
+#             nodes
 # value:
 #    est. reg. ftn. value at those points
 # assumes kout present at the nodes
 caknnpred <- function(cls,predpts) {
    clusterEvalQ(cls,library(regtools))
-   clusterExport(cls,'predpts',envir=environment())
+   if (!is.null(predpts))
+      clusterExport(cls,'predpts',envir=environment())
    predys <- doclscmd(cls,'predy <<- predict(kout,predpts)')
+   browser()
    mean(unlist(predys))
 }
 
