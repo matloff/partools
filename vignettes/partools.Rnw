@@ -353,7 +353,7 @@ then read into memory at the 16 cluster nodes using {\bf fileread()}:
 
 The call to {\bf filesplitrand()} splits the file as described above;
 since these files are permanent, we can skip this step in future R
-sessions involving this data (if the file doesn't change).  The function
+sessions involving this data (if the data doesn't change).  The function
 {\bf filesplitrand()} was used instead of {\bf filesplit()} to construct
 the distributed file, in order to randomize the placement of the records
 of {\bf yr2008} across cluster nodes.  As noted earlier, random
