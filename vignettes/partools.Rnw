@@ -34,13 +34,13 @@ Spark.
 \section{Motivation}
 
 With the advent of Big Data, the Hadoop framework became ubiquitous in
-the years following its birth in 2006.
-Yet it was clear from the start that Hadoop had major shortcomings in
-performance, and recently these are being much more seriously
-discussed.\footnote{See for example ``The Hadoop Honeymoon is Over,''
-{\it https://www.linkedin.com/pulse/hadoop-honeymoon-over-martyn-jones}}
-This has resulted in a new platform, Spark, gaining popularity.  As with
-Hadoop, there is an R interface available for Spark, named SparkR. 
+the years following its birth in 2006.  Yet it was clear from the start
+that Hadoop had major shortcomings in performance, and eventually these
+came under serious discussion\footnote{See for example ``The Hadoop
+Honeymoon is Over,'' {\it
+https://www.linkedin.com/pulse/hadoop-honeymoon-over-martyn-jones}} This
+resulted in a new platform, Spark, gaining popularity.  As with Hadoop,
+there is an R interface available for Spark, named SparkR. 
 
 Spark overcomes one of Hadoop's major problems, which is the lack of
 ability to cache data in a multi-pass computation.  However, Spark
@@ -64,8 +64,8 @@ use for those who are not computer systems experts.
 \item Although a major plus for Hadoop/Spark is fault tolerance, it is
 needed only for users working on extremely large clusters, consisting of
 hundreds or thousands of nodes. Disk failure rates are simply too low
-for fault tolerance to be an issue for many Hadoop/Snow users, who do
-not have such large
+for fault tolerance to be an issue for many users who think they need
+Hadoop/Spark but who do not have such large
 systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy} 
 
 \end{itemize}
@@ -73,9 +73,13 @@ systems.\footnote{https://wiki.apache.org/hadoop/PoweredBy}
 The one firm advantage of Hadoop/Spark is their use of distributed file
 systems.  Under the philosophy, ``Move the computation to the data,
 rather than {\it vice versa},'' network traffic may be greatly reduced,
-thus speeding up computation.  In addition, this approach helps deal
-with the fact that Big Data sets may not fit into the memory of a single
-machine.
+thus speeding up computation.  
+
+In addition, this approach helps deal with the fact that Big Data sets
+may not fit into the memory of a single machine.  (This aspect is too
+often overlooked in discussions of parallel/distributed systems.)
+
+\subsection{An Alternative to Hadoop/Spark}
 
 Therefore:
 
@@ -83,7 +87,7 @@ Therefore:
 
 It is desirable to have a package that retains the distributed-file
 nature of Hadoop/Spark  while staying fully within the simple, familiar,
-yet powerful POR framework.  
+yet powerful POR framework, no Java or other external language needed.  
 
 The {\bf partools} package is designed to meet these goals.  It is
 intended as {\bf a simple, sensible POR alternative to Hadoop/Spark}.
@@ -93,13 +97,25 @@ Hadoop/Spark}.
 
 \end{quote}
 
-Since {\bf partools} uses the portion of the R {\bf parallel} package
-derived from the package {\bf snow}, and because it is meant as an
-alternative to Hadoop/Spark, we informally refer to {\bf partools} as
-Snowdoop.
-
 The package does not provide fault tolerance of its own.  If this is an
 issue, one can provide it externally, say with the XtreemFS system.
+
+\subsection{Software Alchemy}
+
+Consider a large linear regression application.  We might consider
+dividing the data into chunks, calling {\bf lm()} on each chunk, then
+simply average the estimated coeficient vector over chunks.  It can be
+shown that under fairly general conditions, this works, in the sense of
+producing estimators with the same asymptotic variance as that of the
+original estimator.  
+
+This technique was developed independently by a number of researchers.
+I call it Software Alchemy (SA), as it turns non-embarassingly parallel
+problems into embarassingly parallel ones.\footnote{ Software Alchemy:
+Turning Complex Statistical Computations into Embarrassingly-Parallel
+Ones, Norman Matloff, {\it Journal of Statistical Software}, 71 (2016).}
+
+The {\bf partools} package contains a number of functions using SA.
 
 \section{Where Is the Magic?}
 
@@ -112,8 +128,8 @@ of the package stems from just two simple sources:
 \item [(a)] The package follows a Keep It Distributed philosophy:  Form
 distributed objects {\it and keep using them in distributed form
 throughout one's R session, accessing them repeatedly for one's various
-desired operations --- and avoiding operations that collect data from
-the worker nodes to the manager node.}
+desired operations --- and avoiding, to the extent possible, operations
+that collect data from the worker nodes to the manager node.}
 
 \item [(b)] The package consists of a number of utility functions that
 greatly facilitate creating and storing and distributed
@@ -132,8 +148,8 @@ monolithic}.
 \begin{itemize}
 
 \item Files are stored in a distributed manner, in files with a common
-basename. For example, the file {\bf x} is stored as separate files {\bf
-x.01}, {\bf x.02} etc. 
+basename. For example, the virtual file {\bf x} is stored as separate
+files {\bf x.01}, {\bf x.02} etc. 
 
 \item Data frames and matrices are stored in memory at the nodes in a
 distributed manner, with a common name.  For example, the data frame
@@ -171,11 +187,11 @@ various cluster nodes.  This plays a key role in the software.
 
 The package consists of three main groups of functions:
 
-\subsubsection{Distributed-file functions}
+\subsubsection{Distributed-file and distributed-data frame functions}
 
    \begin{itemize}
 
-   \item {\bf filesplit():}  Create a distributed file from monotlithic one.
+   \item {\bf filesplit():}  Create a distributed file from monolithic one.
 
    \item {\bf filesplitrand():}  Create a distributed file from monotlithic one,
    but randomize the record order.
@@ -192,15 +208,9 @@ The package consists of three main groups of functions:
    \item {\bf filesave():}  Write a distributed data frame to a distributed
    file.
 
-   \item {\bf filechunkname():} For the calling cluster node, returns
-   the full name of the file chunk, including suffix, e.g. '01', '02'
-   etc.
-
-   \end{itemize}
-
-\subsubsection{Tabulative functions}
-
-   \begin{itemize}
+   \item {\bf filechunkname():} Returns the full name of the file chunk,
+   associated with the calling cluster node, including suffix, e.g.
+   '01', '02' etc.
 
    \item {\bf distribsplit():}  Create a distributed data frame/matrix
    from monotlithic one.
@@ -208,10 +218,16 @@ The package consists of three main groups of functions:
    \item {\bf distribcat():}  Create a monotlithic data frame/matrix from
    distributed one.
 
+   \end{itemize}
+
+\subsubsection{Tabulative functions}
+
+   \begin{itemize}
+
    \item {\bf distribagg():}  Distributed form of R's {\bf aggregate()}.
 
    \item {\bf distribcounts():}  Wrapper for {\bf distribagg()} to obtain
-   cell counts.
+   table cell counts.
 
    \item {\bf dfileagg():}  Like {\bf distribagg()}, but file-based
    rather than in-memory, in order to handle files that are too big to
@@ -219,7 +235,7 @@ The package consists of three main groups of functions:
 
    \item {\bf distribgetrows()}: Applies an R {\bf subset()} or similar
    filtering operation to the distributed object, and collects the
-   results into a single object at the caller.
+   resulting rows into a single object at the caller.
 
    \item {\bf distribrange():}  Distributed form of R's {\bf range()}.
 
@@ -270,7 +286,7 @@ The package consists of three main groups of functions:
    \item {\bf formrowchunks():} Form chunks of rows of a data
    frame/matrix.
 
-   \item {\bf matrixtolist():} For a list of the rows or columns of a
+   \item {\bf matrixtolist():} Forms a list of the rows or columns of a
    data frame or matrix.
 
    \item {\bf addlists():}  ``Add'' two lists, meaning add values of
@@ -280,18 +296,15 @@ The package consists of three main groups of functions:
 
    \end{itemize}
 
-\subsection{Software Alchemy}
+\subsection{More on Software Alchemy}
 
 All the functions with names beginning with ``ca'' use the Software
-Alchemy (SA) method ({\it Parallel Computation for Data Science}, N.
-Matloff, Chapman and Hall, 2015) to parallelize statistical
-operations.\footnote{More detailed presentation in forthcoming paper in
-the {\it Journal of Statistical Software}.}  The idea is simple:  Apply
-the given estimator to each chunk in the distributed object, and average
-over chunks.  It is proven that the resulting distributed estimator has
-the same statistical accuracy --- the same asymptotic variance --- as
-the original serial one.\footnote{In the world of parallel computation,
-the standard word for nonparallel is {\it serial}.}
+Alchemy (SA) method.  The idea is simple:  Apply the given estimator to
+each chunk in the distributed object, and average over chunks.  It is
+proven that the resulting distributed estimator has the same statistical
+accuracy --- the same asymptotic variance --- as the original serial
+one.\footnote{In the world of parallel computation, the standard word
+for nonparallel is {\it serial}.}
 
 A variant, suitable in many regression and classification algorithms,
 retains the chunk output in the result, rather than performing an
@@ -304,11 +317,11 @@ corresponding coefficients are retained in the SA output.  When one is
 faced with predicting the response variable for a new data point, a
 prediction is calculated from each chunk, and those predictions are
 averaged to obtain the final prediction for the new point.  In a
-classification context, voting is used.
+classification context, voting may be used.
 
-Note that SA requires that the data be i.i.d.  If your data was stored
-in some sorted order --- in the flight date below, it was sorted by date
---- you need to randomize it first, using one of the functions provided
+Note that SA requires that the data be i.i.d.  If the data was stored
+in some sorted order --- in the flight data below, it was sorted by date
+--- it needs to be randomize it first, using one of the functions provided
 by {\bf partools} for this purpose.
 
 \section{Sample Session}
@@ -322,7 +335,7 @@ due to parallelism, but small enough that we won't have to wait really
 long amounts of time in our sample session here.  
 
 The session was run on a 16-core machine, with a 16-node R virtual
-cluster in the sense of the R {\bf parallel} package.  carefully,
+cluster in the sense of the R {\bf parallel} package.  Note carefully,
 though, that we should not expect a 16-fold speedup. In the world of
 parallel computation, one usually gets of speedups of considerably less
 than $n$ for a platform of $n$ computational entities, in this case with
@@ -355,7 +368,7 @@ memory at the cluster manager:
 
 (In practice, though, this would not be done, i.e.\ we would not have
 {\it both} distributed {\it and} monotlithic versions of the data at the
-same time.
+same time.)
 
 The first operation run involved the package's distributed version of
 R's {\bf aggregate()}.  Here we want to tabulate departure delay,
@@ -485,7 +498,8 @@ Software Alchemy, which replaces the given operation by a {\it
 distributed, statistically equivalent} operation.  This will often
 produce a significant speedup.  Note again that though the result may
 different from the non-distributed version, say in the third significant
-digit, it is just as accurate statistically.
+digit, it is just as accurate statistically; neither estimate is
+``better'' than the other.
 
 In the flight data, we predicted the arrival delay from the departure
 delay and distance, comparing the distributed and serial versions, 
