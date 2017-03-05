@@ -129,7 +129,10 @@ of the package stems from just two simple sources:
 distributed objects {\it and keep using them in distributed form
 throughout one's R session, accessing them repeatedly for one's various
 desired operations --- and avoiding, to the extent possible, operations
-that collect data from the worker nodes to the manager node.}
+that collect data from the worker nodes to the manager node.}  By
+keeping things distributed in this way, whatever cost there was to
+distributing the data originally eventually yields a net performance
+gain.
 
 \item [(b)] The package consists of a number of utility functions that
 greatly facilitate creating and storing and distributed
@@ -335,12 +338,20 @@ due to parallelism, but small enough that we won't have to wait really
 long amounts of time in our sample session here.  
 
 The session was run on a 16-core machine, with a 16-node R virtual
-cluster in the sense of the R {\bf parallel} package.  Note carefully,
-though, that we should not expect a 16-fold speedup. In the world of
-parallel computation, one usually gets of speedups of considerably less
-than $n$ for a platform of $n$ computational entities, in this case with
-$n = 16$.  Indeed, one is often saddened to find that the parallel
-version is actually {\it slower} than the serial one!
+cluster in the sense of the R {\bf parallel} package (which is loaded by
+{\bf partools}).  Note carefully, though, that we should not expect a
+16-fold speedup. In the world of parallel computation, one usually gets
+of speedups of considerably less than $n$ for a platform of $n$
+computational entities, in this case with $n = 16$.  Indeed, one is
+often saddened to find that the parallel version is actually {\it
+slower} than the serial one!
+
+To create our cluster {\bf cls}, we ran
+
+\begin{verbatim}
+> cls <- makeCluster(16)  # from 'parallel' library
+> setclsinfo(cls)  # from 'partools'
+\end{verbatim}
 
 The file, {\bf yr2008}, was first split into a distributed file, stored
 in {\bf yr2008r.01},...,{\bf yr2008r.16}, using {\bf filesplitrand()}, and
@@ -359,6 +370,13 @@ the distributed file, in order to randomize the placement of the records
 of {\bf yr2008} across cluster nodes.  As noted earlier, random
 arrangement of the rows is required for SA.
 
+The argument 2 here means that the suffixes are 2 digits, specifically
+'01', '02' and so on.  So, we create files {\bf yr2008r.01} etc.\ using
+{\bf filesplit()}.  The call to {\bf fileread()} specifies that cluster
+node 1 will read the file {\bf yr2008r.01}, cluster node 2 will read
+{\bf yr2008r.02} and so on.  Each node will place the data it reads into
+a data frame {\bf yr2008}.
+
 In order to run timing comparisons, the full file was also read into
 memory at the cluster manager:
 
@@ -371,7 +389,7 @@ memory at the cluster manager:
 same time.)
 
 The first operation run involved the package's distributed version of
-R's {\bf aggregate()}.  Here we want to tabulate departure delay,
+R's {\bf aggregate()}.  Here we wanted to tabulate departure delay,
 arrival delay and flight time, broken down into cells according to
 flight origin and destination.  We'll find the maximum value in each
 cell.
@@ -388,6 +406,10 @@ cell.
    user  system elapsed  
   2.291   0.084  15.952 
 \end{verbatim}
+
+What {\bf distribagg()} did here was have each cluster node run {\bf
+aggregate()} on its own chunk of the data, then (pardon the pun)
+aggregate the return values from the nodes.
 
 The serial version was much slower.
 
@@ -433,10 +455,12 @@ distributed object:
 
 What {\bf distribgetrows()} does is produce a data frame at each cluster
 node, per the user's instructions, then combine them together at the
-caller via R's {\bf rbind()}.  A simple concept, yet quite versatile.
+caller via R's {\bf rbind()}.  The user sets the second argument, a
+quoted string, to whatever she would have done on a serial basis.  A
+simple concept, yet quite versatile.
 
 As another example, say we are investigating data completeness.  We may
-wish to flag all records having an inordinate number of NA values.  As I
+wish to flag all records having an inordinate number of NA values.  As a
 first step, we may wish to add a column to our data frame, indicating
 how many NA values there are in each row.  If we did not have the
 advantage of distributed computation, here is how long it would take for
@@ -493,13 +517,16 @@ satisfying the filtering condition had been smaller than the 136246 we
 had here, the speedup factor would have been greater.
 
 Now let's turn to statistical operations, starting of course with linear
-regression.  As noted, these {\bf partools} functions make use of
+regression.  As noted, some {\bf partools} functions make use of
 Software Alchemy, which replaces the given operation by a {\it
 distributed, statistically equivalent} operation.  This will often
 produce a significant speedup.  Note again that though the result may
 different from the non-distributed version, say in the third significant
 digit, it is just as accurate statistically; neither estimate is
-``better'' than the other.
+``better'' than the other.  
+
+The SA function names begin with 'ca', for ``chunk averaging.''  The SA
+version of {\bf lm()}, for instance, is {\bf calm()}.
 
 In the flight data, we predicted the arrival delay from the departure
 delay and distance, comparing the distributed and serial versions, 
@@ -519,6 +546,9 @@ Coefficients:
    user  system elapsed 
  13.414   0.691  18.396 
 \end{verbatim}
+
+Note again the quoted-string argument.  This is the one the user will
+give to {\bf lm()} in the serial case.
 
 Linear regression is very hard to parallelize, so the speedup factor of
 more than 4 here is nice.  Coefficient estimates were virtually

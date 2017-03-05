@@ -193,7 +193,8 @@ caknnpred <- function(cls,predpts) {
 # arguments:
 #
 #    prcompargs: arguments to go into prcomp()
-#    p: number of variables
+#    p: number of variables (cannot be inferred by the code, since
+#       prcompargs can be so general
 #
 # value:
 #
