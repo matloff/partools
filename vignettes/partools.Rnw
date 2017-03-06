@@ -353,6 +353,8 @@ To create our cluster {\bf cls}, we ran
 > setclsinfo(cls)  # from 'partools'
 \end{verbatim}
 
+\subsection{Distribute the Data}
+
 The file, {\bf yr2008}, was first split into a distributed file, stored
 in {\bf yr2008r.01},...,{\bf yr2008r.16}, using {\bf filesplitrand()}, and
 then read into memory at the 16 cluster nodes using {\bf fileread()}:
@@ -376,6 +378,8 @@ The argument 2 here means that the suffixes are 2 digits, specifically
 node 1 will read the file {\bf yr2008r.01}, cluster node 2 will read
 {\bf yr2008r.02} and so on.  Each node will place the data it reads into
 a data frame {\bf yr2008}.
+
+\subsection{Distributed Aggregation of Summary Statistics}
 
 In order to run timing comparisons, the full file was also read into
 memory at the cluster manager:
@@ -429,6 +433,8 @@ The serial version was much slower.
 So, the results of {\bf distribagg()} did indeed match those of {\bf
 aggregate()}, but did so more than 15 times faster!
 
+\subsection{Un-distributing Data}
+
 Remember, the Keep It Distributed  philosophy of {\bf partools} is to
 create distributed objects and then keep using them repeatedly in
 distributed form.  However, in some cases, we may wish to collect a
@@ -458,6 +464,8 @@ node, per the user's instructions, then combine them together at the
 caller via R's {\bf rbind()}.  The user sets the second argument, a
 quoted string, to whatever she would have done on a serial basis.  A
 simple concept, yet quite versatile.
+
+\subsection{Distributed NA Processing}
 
 As another example, say we are investigating data completeness.  We may
 wish to flag all records having an inordinate number of NA values.  As a
@@ -516,6 +524,8 @@ multicore machine, but it still takes time.  If the number of records
 satisfying the filtering condition had been smaller than the 136246 we
 had here, the speedup factor would have been greater.
 
+\subsection{SA: Linear Regression}
+
 Now let's turn to statistical operations, starting of course with linear
 regression.  As noted, some {\bf partools} functions make use of
 Software Alchemy, which replaces the given operation by a {\it
@@ -554,6 +564,8 @@ Linear regression is very hard to parallelize, so the speedup factor of
 more than 4 here is nice.  Coefficient estimates were virtually
 identical.
 
+\subsection{SA: Principal ComponentsRegression}
+
 Next, principal components.  Since R's {\bf prcomp()} does not handle NA
 values for nonformula specifications, let's do that separately first:
 
@@ -584,57 +596,68 @@ times were small.  And now the PCA runs:
 [6] 5.529869e+00 9.933142e-04 8.679427e-13
 \end{verbatim}
 
-Thus, more than a 6-fold speedup here.  Agreement of the component
+Once again, the second argument of {\bf caprcomp()} is a quoted string,
+in which the user specifies the desired arguments to {\bf prcomp()}.
+Since those arguments may be complicated, the code cannot deduce the
+number of variables, and thus needs to be specified in the third
+argument.
+
+We have more than a 6-fold speedup here.  Agreement of the component
 standard deviations is good.\footnote{Note that the last component,
-i.e.\ the eighth one, is minuscule is statistically  0.  Again, SA gives
+i.e.\ the eighth one, is minuscule, statistically  0.  Again, SA gives
 results that are statistically equivalent to the serial ones.}
 
-Next, let's find the {\it interquartile range} for several columns.
-This is a robust measure of dispersion, defined at the difference
-between the 75$^{th}$ and 25$^{th}$ percentiles. 
-Here is serial code to find this:
+% THIS PART NEEDS TO BE REDONE
 
-\begin{verbatim}
-# find the interquartile range for a vector x
-iqr <- function(x) {tmp <- quantile(x,na.rm=T); tmp[4] - tmp[2]}
-# find the interquartile range for each column of a data frame dfr
-iqrm <- function(dfr) apply(dfr,2,iqr)
-\end{verbatim}
+% Next, let's find the {\it interquartile range} for several columns.
+% This is a robust measure of dispersion, defined at the difference
+% between the 75$^{th}$ and 25$^{th}$ percentiles. 
+% Here is serial code to find this:
+% 
+% \begin{verbatim}
+% # find the interquartile range for a vector x; quantile function's
+% # default is to find the seq(0, 1, 0.25) quantiles
+% iqr <- function(x) {tmp <- quantile(x,na.rm=TRUE); tmp[4] - tmp[2]}
+% # find the interquartile range for each column of a data frame dfr
+% iqrm <- function(dfr) apply(dfr,2,iqr)
+% \end{verbatim}
+% 
+% So, let's compare times.  First, the serial version:
+% 
+% \begin{verbatim}
+% > system.time(print(iqrm(yr2008[,c(5:8,12:16,19:21)])))
+%           DepTime        CRSDepTime           ArrTime        CRSArrTime 
+%               800               790               802               792 
+% ActualElapsedTime    CRSElapsedTime           AirTime          ArrDelay 
+%                80                79                77                22 
+%          DepDelay          Distance            TaxiIn           TaxiOut 
+%                12               629                 4                 9 
+%    user  system elapsed 
+%  29.280   0.243  29.554 
+% \end{verbatim}
+% 
+% For the distributed version,
+% 
+% \begin{verbatim}
+% > system.time(print(colMeans(distribgetrows(cls,'iqrm(yr2008[,c(5:8,12:16,19:21)])'))))
+%           DepTime        CRSDepTime           ArrTime        CRSArrTime 
+%          800.1250          790.0625          801.8125          791.8750 
+% ActualElapsedTime    CRSElapsedTime           AirTime          ArrDelay 
+%           80.0000           78.9375           76.5625           22.0000 
+%          DepDelay          Distance            TaxiIn           TaxiOut 
+%           12.0000          627.6875            4.0000            9.0000 
+%    user  system elapsed 
+%   0.009   0.002   2.587 
+% \end{verbatim}
+% 
+% Here the speedup was more than 11-fold, with agreement generally to
+% three significant digits.  Once again, note that statistically speaking,
+% both estimators have the same accuracy.
 
-So, let's compare times.  First, the serial version:
-
-\begin{verbatim}
-> system.time(print(iqrm(yr2008[,c(5:8,12:16,19:21)])))
-          DepTime        CRSDepTime           ArrTime        CRSArrTime 
-              800               790               802               792 
-ActualElapsedTime    CRSElapsedTime           AirTime          ArrDelay 
-               80                79                77                22 
-         DepDelay          Distance            TaxiIn           TaxiOut 
-               12               629                 4                 9 
-   user  system elapsed 
- 29.280   0.243  29.554 
-\end{verbatim}
-
-For the distributed version,
-
-\begin{verbatim}
-> system.time(print(colMeans(distribgetrows(cls,'iqrm(yr2008[,c(5:8,12:16,19:21)])'))))
-          DepTime        CRSDepTime           ArrTime        CRSArrTime 
-         800.1250          790.0625          801.8125          791.8750 
-ActualElapsedTime    CRSElapsedTime           AirTime          ArrDelay 
-          80.0000           78.9375           76.5625           22.0000 
-         DepDelay          Distance            TaxiIn           TaxiOut 
-          12.0000          627.6875            4.0000            9.0000 
-   user  system elapsed 
-  0.009   0.002   2.587 
-\end{verbatim}
-
-Here the speedup was more than 11-fold, with agreement generally to
-three significant digits.  Once again, note that statistically speaking,
-both estimators have the same accuracy.
+\subsection{SA: K-Means Clustering}
 
 The package also includes a distributed version of k-means clustering.
-Here it is on the flight delay data.  First, retain only the NA-free
+Here it is run on the flight delay data.  First, retain only the NA-free
 rows for the variables of interest, then run:
 
 \begin{verbatim}
@@ -687,29 +710,34 @@ virtually identical:
 3 1886.9094 7.542760 18.35823
 \end{verbatim}
 
-\section{Statistical/Machine Learning Example}
+\subsection{SA: Multiclass Classification}
 
 Here we apply random forests to the UC Irvine forest cover type data,
-which has 590,000 records of 55 variables.  The last variable is the co
-ver type, coded 1 through 7.  The machine used was quad core with
-hyperthreading level of 2.  (Some output not shown.)
+which has 590,000 records of 55 variables.  The last variable is the
+cover type, coded 1 through 7.  The machine used was quad core with
+hyperthreading level of 2, giving a theoretically possible parallelism 
+degree of 8.  Thus a cluster of size 8 was tried.  
+
+We used random forests for our classification algorithm (perhaps
+appropriate, given the data here!), but could have used any algorithm
+whose R implemention has a {\bf predict()} method.  (Some output not shown.)
 
 \begin{verbatim}
 > library(rpart)
 > cls <- makeCluster(8)
 > setclsinfo(cls)
-> clusterEvalQ(cls,library(rpart))
-> cvr <-
-    read.csv('~/Research/DataSets/ForestCover/CovTypeFull.csv',header=F)
-> cvr$V55 <- as.factor(cvr$V55)  # rpart requires
+> clusterEvalQ(cls,library(rpart))  # have each node load pkg
+> cvr <- read.csv('~/Research/DataSets/ForestCover/CovTypeFull.csv',
+     header=FALSE)
+> cvr$V55 <- as.factor(cvr$V55)  # rpart requires factor for class
 > trnidxs <- sample(1:580000,290000)  # form training and test sets
 > trn <- cvr[trnidxs,]
 > tst <- cvr[-trnidxs,]
 > distribsplit(cls,'trn')
+# do fit at each node; again, one argument is the serial argument
 > system.time(fit <- caclassfit(cls,'rpart(V55 ~ .,data=trn,xval=25)'))
    user  system elapsed
   0.126   0.005  25.294
-> # system.time(predout <- caclasspred(fit,tst,10,type='class'))
 > system.time(predout <- caclasspred(fit,tst,55,type='class'))
    user  system elapsed
  26.132   0.910  27.045
@@ -726,7 +754,18 @@ hyperthreading level of 2.  (Some output not shown.)
 [1] 0.6691202
 \end{verbatim}
 
-So, SA more than tripled the fitting speed, with the same accuracy.
+What {\bf caclassfit()} does is run our classification algorithm, in
+this case {\bf rpart}, at each node, then collect all the fitted models
+and return them to the caller.  So here, after the call, {\bf fit} will
+be an R list, element {\it i} of which is the fit computed by cluster
+node {\it i}.
+
+The call to {\bf caclasspred()} then applies these fits (on the parent
+node, not the cluster nodes) to our test data, {\bf tst}.  The result,
+{\bf predout} contains the predictions for each of the 149 cases in {\bf
+tst}, using voting among the eight fits.
+
+Here SA more than tripled the fitting speed, with the same accuracy.
 Prediction using SA is relatively slow, due to the voting process, but
 arguably this is not an issue in a production setting, and in any case,
 SA was substantially faster even in total fitting plus prediction time.
@@ -767,6 +806,8 @@ enough for only 1/4 of the data.  So, we break up the original data file
 to 4 pieces, {\bf yr2008.1} through {\bf yr2008.4}, and we run, say,
 
 \begin{verbatim}
+# say we have machines pc28 and pc29 available for computation
+> cls <- makeCluster(c('pc28','pc29'))
 > dfileagg(cls,c('yr2008.1','yr2008.2','yr2008.3','yr2008.4'),
      c("DepDelay","ArrDelay","AirTime"),
      c("Origin","Dest"),"yr2008", FUN="max")
