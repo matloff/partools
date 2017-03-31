@@ -1,6 +1,7 @@
 Package: partools
 Version: 1.1.5
-Author: Norm Matloff <normmatloff@gmail.com> [cre,aut], with
+Author: Norm Matloff <normmatloff@gmail.com> [cre,aut], 
+   Clark Fitzgerald <clarkfitzg@gmail.com> [aut], with
    contributions by Alex Rumbaugh <aprumbaugh@ucdavis.edu> and
    Hadley Wickham <h.wickham@gmail.com>
 Maintainer: Norm Matloff <normmatloff@gmail.com>
