@@ -13,7 +13,7 @@ Description: Miscellaneous utilities for parallelizing large
    presented in N. Matloff, Parallel Computation for Data Science,
    Chapman and Hall, 2015.  Includes a debugging aid.
 Depends: regtools,parallel,stats,utils,data.table,pdist,methods
-Suggests: rpart,e1071
+Suggests: rpart,e1071,testthat
 ByteCompile: yes
 NeedsCompilation: no
 License: GPL (>= 2)
