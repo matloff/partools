@@ -81,6 +81,9 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
      \code{tmpdataexpr}.  See below.}
   \item{FUN}{First-level aggregation function.}
   \item{FUN1}{Second-level aggregation function.}
+  \item{inbasename}{basename of the input files, e.g. x for x.1, x.2, ...}
+  \item{outbasename}{basename of the output files}
+  \item{nout}{number of output files}
 }
 
 \details{
