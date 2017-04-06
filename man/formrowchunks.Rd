@@ -14,6 +14,7 @@
 \alias{distribmeans}
 \alias{docmd}
 \alias{doclscmd}
+\alias{dotoexec}
 \alias{distribisdt}
 \alias{geteltis}
 \alias{ipstrcat}
