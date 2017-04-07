@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,doclscmd,geteltis,distribmeans,distribisdt,ipstrcat}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,doclscmd,geteltis,distribmeans,distribisdt,ipstrcat,dwhich.min}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -12,6 +12,7 @@
 \alias{distribcounts}
 \alias{distribgetrows}
 \alias{distribmeans}
+\alias{dwhich.min}
 \alias{docmd}
 \alias{doclscmd}
 \alias{dotoexec}
@@ -40,6 +41,7 @@ distribagg(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN)
 distribrange(cls,vec,na.rm=FALSE) 
 distribcounts(cls,xnames,dataname)
 distribmeans(cls,ynames,xnames,dataname,saveni=FALSE)
+dwhich.min(cls,colname)
 distribgetrows(cls,cmd)
 distribisdt(cls,dataname) 
 docmd(toexec) 
@@ -232,6 +234,10 @@ setkey(mtc,cyl)
 distribsplit(cls,'mtc')
 distribcounts(cls,c("cyl","gear"),"mtc")
 distribmeans(cls,c('mpg','hp'),c('cyl','gear'),'mtc')
+
+# dwhich.min is a distributed version of which.min()
+dwhich.min(cls,'mtc$mpg')  # smallest is at node 1, row 15
+
 
 stopCluster(cls)
 

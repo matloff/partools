@@ -269,6 +269,20 @@ distribmeans <- function(cls,ynames,xnames,dataname,saveni=FALSE) {
 #    xtabs(counts ~ .,data=tmp)
 # }
 
+# find the smallest value in the indicated column of the given
+# distributed object; return value is a pair (node number, row number)
+dwhich.min <- function(cls,colname) {
+   cmd <- paste('which.min(',colname,')',sep='')
+   mininfo <- function(x) {i <- which.min(x); c(i,x[i])}
+   cmd <- paste('mininfo(',colname,')',sep='')
+   clusterExport(cls,c('mininfo','cmd'),envir=environment())
+   rslt <- clusterEvalQ(cls,docmd(cmd))
+   tmp <- unlist(Reduce(rbind,rslt))
+   nodenum <- which.min(tmp[,2])
+   rownum <- tmp[nodenum,1]
+   c(nodenum,rownum)
+}
+
 distribrange <- function(cls,vec,na.rm=FALSE) {
    narm <- if(na.rm) 'TRUE' else 'FALSE'  
    narm <- paste("na.rm=",narm)
