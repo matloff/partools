@@ -106,7 +106,7 @@ cabase <- function(cls,ovf,estf, estcovf=NULL,findmean=TRUE,
          for (i in 1:nchunks) {
             summand <- estcovf(ovout[[i]]) 
             if (any(dim(thtcov) != dim(summand))) {
-               printf('dimension mismatch')
+               print('dimension mismatch')
                stop('likely cause is constant variable in some chunk')
             }
             thtcov <- thtcov + summand

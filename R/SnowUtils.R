@@ -269,16 +269,30 @@ distribmeans <- function(cls,ynames,xnames,dataname,saveni=FALSE) {
 #    xtabs(counts ~ .,data=tmp)
 # }
 
-# find the smallest value in the indicated column of the given
-# distributed object; return value is a pair (node number, row number)
-dwhich.min <- function(cls,colname) {
-   cmd <- paste('which.min(',colname,')',sep='')
+# find the largest value in the indicated vector; return value is a pair
+# (node number, row number)
+dwhich.min <- function(cls,vecname) {
+   cmd <- paste('which.min(',vecname,')',sep='')
    mininfo <- function(x) {i <- which.min(x); c(i,x[i])}
-   cmd <- paste('mininfo(',colname,')',sep='')
+   cmd <- paste('mininfo(',vecname,')',sep='')
    clusterExport(cls,c('mininfo','cmd'),envir=environment())
    rslt <- clusterEvalQ(cls,docmd(cmd))
    tmp <- unlist(Reduce(rbind,rslt))
    nodenum <- which.min(tmp[,2])
+   rownum <- tmp[nodenum,1]
+   c(nodenum,rownum)
+}
+
+# find the largest value in the indicated vector; return value is a pair
+# (node number, row number)
+dwhich.max <- function(cls,vecname) {
+   cmd <- paste('which.max(',vecname,')',sep='')
+   maxinfo <- function(x) {i <- which.max(x); c(i,x[i])}
+   cmd <- paste('maxinfo(',vecname,')',sep='')
+   clusterExport(cls,c('maxinfo','cmd'),envir=environment())
+   rslt <- clusterEvalQ(cls,docmd(cmd))
+   tmp <- unlist(Reduce(rbind,rslt))
+   nodenum <- which.max(tmp[,2])
    rownum <- tmp[nodenum,1]
    c(nodenum,rownum)
 }

@@ -1,4 +1,4 @@
-\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,doclscmd,geteltis,distribmeans,distribisdt,ipstrcat,dwhich.min}
+\name{formrowchunks,addlists,matrixtolist,setclsinfo,getpte,distribsplit,distribcat,distribagg,distribrange,distribcounts,distribgetrows,docmd,doclscmd,geteltis,distribmeans,distribisdt,ipstrcat,dwhich.min,dwhich.max}
 \alias{formrowchunks}
 \alias{matrixtolist} 
 \alias{addlists}
@@ -13,6 +13,7 @@
 \alias{distribgetrows}
 \alias{distribmeans}
 \alias{dwhich.min}
+\alias{dwhich.max}
 \alias{docmd}
 \alias{doclscmd}
 \alias{dotoexec}
@@ -41,7 +42,8 @@ distribagg(cls,ynames,xnames,dataname,FUN,FUNdim=1,FUN1=FUN)
 distribrange(cls,vec,na.rm=FALSE) 
 distribcounts(cls,xnames,dataname)
 distribmeans(cls,ynames,xnames,dataname,saveni=FALSE)
-dwhich.min(cls,colname)
+dwhich.min(cls,vecname)
+dwhich.max(cls,vecname)
 distribgetrows(cls,cmd)
 distribisdt(cls,dataname) 
 docmd(toexec) 
@@ -65,7 +67,7 @@ ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
      distributed.} 
   \item{ynames}{Vector of quoted names of variables on which \code{FUN} 
      is to be applied.}
-
+  \item{vecname}{Quoted name of a vector.}
   \item{...}{One of more vectors of character strings, where the vectors
      are typically of length 1.}
   \item{xnames}{Vector of quoted names of variables that define the
@@ -135,6 +137,9 @@ workers and then across workers.
 
 The \code{distribrange} function is a distributed form of \code{range}.
 
+The \code{dwhich.min} and \code{dwhich.max} functions are distributed
+analogs of R's \code{which.min} and \code{which.max}.
+
 The \code{distribgetrows} function is useful in a variety of situations.
 It can be used, for instance, as a distributed form of \code{select}.
 In the latter case, the specified rows will be selected at each cluster
@@ -163,6 +168,10 @@ The \code{distribcat} function returns the concatenated data frame;
 The \code{distribagg} function returns a data frame, the same as would a
 call to \code{aggregate}, though possibly in different row order;
 \code{distribcounts} works similarly.
+
+The \code{dwhich.min} and \code{dwhich.max} functions each return a
+two-tuple, consisting of the node number and row number which node at
+which the min or max occurs.
 
 }
 
@@ -235,9 +244,8 @@ distribsplit(cls,'mtc')
 distribcounts(cls,c("cyl","gear"),"mtc")
 distribmeans(cls,c('mpg','hp'),c('cyl','gear'),'mtc')
 
-# dwhich.min is a distributed version of which.min()
 dwhich.min(cls,'mtc$mpg')  # smallest is at node 1, row 15
-
+dwhich.max(cls,'mtc$mpg')  # largest is at node 2, row 4
 
 stopCluster(cls)
 
