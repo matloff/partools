@@ -1,5 +1,5 @@
 
-import(parallel,stats,utils,data.table,pdist)
+import(parallel,stats,utils,data.table,pdist,regtools)
 
 importFrom("methods", "new")
 
