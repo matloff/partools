@@ -269,8 +269,8 @@ distribmeans <- function(cls,ynames,xnames,dataname,saveni=FALSE) {
 #    xtabs(counts ~ .,data=tmp)
 # }
 
-# find the largest value in the indicated vector; return value is a pair
-# (node number, row number)
+# find the smallest value in the indicated distributed vector; return
+# value is a pair (node number, row number)
 dwhich.min <- function(cls,vecname) {
    cmd <- paste('which.min(',vecname,')',sep='')
    mininfo <- function(x) {i <- which.min(x); c(i,x[i])}
@@ -283,8 +283,8 @@ dwhich.min <- function(cls,vecname) {
    c(nodenum,rownum)
 }
 
-# find the largest value in the indicated vector; return value is a pair
-# (node number, row number)
+# find the largest value in the indicated distributed vector; return
+# value is a pair (node number, row number)
 dwhich.max <- function(cls,vecname) {
    cmd <- paste('which.max(',vecname,')',sep='')
    maxinfo <- function(x) {i <- which.max(x); c(i,x[i])}
@@ -296,6 +296,21 @@ dwhich.max <- function(cls,vecname) {
    rownum <- tmp[nodenum,1]
    c(nodenum,rownum)
 }
+
+# find the k largest or smallest values in the specified distributed
+# vector; UNDER CONSTRUCTION
+# dwhich.extremek <- function(cls,vecname,k,largest=TRUE) {
+#    extremek <- function(vecname,k,largest) {
+#       tmpvec <- get('vecname')
+#       tmporder <- order(tmpvec,!largest)[1:k]
+#       cbind(order(tmporder,tmpvec[tmporder][
+#    }
+#    cmd <- paste('extremek(',vecname,',',k,'.',largest,')')
+#    clusterExport(cls,'cmd),envir=environment())
+#    rslt <- clusterEvalQ(cls,docmd(cmd))
+#    tmp <- unlist(Reduce(rbind,rslt))
+# 
+# }
 
 distribrange <- function(cls,vec,na.rm=FALSE) {
    narm <- if(na.rm) 'TRUE' else 'FALSE'  

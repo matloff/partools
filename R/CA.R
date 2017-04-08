@@ -153,9 +153,10 @@ caglm <- function(cls,glmargs) {
 #    cls: cluster
 #    yname: name of distributed Y vector
 #    k: number of nearest neighbors
-#    xname: name of distributed X matrix/data frame, to which
-#           preprocessx() will be applied, producing a global variable
-#           xdata; if '', then sdata is assumed already present
+#    xname: if nonempty, this is the distributed matrix of X values, 
+#           which will be fed into preprocessx() to produce the 
+#           global variable xdata at the nodes; if empty, xdata will be
+#           generated
 # value:
 #    none at caller; xdata, kout are left there at the nodes 
 #    for future use
