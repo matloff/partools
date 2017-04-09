@@ -177,7 +177,9 @@ readmypart <- function(myidxs,
       tmp <- tmp[tmp <= linecounts[i]]
       mydf <- rbind(mydf,filechunk[tmp,])
    }
-   assign(basenm,mydf,envir=.GlobalEnv)  # write to global at worker
+   ### assign(basenm,mydf,envir=.GlobalEnv)  # write to global at worker
+   eval(parse(text = 
+      paste('assign("',basenm,'",mydf,envir=.GlobalEnv)',sep='')))
 }
 
 # split a file basenm into nch approximately equal-sized chunks, with
