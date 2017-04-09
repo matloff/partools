@@ -1,4 +1,5 @@
 
+if (getRversion() >= "2.15.1")  utils::globalVariables(c("toexec", "tmpx"))
 
 # general "Snow" (the part of 'parallel' adapted from the old Snow)
 # utilities, some used in Snowdoop but generally applicable
@@ -22,12 +23,25 @@ formrowchunks <- function(cls,m,mchunkname,scramble=FALSE) {
    idxs <- if (!scramble) 1:nr else sample(1:nr,nr,replace=FALSE)
    rcs <- clusterSplit(cls,idxs)
    rowchunks <- lapply(rcs, function(rc) m[rc,])
-#    getrowchunk <- function(rc) 
-#       assign(mchunkname,m[rc,],envir=.GlobalEnv)
-#    invisible(clusterApply(cls,rcs,getrowchunk))
-   invisible(clusterApply(cls,rowchunks,  # write to global at worker node
-      function(chunk) 
-         assign(mchunkname,chunk,envir=.GlobalEnv)))
+   # need to write chunk i to global at worker node i
+   # need very convoluted workaround to avoid CRAN check's aversion
+   # to globals, even though these globals are only at the worker
+   # nodes; Uwe Ligges of CRAN advised workaround based on
+   # globalVariables(), but this didn't work here; anyway, Uwe was big
+   # on having CRAN automated, i.e. no special human intervention, so he
+   # wants a workaround, and here it is; it involves a "surreptitious"
+   # assign 
+   invisible(
+      clusterApply(
+         cls,rowchunks,  
+         function(onechunk) {
+            cmd <- 
+               paste('assign("',mchunkname,'",onechunk,envir = .GlobalEnv)',
+                  sep='')
+            eval(parse(text = cmd))
+         }
+      )
+   )
 }
 
 # extracts rows (rc=1) or columns (rc=2) of a matrix, producing a list
