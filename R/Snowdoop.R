@@ -29,12 +29,12 @@ filechunkname <- function (basenm, ndigs,nodenum=NULL)
 #    cls: a 'parallel' cluster
 #    infilenm: name of input file (without suffix, if distributed)
 #    colnum: index of the column to be sorted
-#    outdfnm: name of output file (without suffix)
+#    outdfnm: name of output distributed data frame 
 #    infiledst: if TRUE, infilenm is distributed
 #    ndigs: number of digits in suffix of distributed files
 #    nsamp: bins formed by sampling the first nsamp records of infilenm
 #    header: infilenm has a header
-#    sep: sep value for infilenm
+#    sep: sep character between fields in infilenm
 #    usefread: use fread()
 
 filesort <- function(cls,infilenm,colnum,outdfnm,
@@ -46,8 +46,42 @@ filesort <- function(cls,infilenm,colnum,outdfnm,
    bds <- getbounds(cls,infilenm,infiledst,colnum,ndigs,header,sep,nsamp) 
    # at each node, cull out the records in infilenm for that node's bin,
    # and sort them at the node
-   invisible(clusterApply(cls,bds,makemysortedchunk,
-      infilenm,ndigs,colnum,outdfnm,infiledst,header,sep,usefread))
+   invisible(
+   clusterApply(cls,bds,makemysortedchunk,
+      infilenm,ndigs,colnum,outdfnm,infiledst,header,sep,usefread)
+   )
+}
+
+# does most of the work for filesort(), for the given node; reads in
+# data from disk, flagging records for this node's bin; finally writes
+# the assembled data frame to global space of this node
+makemysortedchunk <- function(mybds,infilenm,ndigs,colnum,outdfnm,
+                    infiledst,header,sep,usefread) {
+   pte <- getpte()
+   me <- pte$myid
+   ncls <- pte$ncls
+   mylo <- mybds[1]
+   myhi <- mybds[2]
+   if (usefread) {
+      requireNamespace('data.table')
+      myfread <- data.table::fread
+   } else myfread <- read.table
+   if (!infiledst) {
+      # this node reads the ordinary file, and grabs the records 
+      # belonging to its bin
+      tmp <- myfread(infilenm,header=header,sep=sep) 
+      mychunk <- getmypart(tmp,colnum,myhi,mylo)
+   } else {
+      # this node reads all chunks of`the distributed file, 
+      # and grabs the records belonging to its bin
+      for (i in 1:ncls) {
+         tmp <- myfread(filechunkname(infilenm,ndigs,i),header=header,sep=sep) 
+         tmp <- getmypart(tmp,colnum,myhi,mylo)
+         mychunk <- if (i == 1) tmp else rbind(mychunk,tmp)
+      }
+   }
+   sortedmchunk <- mychunk[order(mychunk[,colnum]),]
+   eval(parse(text = paste(outdfnm,' <<- sortedmchunk')))
 }
 
 # find the bins
@@ -79,35 +113,6 @@ getsample <- function(basenm,ndigs,colnum,nsamp,
 {
    fname <- filechunkname(basenm,ndigs)
    read.table(fname,nrows=nsamp,header=header,sep=sep)[,colnum]
-}
-
-makemysortedchunk <- function(mybds,infilenm,ndigs,colnum,outdfnm,
-                    infiledst,header,sep,usefread) {
-   pte <- getpte()
-   me <- pte$myid
-   ncls <- pte$ncls
-   mylo <- mybds[1]
-   myhi <- mybds[2]
-   if (usefread) {
-      requireNamespace('data.table')
-      myfread <- data.table::fread
-   } else myfread <- read.table
-   if (!infiledst) {
-      # this node reads the ordinary file, and grabs the records 
-      # belonging to its bin
-      tmp <- myfread(infilenm,header=header,sep=sep) 
-      mychunk <- getmypart(tmp,colnum,myhi,mylo)
-   } else {
-      # this node reads all chunks of`the distributed file, 
-      # and grabs the records belonging to its bin
-      for (i in 1:ncls) {
-         tmp <- myfread(filechunkname(infilenm,ndigs,i),header=header,sep=sep) 
-         tmp <- getmypart(tmp,colnum,myhi,mylo)
-         mychunk <- if (i == 1) tmp else rbind(mychunk,tmp)
-      }
-   }
-   sortedmchunk <- mychunk[order(mychunk[,colnum]),]
-   assign(outdfnm,sortedmchunk,envir=.GlobalEnv)  # write to global at worker
 }
 
 # grab for this node's bin from this chunk of the file (the whole file,
