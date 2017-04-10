@@ -161,7 +161,6 @@ caglm <- function(cls,glmargs) {
 #    none at caller; xdata, kout are left there at the nodes 
 #    for future use
 caknn <- function(cls,yname,k,xname='') {
-   clusterEvalQ(cls,library(regtools))
    if (xname != '') {
       # run preprocessx() to generate xdata
       cmd <- paste('xdata <<- preprocessx(',xname,',',k,')',sep='')
@@ -171,24 +170,25 @@ caknn <- function(cls,yname,k,xname='') {
    doclscmd(cls,cmd)
 }
 
-# kNN predict
-# arguments:
-#    predpts: matrix/df of X values at which to find est. reg. ftn.;
-#             if NULL, it is assumed that predpts already exists at the
-#             nodes
-# value:
-#    est. reg. ftn. value at those points
-# assumes kout present at the nodes
-caknnpred <- function(cls,predpts) {
-   if (!is.matrix(predpts)) 
-      predpts <- as.matrix(predpts)
-   clusterEvalQ(cls,library(regtools))
-   if (!is.null(predpts))
-      clusterExport(cls,'predpts',envir=environment())
-   predys <- doclscmd(cls,'predy <<- predict(kout,predpts)')
-   predys <- Reduce(rbind,predys)
-   colMeans(predys)
-}
+# needs fixing
+### # kNN predict
+### # arguments:
+### #    predpts: matrix/df of X values at which to find est. reg. ftn.;
+### #             if NULL, it is assumed that predpts already exists at the
+### #             nodes
+### # value:
+### #    est. reg. ftn. value at those points
+### # assumes kout present at the nodes
+### caknnpred <- function(cls,predpts) {
+###    if (!is.matrix(predpts)) 
+###       predpts <- as.matrix(predpts)
+###    clusterEvalQ(cls,library(regtools))
+###    if (!is.null(predpts))
+###       clusterExport(cls,'predpts',envir=environment())
+###    predys <- doclscmd(cls,'predy <<- predict(kout,predpts)')
+###    predys <- Reduce(rbind,predys)
+###    colMeans(predys)
+### }
 
 # ca() wrapper for prcomp()
 # arguments:
