@@ -69,8 +69,6 @@ caknn(cls, yname, k, xname='')
      \code{quantile}. Should not be 0.00 or 1.00, as asymptotic
      normality doesn't hold.}
   \item{FUN}{Quoted name of a function.}
-  \item{predpts}{matrix/df of X values at which to find est. reg. ftn.; if
-      NULL, it is assumed that predpts already exists at nodes.}
 
 }
 
