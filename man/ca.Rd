@@ -212,6 +212,7 @@ lm(u[,3] ~ u[,1]+u[,2])
 ovf <- function(dummy=NULL) lm(V3 ~ .,data=z168)
 ca(cls,u,ovf,estf=coef,estcovf=vcov)$tht
 
+\dontrun{
 # Census data on programmers and engineers; include a quadratic term for
 # age, due to nonmonotone relation to income
 data(prgeng) 
@@ -251,6 +252,7 @@ pe$phd <- as.integer(pe$educ == 16)
 pe <- pe[,c(1,7,8,9,12,13)] 
 distribsplit(cls,'pe',scramble=TRUE)
 kout <- caknn(cls,'pe[,3]',50,'pe[,-3]') 
+}
 
 stopCluster(cls)
 
