@@ -1,4 +1,4 @@
-\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,caknn,caknnpred}
+\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,caknn}
 \alias{ca}
 \alias{cabase}
 \alias{calm}
@@ -9,7 +9,6 @@
 \alias{caquantile}
 \alias{caagg}
 \alias{caknn}
-\alias{caknnpred}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -29,7 +28,6 @@ cameans(cls,cols,na.rm=FALSE)
 caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE) 
 caagg(cls,ynames,xnames,dataname,FUN)
 caknn(cls, yname, k, xname='')
-caknnpred(cls, predpts)
 }
 
 \arguments{
@@ -255,8 +253,6 @@ pe$phd <- as.integer(pe$educ == 16)
 pe <- pe[,c(1,7,8,9,12,13)] 
 distribsplit(cls,'pe',scramble=TRUE)
 kout <- caknn(cls,'pe[,3]',50,'pe[,-3]') 
-# about 39305, 70525 
-caknnpred(cls,pe[c(3,8),-3])
 
 stopCluster(cls)
 

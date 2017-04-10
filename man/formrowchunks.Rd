@@ -16,7 +16,6 @@
 \alias{dwhich.max}
 \alias{docmd}
 \alias{doclscmd}
-\alias{dotoexec}
 \alias{distribisdt}
 \alias{geteltis}
 \alias{ipstrcat}
