@@ -1,5 +1,3 @@
-library(partools)
-
 context("Cluster setup")
 
 test_that("Defaults", {

@@ -97,10 +97,9 @@ ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
 \details{The \code{setclsinfo} function does initialization needed for
 use of the tools in the package.
 
-The function \code{formrowchunks} forms chunks of rows of
-\code{m}, corresponding to the number of worker nodes
-in the cluster \code{m}.  For any given worker, the code places its
-chunk in \code{mchunk} in the global space of the worker.
+\code{formrowchunks} splits \code{m} into chunks of rows and puts each
+chunk into a global variable called \code{mchunkname} in the global space
+of the worker.
 
 A call to \code{matrixtolist} extracts the rows or columns of a matrix
 or data frame and forms an R list from them.
