@@ -5,14 +5,12 @@ setclsinfo(cls)
 
 az <- data.frame(letter = letters, number = seq_along(letters))
 
-test_that("formrowchunks will export", {
+test_that("formrowchunks exports data", {
 
-    formrowchunks(cls, az, "az_i")
-
-    variables <- clusterEvalQ(cls, ls())
-    azin <- sapply(variables, function(x) "az_i" %in% x)
-    expect_true(all(azin))
-
+    formrowchunks(cls, az, "az_i", scramble = TRUE)
     chunks <- clusterEvalQ(cls, az_i)
+    az2 <- do.call(rbind, chunks)
+    az2 <- az2[order(az2$number), ]
+    expect_equal(az, az2)
 
 })
