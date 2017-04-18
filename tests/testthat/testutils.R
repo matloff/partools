@@ -31,3 +31,22 @@ test_that("distrib* functions", {
     expect_equivalent(az, az2)
 
 })
+
+
+test_that("Creating a new column in a data frame", {
+
+    distribsplit(cls, "az")
+
+    az_expected <- az
+    az_expected$LETTER <- toupper(az_expected$letter)
+
+    clusterEvalQ(cls, {
+        az$LETTER <- toupper(az$letter)
+        NULL
+    })
+
+    az_actual <- distribcat(cls, "az")
+
+    expect_equal(az_expected, az_actual)
+
+})
