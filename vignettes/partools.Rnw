@@ -355,12 +355,12 @@ To create our cluster {\bf cls}, we ran
 
 \subsection{Distribute the Data}
 
-The file, {\bf yr2008}, was first split into a distributed file, stored
+The file, {\bf 2008.csv}, was first split into a distributed file, stored
 in {\bf yr2008r.01},...,{\bf yr2008r.16}, using {\bf filesplitrand()}, and
 then read into memory at the 16 cluster nodes using {\bf fileread()}:
 
 \begin{verbatim}
-> filesplitrand(cls,'yr2008','yr2008r',2,header=TRUE,sep=",")
+> filesplitrand(cls,'2008.csv','yr2008r',2,header=TRUE,sep=",")
 > fileread(cls,'yr2008r','yr2008',2,header=TRUE, sep=",")
 \end{verbatim}
 
@@ -524,7 +524,23 @@ multicore machine, but it still takes time.  If the number of records
 satisfying the filtering condition had been smaller than the 136246 we
 had here, the speedup factor would have been greater.
 
-\subsection{SA: Linear Regression}
+\subsection{Integration with parallel}
+
+{\bf partools} uses the {\bf parallel} package, so one can leverage the
+functions in {\bf parallel} to compute on objects created through {\bf
+partools}. {\bf clusterEvalQ()} evaluates expressions on each of the
+workers, and is useful for modifying existing distributed objects in place. 
+For example, the following code will create a new column in {\bf yr2008}.
+\begin{verbatim}
+
+clusterEvalQ(cls, {
+    az$LETTER <- toupper(az$letter)
+    NULL  # keep this NULL
+})
+
+\end{verbatim}
+
+\section{Software Alchemy}
 
 Now let's turn to statistical operations, starting of course with linear
 regression.  As noted, some {\bf partools} functions make use of
@@ -537,6 +553,8 @@ digit, it is just as accurate statistically; neither estimate is
 
 The SA function names begin with 'ca', for ``chunk averaging.''  The SA
 version of {\bf lm()}, for instance, is {\bf calm()}.
+
+\subsection{SA: Linear Regression}
 
 In the flight data, we predicted the arrival delay from the departure
 delay and distance, comparing the distributed and serial versions, 
