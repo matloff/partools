@@ -237,8 +237,9 @@ distribcounts <- function(cls,xnames,dataname) {
    res
 }
 
-distribunique <- function(cls,ynames,dataname) {
-}
+# TODO: Clark - Write this function
+#distribunique <- function(cls,ynames,dataname) {
+#}
 
 # determine whether the distributed object dataname is a data.table
 distribisdt <- function(cls,dataname) {
