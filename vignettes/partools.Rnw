@@ -543,7 +543,7 @@ Below are a few examples.
 [[2]]
 406905592 bytes
 \end{verbatim}
-This was done on a two node local cluster. Each of the two distributed
+This code ran on a two node local cluster. Each of the two distributed
 objects occupies around 400 MB.
 
 We can create a new column in {\bf yr2008} by calculating the minute of
@@ -551,21 +551,32 @@ arrival or departure. One way to do this is to write and test a function locally
 {\bf clusterExport()} to send it to the cluster, and finally evaluate it
 with {\bf clusterEvalQ()}.
 
-% TODO: Clark- finish this example
-%\begin{verbatim}
-%
-%minute <- function(x){
-%    two_right_digits = regmatches(gregexpr("..$", x, value = TRUE)
-%    as.integer(two_right_digits)
-%}
-%minute(c(1L, 20L, 301L, 1937L)
-%
-%clusterEvalQ(cls, {
-%    az$LETTER <- toupper(az$letter)
-%    NULL  # keep this NULL
-%})
+\begin{verbatim}
+
+minute <- function(x){
+    x <- as.character(x)
+    matches = regexpr(".?.$", x)
+    two_right_digits = regmatches(x, matches)
+    as.integer(two_right_digits)
+}
+
+# Verify locally that code does the right thing
+minute(c(1L, 20L, 301L, 1937L))
+# [1]  1 20  1 37
+
+# Send the function to the data
+clusterExport(cls, "minute")
+
+#  2 nodes produced errors; first error: replacement has 3428517 rows, data
+#  has 3504864
+
+clusterEvalQ(cls, {
+    yr2008$ArrMinute <- minute(yr2008$ArrTime)
+    yr2008$DepMinute <- minute(yr2008$DepTime)
+})
 
 \end{verbatim}
+
 Alternatively one could write this function to do global assignment within
 the workers using {\bf <<- }, but this is not as clean.
 
