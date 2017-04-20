@@ -237,6 +237,9 @@ distribcounts <- function(cls,xnames,dataname) {
    res
 }
 
+distribunique <- function(cls,ynames,dataname) {
+}
+
 # determine whether the distributed object dataname is a data.table
 distribisdt <- function(cls,dataname) {
    rcmd <- paste('is.data.table(',dataname,')',sep='')

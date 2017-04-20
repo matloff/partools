@@ -546,6 +546,21 @@ Below are a few examples.
 This code ran on a two node local cluster. Each of the two distributed
 objects occupies around 400 MB.
 
+Suppose we want to see all possible values for the {\bf ArrTime, DepTime }
+variables. It's important to note that we reduce locally on each 
+
+\begin{verbatim}
+#  2 nodes produced errors; first error: replacement has 3428517 rows, data
+#  has 3504864
+
+distribunique(cls, "yr2008")
+
+alltimes = clusterEvalQ(cls, unique(c(yr2008$ArrTime, yr2008$DepTime)))
+
+alltimes = sort(unique(c(alltimes[[1]], alltimes[[2]])))
+\end{verbatim}
+
+
 We can create a new column in {\bf yr2008} by calculating the minute of
 arrival or departure. One way to do this is to write and test a function locally, use
 {\bf clusterExport()} to send it to the cluster, and finally evaluate it
@@ -566,9 +581,6 @@ minute(c(1L, 20L, 301L, 1937L))
 
 # Send the function to the data
 clusterExport(cls, "minute")
-
-#  2 nodes produced errors; first error: replacement has 3428517 rows, data
-#  has 3504864
 
 clusterEvalQ(cls, {
     yr2008$ArrMinute <- minute(yr2008$ArrTime)
