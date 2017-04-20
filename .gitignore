@@ -1,2 +1,3 @@
 ..Rcheck/
 vignettes/*.csv
+vignettes/yr2008*

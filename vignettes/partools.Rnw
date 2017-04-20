@@ -529,18 +529,47 @@ had here, the speedup factor would have been greater.
 {\bf partools} uses the {\bf parallel} package, so one can leverage the
 functions in {\bf parallel} to compute on objects created through {\bf
 partools}. {\bf clusterEvalQ()} evaluates expressions on each of the
-workers, and is useful for modifying existing distributed objects in place. 
-For example, the following code will create a new column in {\bf yr2008}.
-\begin{verbatim}
+workers, and is useful for interacting with existing distributed objects.
+Below are a few examples.
 
-clusterEvalQ(cls, {
-    az$LETTER <- toupper(az$letter)
-    NULL  # keep this NULL
-})
+{\bf object.size()} estimates the size of the objects in memory.
+\begin{verbatim}
+> clusterEvalQ(cls, {
++     object.size(yr2008)
++ })
+[[1]]
+406905480 bytes
+
+[[2]]
+406905592 bytes
+\end{verbatim}
+This was done on a two node local cluster. Each of the two distributed
+objects occupies around 400 MB.
+
+We can create a new column in {\bf yr2008} by calculating the minute of
+arrival or departure. One way to do this is to write and test a function locally, use
+{\bf clusterExport()} to send it to the cluster, and finally evaluate it
+with {\bf clusterEvalQ()}.
+
+% TODO: Clark- finish this example
+%\begin{verbatim}
+%
+%minute <- function(x){
+%    two_right_digits = regmatches(gregexpr("..$", x, value = TRUE)
+%    as.integer(two_right_digits)
+%}
+%minute(c(1L, 20L, 301L, 1937L)
+%
+%clusterEvalQ(cls, {
+%    az$LETTER <- toupper(az$letter)
+%    NULL  # keep this NULL
+%})
 
 \end{verbatim}
+Alternatively one could write this function to do global assignment within
+the workers using {\bf <<- }, but this is not as clean.
 
-\section{Software Alchemy}
+\section{SA: Software Alchemy}
 
 Now let's turn to statistical operations, starting of course with linear
 regression.  As noted, some {\bf partools} functions make use of
