@@ -43,7 +43,7 @@ filesort <- function(cls,infilenm,colnum,outdfnm,
       c('getbounds','getsample','makemysortedchunk','getmypart'),
       envir=environment())
    # find the bins
-   bds <- getbounds(cls,infilenm,infiledst,colnum,ndigs,header,sep,nsamp) 
+   bds <- getbounds(cls,infilenm,infiledst,colnum,ndigs,header,sep,nsamp, ...)
    # at each node, cull out the records in infilenm for that node's bin,
    # and sort them at the node
    invisible(

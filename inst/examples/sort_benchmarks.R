@@ -15,7 +15,37 @@ sorted <- unsorted[order(unsorted[, 1]), ]
 
 distribsplit(cls, "unsorted")
 
-filesave(cls, "unsorted", newbasename = "unsorted", ndigs = 2, sep = ",")
+filesave(cls, "unsorted", newbasename = "unsorted", ndigs = 2, sep = "\t")
 
 filesort(cls, infilenm = "unsorted", colnum = 1, outdfnm = "unsorted"
          , infiledst = TRUE, ndigs = 2, sep = ",", comment.char = "")
+
+
+write.table(unsorted[1:10, ]
+            , "little.txt"
+            , sep = "\t"
+            , row.names = FALSE
+            , qmethod = "double"
+            )
+
+
+t2 = read.table("little.txt"
+                , header = TRUE
+                , sep = "\t"
+                #, quote = "\""
+                , comment.char = ""
+                #, fill = TRUE
+                #, nrows = 10
+                #, colClasses = rep("character", 3)
+                )
+
+
+t1 = read.table("unsorted.01"
+                , header = TRUE
+                , sep = "\t"
+                , quote = "\""
+                , comment.char = ""
+                #, fill = TRUE
+                #, nrows = 10
+                #, colClasses = rep("character", 3)
+                )
