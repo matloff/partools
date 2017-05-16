@@ -1,4 +1,4 @@
 ..Rcheck/
 vignettes/*.csv
 vignettes/yr2008*
-inst/examples/*.txt
+inst/examples/unsorted*
