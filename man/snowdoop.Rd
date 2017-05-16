@@ -28,7 +28,7 @@ related operations.
 \usage{
 filechunkname(basenm,ndigs,nodenum=NULL)
 filesort(cls,infilenm,colnum,outdfnm,infiledst=FALSE,
-   ndigs=0,nsamp=1000,header=FALSE,sep="",usefread=FALSE)
+   ndigs=0,nsamp=1000,header=FALSE,sep="",usefread=FALSE, ...)
 filesplit(nch,basenm,header=FALSE,seqnums=FALSE)
 filesplitrand(cls,fname,newbasename,ndigs,header=FALSE,sep)
 fileshuffle(inbasename, nout, outbasename, header = FALSE)
@@ -84,6 +84,7 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
   \item{inbasename}{basename of the input files, e.g. x for x.1, x.2, ...}
   \item{outbasename}{basename of the output files}
   \item{nout}{number of output files}
+  \item{...}{Additional arguments to \code{read.table}}
 }
 
 \details{

@@ -18,4 +18,4 @@ distribsplit(cls, "unsorted")
 filesave(cls, "unsorted", newbasename = "unsorted", ndigs = 2, sep = ",")
 
 filesort(cls, infilenm = "unsorted", colnum = 1, outdfnm = "unsorted"
-         , infiledst = TRUE, ndigs = 2, sep = ",")
+         , infiledst = TRUE, ndigs = 2, sep = ",", comment.char = "")
