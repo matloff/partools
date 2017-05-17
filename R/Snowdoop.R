@@ -374,7 +374,7 @@ filesave <- function(cls,dname,newbasename,ndigs,sep, ...) {
 # reads in a distributed file with prefix fname, producing a distributed
 # data frame dname
 fileread <- function(cls,fname,dname,ndigs,
-               header=FALSE,sep=" ",usefread=FALSE) {
+               header=FALSE,sep=" ",usefread=FALSE, ...) {
    if (usefread) {
      clusterEvalQ(cls,requireNamespace('data.table'))
      clusterEvalQ(cls,myfread <- data.table::fread)
