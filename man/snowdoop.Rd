@@ -36,7 +36,7 @@ linecount(infile,header=FALSE,chunksize=100000)
 filecat(cls, basenm, header = FALSE)  
 readnscramble(cls,basenm,header=FALSE,sep= " ")
 filesave(cls,dname,newbasename,ndigs,sep)
-fileread(cls,fname,dname,ndigs,header=FALSE,sep=" ",usefread=FALSE)
+fileread(cls,fname,dname,ndigs,header=FALSE,sep=" ",usefread=FALSE, ...)
 getnumdigs(nch)
 fileagg(fnames,ynames,xnames,header=FALSE,sep= " ",FUN,FUN1=FUN) 
 dfileagg(cls,fnames,ynames,xnames,header=FALSE,sep=" ",FUN,FUN1=FUN) 
@@ -84,7 +84,7 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
   \item{inbasename}{basename of the input files, e.g. x for x.1, x.2, ...}
   \item{outbasename}{basename of the output files}
   \item{nout}{number of output files}
-  \item{...}{Additional arguments to \code{read.table}}
+  \item{...}{Additional arguments to \code{read.table, write.table}}
 }
 
 \details{

@@ -341,24 +341,34 @@ filecat <- function (cls, basenm, header = FALSE)  {
 # saves the distributed data frame/matrix d to a distributed file of the
 # specified basename; the suffix has ndigs digits, and the field 
 # separator will be sep; d must have column names
-filesave <- function(cls,dname,newbasename,ndigs,sep) {
-   # what will the new file be called at each node?
-   tmp <- paste('"',newbasename,'",',ndigs,sep='')
-   cmd <- paste('myfilename <- filechunkname(',tmp,')',sep='')
-   clusterExport(cls,"cmd",envir=environment())
-   clusterEvalQ(cls,eval(parse(text=cmd)))
-   # start building the write.table() call
-   tmp <- paste(dname,'myfilename',sep=',')
-   # what will the column names be for the new files?
-   clusterEvalQ(cls,eval(parse(text=cmd)))
-   cncmd <- paste('colnames(',dname,')',sep='')
-   clusterExport(cls,"cncmd",envir=environment())
-   clusterEvalQ(cls,cnames <- eval(parse(text=cncmd)))[[1]]
-   # now finish pasting the write.table() command, and run it
-   writecmd <- paste('write.table(',tmp,
-      ',row.names=FALSE,col.names=cnames,sep="',sep,'")',sep='')
-   clusterExport(cls,"writecmd",envir=environment())
-   clusterEvalQ(cls,eval(parse(text=writecmd)))
+filesave <- function(cls,dname,newbasename,ndigs,sep, ...) {
+#   # what will the new file be called at each node?
+#   tmp <- paste('"',newbasename,'",',ndigs,sep='')
+#   cmd <- paste('myfilename <- filechunkname(',tmp,')',sep='')
+#   clusterExport(cls,"cmd",envir=environment())
+#   clusterEvalQ(cls,eval(parse(text=cmd)))
+#   # start building the write.table() call
+#   tmp <- paste(dname,'myfilename',sep=',')
+#   # what will the column names be for the new files?
+#   clusterEvalQ(cls,eval(parse(text=cmd)))
+#   cncmd <- paste('colnames(',dname,')',sep='')
+#   clusterExport(cls,"cncmd",envir=environment())
+#   clusterEvalQ(cls,cnames <- eval(parse(text=cncmd)))[[1]]
+#   # now finish pasting the write.table() command, and run it
+#   writecmd <- paste('write.table(',tmp,
+#      ',row.names=FALSE,col.names=cnames,sep="',sep,'")',sep='')
+#   clusterExport(cls,"writecmd",envir=environment())
+#   clusterEvalQ(cls,eval(parse(text=writecmd)))
+
+    write_one_chunk <- function(dname, newbasename, ndigs, sep, ...)
+    {
+        write.table(get(dname)
+                    , file = filechunkname(newbasename, ndigs)
+                    , sep = sep
+                    , ...)
+    }
+
+    clusterCall(cls, write_one_chunk, dname, newbasename, ndigs, sep, ...)
 }
 
 # reads in a distributed file with prefix fname, producing a distributed
