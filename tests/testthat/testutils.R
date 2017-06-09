@@ -1,5 +1,8 @@
 context("Utilities in SnowUtils")
 
+cls <- makeCluster(2)
+setclsinfo(cls)
+
 az <- data.frame(letter = letters, number = seq_along(letters))
 azaz <- rbind(az, az)
 
@@ -45,5 +48,34 @@ test_that("Creating a new column in a data frame", {
     az_actual <- distribcat(cls, "az")
 
     expect_equal(az_expected, az_actual)
+
+})
+
+
+test_that("Other arguments for read and write table", {
+
+    distribsplit(cls, "az")
+
+    ndigs <- 2
+    basename <- "az"
+
+    filesave(cls, "az", newbasename = basename, ndigs = ndigs
+             , sep = " ", row.names = FALSE)
+    fileread(cls, fname = basename, dname = "az2", ndigs = ndigs
+             , header = TRUE)
+    az2 <- distribcat(cls, "az2")
+    expect_equal(az, az2)
+
+    # TODO: Clark - need to be able to pass in ndigs here.
+    # Probably newbasename too.
+
+    # Should have a randomized az on the cluster now
+    #readnscramble(cls, basename, header = TRUE, sep = " ")
+
+
+#    >     readnscramble(cls, basename, header = TRUE, sep = " ")
+#    Error in file(infile, "r") : cannot open the connection
+#    In addition: Warning message:
+#    In file(infile, "r") : cannot open file 'az.1': No such file or directory
 
 })
