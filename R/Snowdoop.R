@@ -99,6 +99,11 @@ getbounds <- function(cls,infilenm,infiledst,colnum,ndigs,header,sep,nsamp, ...)
    bds <- list()
    q <- quantile(samp,((2:numnodes) - 1) / numnodes)
    samp <- sort(samp)
+
+   # TODO: Clark - Handling strings now
+   #q <- seq(from 
+   pernode <- nsamp / numnodes
+
    for (i in 1:numnodes) {
       mylo <- if (i > 1) q[i-1] else NA
       myhi <- if (i < numnodes) q[i] else NA
