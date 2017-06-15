@@ -15,6 +15,6 @@ export(writemgrscreen,writewrkrscreens,killdebug,
    caclassfit,caclasspred,vote,re_code,
    setclsinfo,filechunkname,exportlibpaths,filesplit,
    parpdist,
-   ipstrcat
+   ipstrcat,disksort
    )
  
