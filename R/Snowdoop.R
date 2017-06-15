@@ -80,7 +80,11 @@ makemysortedchunk <- function(mybds,infilenm,ndigs,colnum,outdfnm,
          mychunk <- if (i == 1) tmp else rbind(mychunk,tmp)
       }
    }
-   sortedmchunk <- mychunk[order(mychunk[,colnum]),]
+
+   # Could sort more efficiently with data.table
+   mychunk <- data.frame(mychunk)
+   sortedmchunk <- mychunk[order(mychunk[,colnum]), ]
+
    eval(parse(text = paste(outdfnm,' <<- sortedmchunk')))
 }
 
