@@ -96,17 +96,16 @@ getbounds <- function(cls,infilenm,infiledst,colnum,ndigs,header,sep,nsamp, ...)
    } else  # sample from the ordinary file
       samp <- 
         read.table(infilenm,nrows=nsamp,header=header,sep=sep, ...)[,colnum]
-   bds <- list()
-   q <- quantile(samp,((2:numnodes) - 1) / numnodes)
-   samp <- sort(samp)
 
-   # TODO: Clark - Handling strings now
-   #q <- seq(from 
-   pernode <- nsamp / numnodes
+   bds <- list()
+   samp <- sort(samp)
+   pernode <- floor(length(samp) / numnodes)
+   #breaks <- quantile(samp,((2:numnodes) - 1) / numnodes)
+   breaks <- seq(from = pernode, by = pernode, length.out = numnodes - 1)
 
    for (i in 1:numnodes) {
-      mylo <- if (i > 1) q[i-1] else NA
-      myhi <- if (i < numnodes) q[i] else NA
+      mylo <- if (i > 1) breaks[i-1] else NA
+      myhi <- if (i < numnodes) breaks[i] else NA
       bds[[i]] <- c(mylo,myhi)
    }
    bds

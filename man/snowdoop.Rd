@@ -54,7 +54,7 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
      \code{nodenum}; otherwise, get the name for the chunk associated
      with this node.}
   \item{infilenm}{Name of input file (without suffix, if distributed).}
-  \item{outdfnm}{Name of output file (without suffix).}
+  \item{outdfnm}{Quoted name of a distributed data frame.}
   \item{infiledst}{If TRUE, infilenm is distributed.}
   \item{colnum}{Column number on which the sort will be done.  It is
      assumed that this data column is free of NAs.}
