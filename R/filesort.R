@@ -16,9 +16,34 @@
 disksort = function(infile
                     , outfile = NULL
                     , sortcolumn = 1L
-                    , nrows = NULL
+                    , nrows = 1000L
+                    , nbins = 10L
                     , read.table.args = NULL
                     , write.table.args = NULL
-                    )
-{
+                    ){
+
+    if is.character(infile){
+        if is.null(outfile)
+            outfile = paste0("sorted_", infile)
+        infile = file(infile)
+    }
+
+    if is.character(outfile)
+        outfile = file(outfile)
+
+    if !isOpen(infile)
+        open(infile, "rt")
+
+    if !isOpen(outfile)
+        open(outfile, "at")
+
+    chunk = read.table(infile, nrows)
+
+    while(nrow(chunk) > 0){
+        write.table(chunk, outfile)
+        chunk = read.table(infile)
+    }
+
+    close(infile)
+    close(outfile)
 }
