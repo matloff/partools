@@ -64,7 +64,8 @@ makemysortedchunk <- function(mybds,infilenm,ndigs,colnum,outdfnm,
    myhi <- mybds[2]
    if (usefread) {
       requireNamespace('data.table')
-      myfread <- data.table::fread
+      # Always get a data.frame back.
+      myfread <- function(...) data.frame(data.table::fread(...))
    } else myfread <- read.table
    if (!infiledst) {
       # this node reads the ordinary file, and grabs the records 
@@ -80,9 +81,7 @@ makemysortedchunk <- function(mybds,infilenm,ndigs,colnum,outdfnm,
          mychunk <- if (i == 1) tmp else rbind(mychunk,tmp)
       }
    }
-
    # Could sort more efficiently with data.table
-   mychunk <- data.frame(mychunk)
    sortedmchunk <- mychunk[order(mychunk[,colnum]), ]
 
    eval(parse(text = paste(outdfnm,' <<- sortedmchunk')))
@@ -102,9 +101,10 @@ getbounds <- function(cls,infilenm,infiledst,colnum,ndigs,header,sep,nsamp, ...)
         read.table(infilenm,nrows=nsamp,header=header,sep=sep, ...)[,colnum]
 
    bds <- list()
+
+   # Manually do the quantile so it works with character vectors
    samp <- sort(samp)
    pernode <- floor(length(samp) / numnodes)
-   #breaks <- quantile(samp,((2:numnodes) - 1) / numnodes)
    breaks <- seq(from = pernode, by = pernode, length.out = numnodes - 1)
    breaks <- samp[breaks]
 
