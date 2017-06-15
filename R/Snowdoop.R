@@ -102,6 +102,7 @@ getbounds <- function(cls,infilenm,infiledst,colnum,ndigs,header,sep,nsamp, ...)
    pernode <- floor(length(samp) / numnodes)
    #breaks <- quantile(samp,((2:numnodes) - 1) / numnodes)
    breaks <- seq(from = pernode, by = pernode, length.out = numnodes - 1)
+   breaks <- samp[breaks]
 
    for (i in 1:numnodes) {
       mylo <- if (i > 1) breaks[i-1] else NA
@@ -120,7 +121,7 @@ getsample <- function(basenm,ndigs,colnum,nsamp,
 }
 
 # grab for this node's bin from this chunk of the file (the whole file,
-# in in the non-distributed case)
+# in the non-distributed case)
 getmypart <- function(chunk,colnum,myhi,mylo) {
    pte <- getpte()
    me <- pte$myid
