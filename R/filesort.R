@@ -22,19 +22,19 @@ disksort = function(infile
                     , write.table.args = NULL
                     ){
 
-    if is.character(infile){
-        if is.null(outfile)
+    if(is.character(infile)){
+        if(is.null(outfile))
             outfile = paste0("sorted_", infile)
         infile = file(infile)
     }
 
-    if is.character(outfile)
+    if(is.character(outfile))
         outfile = file(outfile)
 
-    if !isOpen(infile)
+    if(!isOpen(infile))
         open(infile, "rt")
 
-    if !isOpen(outfile)
+    if(!isOpen(outfile))
         open(outfile, "at")
 
     # TODO: reorganize. Perhaps with initialize_disksort(...)
@@ -64,7 +64,7 @@ disksort = function(infile
     })
 
     while(nrow(chunk) > 0){
-        bin_chunk(chunk, bin_files, breaks, sortcolumn)
+        bin_chunk(chunk, bin_file_names, bin_files, breaks, sortcolumn)
         chunk = read.table(infile, nrows = nrows)
     }
 
@@ -97,19 +97,22 @@ cutbin = function(x, breaks, bin_names)
 
 #' Place Chunk Into Bins
 #'
-#' Intermediate step in disksort
+#' Intermediate step in disksort. It would be more efficient to directly
+#' serialize the chunks.
 #'
 #' @param chunk \code{data.frame} to be binned
 #' @param bin_files list of files opened in append mode
 #' @param breaks defines the bins
 #' @param sortcolumn column determining the bin
-bin_chunk = function(chunk, bin_files, breaks, sortcolumn)
+bin_chunk = function(chunk, bin_names, bin_files, breaks, sortcolumn)
 {
 
-    bin_names = sapply(bin_files, function(x) summary(x)[["description"]])
     bins = cutbin(chunk[, sortcolumn], breaks, bin_names)
 
-    binned = split(chunk, bins)
+    binned_chunks = split(chunk, bins)
 
-
+    mapply(function(binchunk, file){
+               write.table(binchunk, file, row.names = FALSE, col.names = FALSE)
+    }
+    , binned_chunks, bin_files)
 }
