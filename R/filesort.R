@@ -8,7 +8,10 @@
 #' \code{\link[utils]{write.table}}. If \code{infile} is the name of a file
 #' then the default prepends "sorted_" to this name.
 #' @param sortcolumn which column of the data frame to sort on
+#' @param breaks vector giving points to split data for binning
 #' @param nrows number of rows in the data.frame held in memory
+#' @param nbins number of bins for bin sort. Ignored if \code{breaks} is
+#' specified.
 #' @param read.table.args named list of extra arguments to read.table
 #' @param write.table.args named list of extra arguments to write.table.
 #' Defaults to using read.table.args to preserve the original formatting.
@@ -16,8 +19,9 @@
 disksort = function(infile
                     , outfile = NULL
                     , sortcolumn = 1L
+                    , breaks = NULL
                     , nrows = 1000L
-                    , nbins = 10L
+                    , nbins = 10L #TODO: This is breaking
                     , read.table.args = NULL
                     , write.table.args = NULL
                     ){
@@ -41,13 +45,15 @@ disksort = function(infile
     # Saving this until I have a better idea of what the structure should
     # be.
 
-    chunk = read.table(infile, nrows)
+    chunk = read.table(infile, nrows = nrows)
 
     # It would be more robust to sample from the whole file.
     # But it's not possible to seek on a more general connection.
-    samp = sort(chunk[, sortcolumn])
-    per_bin = round(nrows / nbins)
-    breaks = samp[per_bin * (1:(nbins-1))]
+    if(is.null(breaks)){
+        samp = sort(chunk[, sortcolumn])
+        per_bin = round(nrows / nbins)
+        breaks = samp[per_bin * (1:(nbins-1))]
+    }
 
     # Store intermediate binned files in this directory
     bindir = paste0(summary(infile)[["description"]], "_chunks")
@@ -59,14 +65,17 @@ disksort = function(infile
 
     bin_files = lapply(bin_file_names, function(filename){
         f = file(filename)
-        open(f, "at")
+        open(f, "wb")
         f
     })
 
     while(nrow(chunk) > 0){
         bin_chunk(chunk, bin_file_names, bin_files, breaks, sortcolumn)
+        # TODO: handle error that comes from reading last empty file
         chunk = read.table(infile, nrows = nrows)
     }
+
+    lapply(bin_files, close)
 
     close(infile)
 }
@@ -97,11 +106,10 @@ cutbin = function(x, breaks, bin_names)
 
 #' Place Chunk Into Bins
 #'
-#' Intermediate step in disksort. It would be more efficient to directly
-#' serialize the chunks.
+#' Intermediate step in disksort. 
 #'
 #' @param chunk \code{data.frame} to be binned
-#' @param bin_files list of files opened in append mode
+#' @param bin_files list of files opened in binary append mode
 #' @param breaks defines the bins
 #' @param sortcolumn column determining the bin
 bin_chunk = function(chunk, bin_names, bin_files, breaks, sortcolumn)
@@ -112,7 +120,7 @@ bin_chunk = function(chunk, bin_names, bin_files, breaks, sortcolumn)
     binned_chunks = split(chunk, bins)
 
     mapply(function(binchunk, file){
-               write.table(binchunk, file, row.names = FALSE, col.names = FALSE)
+               serialize(binchunk, file)
     }
     , binned_chunks, bin_files)
 }
