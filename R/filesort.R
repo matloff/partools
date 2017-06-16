@@ -51,10 +51,11 @@ disksort = function(infile
 
     # Store intermediate binned files in this directory
     bindir = paste0(summary(infile)[["description"]], "_chunks")
-    if dir.exists(bindir) stop()
+    if(dir.exists(bindir))
+        stop("Rename or remove the following directory to proceed: ", bindir)
     dir.create(bindir)
 
-    bin_file_names = paste0(c("", breaks), "_to_", c(breaks, ""))
+    bin_file_names = paste0(bindir, "/", c("", breaks), "_to_", c(breaks, ""))
 
     bin_files = lapply(bin_file_names, function(filename){
         f = file(filename)
@@ -63,7 +64,7 @@ disksort = function(infile
     })
 
     while(nrow(chunk) > 0){
-        write_chunk(chunk, bin_files, breaks, sortcolumn)
+        bin_chunk(chunk, bin_files, breaks, sortcolumn)
         chunk = read.table(infile, nrows = nrows)
     }
 
@@ -71,14 +72,44 @@ disksort = function(infile
 }
 
 
+#' Cut Into Bins
+#' 
+#' No boundaries on the endpoints, and handles character \code{x}.
+#' A little different than normal \code{\link[base]{cut}}
+#' 
+#' @param x column to be cut
+#' @param breaks define the bins
+#' @param bin_names names for the result
+#' @return bins factor
+cutbin = function(x, breaks, bin_names)
+{
+
+    bins = rep(1L, length(x))
+
+    i = 2L
+    for(b in breaks){
+        bins[x > b] = i
+        i = i + 1L
+    }
+    factor(bins, levels = seq_along(bin_names), labels = bin_names)
+}
+
+
 #' Place Chunk Into Bins
 #'
 #' Intermediate step in disksort
 #'
-#' @param chunk \code{data.frame} of data to be binned
+#' @param chunk \code{data.frame} to be binned
 #' @param bin_files list of files opened in append mode
-#' @param breaks where to cut each 
-#' @param sortcolumn determines which bin it falls into
+#' @param breaks defines the bins
+#' @param sortcolumn column determining the bin
 bin_chunk = function(chunk, bin_files, breaks, sortcolumn)
 {
+
+    bin_names = sapply(bin_files, function(x) summary(x)[["description"]])
+    bins = cutbin(chunk[, sortcolumn], breaks, bin_names)
+
+    binned = split(chunk, bins)
+
+
 }
