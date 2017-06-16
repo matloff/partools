@@ -103,6 +103,7 @@ getbounds <- function(cls,infilenm,infiledst,colnum,ndigs,header,sep,nsamp, ...)
    bds <- list()
 
    # Manually do the quantile so it works with character vectors
+   # TODO: Clark- What happens if the breaks are not unique? Test this.
    samp <- sort(samp)
    pernode <- floor(length(samp) / numnodes)
    breaks <- seq(from = pernode, by = pernode, length.out = numnodes - 1)

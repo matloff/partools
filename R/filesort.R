@@ -37,13 +37,48 @@ disksort = function(infile
     if !isOpen(outfile)
         open(outfile, "at")
 
+    # TODO: reorganize. Perhaps with initialize_disksort(...)
+    # Saving this until I have a better idea of what the structure should
+    # be.
+
     chunk = read.table(infile, nrows)
 
+    # It would be more robust to sample from the whole file.
+    # But it's not possible to seek on a more general connection.
+    samp = sort(chunk[, sortcolumn])
+    per_bin = round(nrows / nbins)
+    breaks = samp[per_bin * (1:(nbins-1))]
+
+    # Store intermediate binned files in this directory
+    bindir = paste0(summary(infile)[["description"]], "_chunks")
+    if dir.exists(bindir) stop()
+    dir.create(bindir)
+
+    bin_file_names = paste0(c("", breaks), "_to_", c(breaks, ""))
+
+    bin_files = lapply(bin_file_names, function(filename){
+        f = file(filename)
+        open(f, "at")
+        f
+    })
+
     while(nrow(chunk) > 0){
-        write.table(chunk, outfile)
-        chunk = read.table(infile)
+        write_chunk(chunk, bin_files, breaks, sortcolumn)
+        chunk = read.table(infile, nrows = nrows)
     }
 
     close(infile)
-    close(outfile)
+}
+
+
+#' Place Chunk Into Bins
+#'
+#' Intermediate step in disksort
+#'
+#' @param chunk \code{data.frame} of data to be binned
+#' @param bin_files list of files opened in append mode
+#' @param breaks where to cut each 
+#' @param sortcolumn determines which bin it falls into
+bin_chunk = function(chunk, bin_files, breaks, sortcolumn)
+{
 }
