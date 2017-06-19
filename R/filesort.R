@@ -71,8 +71,11 @@ disksort = function(infile
 
     while(nrow(chunk) > 0){
         bin_chunk(chunk, bin_file_names, bin_files, breaks, sortcolumn)
-        # TODO: handle error that comes from reading last empty file
-        chunk = read.table(infile, nrows = nrows)
+
+        tryCatch(chunk <- read.table(infile, nrows = nrows),
+            # A data frame with no rows
+            error = function(e) chunk <<- chunk[FALSE, ]
+        )
     }
 
     lapply(bin_files, close)

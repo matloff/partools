@@ -21,6 +21,7 @@ test_that("all defaults", {
     disksort(fname_unsorted)
     fname_sorted = paste0("sorted_", fname_unsorted)
     actual = readChar(fname_sorted, nchars = 1000L)
+
     expect_equal(lines_sorted, actual)
     unlink(fname_sorted)
 
@@ -28,3 +29,12 @@ test_that("all defaults", {
 
 
 unlink(fname_unsorted)
+
+
+# Interactive testing
+
+fname = "iris.txt"
+
+write.table(iris, fname, col.names = FALSE, row.names = FALSE)
+
+disksort(fname, breaks = c(5, 6))
