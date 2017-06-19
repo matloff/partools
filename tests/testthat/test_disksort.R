@@ -33,6 +33,7 @@ unlink(fname_unsorted)
 
 # Interactive testing
 
+library(partools)
 fname = "iris.txt"
 
 write.table(iris, fname, col.names = FALSE, row.names = FALSE)

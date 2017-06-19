@@ -15,6 +15,7 @@
 #' @param read.table.args named list of extra arguments to read.table
 #' @param write.table.args named list of extra arguments to write.table.
 #' Defaults to using read.table.args to preserve the original formatting.
+#' @param cleanup remove intermediate files?
 #' @export
 disksort = function(infile
                     , outfile = NULL
@@ -24,6 +25,7 @@ disksort = function(infile
                     , nbins = 10L #TODO: This is breaking
                     , read.table.args = NULL
                     , write.table.args = NULL
+                    , cleanup = TRUE
                     ){
 
     if(is.character(infile)){
@@ -69,15 +71,17 @@ disksort = function(infile
         f
     })
 
-    nchunks = 1L
-    while(TRUE){
+    nchunks = 0L
+    moreinput = TRUE
+    moreinput_env = environment()
+    while(moreinput){
+        nchunks = nchunks + 1L
         bin_chunk(chunk, bin_file_names, bin_files, breaks, sortcolumn)
 
         tryCatch(chunk <- read.table(infile, nrows = nrows),
-            # Break out of the loop. Maybe more graceful way to write this?
-            error = function(e) eval(break, envir = parent.frame(2))
+            # Break out of the loop. Struggling with writing this clearly
+            error = function(e) assign("moreinput", FALSE, envir = moreinput_env)
         )
-        nchunks = nchunks + 1L
     }
 
     close(infile)
@@ -86,6 +90,10 @@ disksort = function(infile
     lapply(bin_file_names, sortbin
            , sortcolumn = sortcolumn, outfile = outfile, nchunks = nchunks)
     close(outfile)
+
+    if(cleanup){
+        unlink(bindir, recursive = TRUE)
+    }
 }
 
 
@@ -159,6 +167,7 @@ sortbin = function(fname, sortcolumn, outfile, nchunks)
     open(f, "rb")
     chunks = replicate(nchunks, unserialize(f))
     unsorted = do.call(rbind, chunks)
-    sorted = unsorted[order(unsorted[, sortcolumn]), ]
+    myorder = order(unsorted[, sortcolumn])
+    sorted = unsorted[myorder, ]
     write.table(sorted, outfile, row.names = FALSE, col.names = FALSE)
 }
