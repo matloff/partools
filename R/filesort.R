@@ -73,14 +73,12 @@ disksort = function(infile
 
     nchunks = 0L
     moreinput = TRUE
-    moreinput_env = environment()
     while(moreinput){
         nchunks = nchunks + 1L
         bin_chunk(chunk, bin_file_names, bin_files, breaks, sortcolumn)
 
         tryCatch(chunk <- read.table(infile, nrows = nrows),
-            # Break out of the loop. Struggling with writing this clearly
-            error = function(e) assign("moreinput", FALSE, envir = moreinput_env)
+            error = function(e) moreinput <<- FALSE
         )
     }
 

@@ -35,7 +35,6 @@ unlink(fname_unsorted)
 
 library(partools)
 fname = "iris.txt"
-
 options(stringsAsFactors = FALSE)
 options("stringsAsFactors") 
 
