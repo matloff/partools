@@ -69,18 +69,23 @@ disksort = function(infile
         f
     })
 
-    while(nrow(chunk) > 0){
+    nchunks = 1L
+    while(TRUE){
         bin_chunk(chunk, bin_file_names, bin_files, breaks, sortcolumn)
 
         tryCatch(chunk <- read.table(infile, nrows = nrows),
-            # A data frame with no rows
-            error = function(e) chunk <<- chunk[FALSE, ]
+            # Break out of the loop. Maybe more graceful way to write this?
+            error = function(e) eval(break, envir = parent.frame(2))
         )
+        nchunks = nchunks + 1L
     }
 
+    close(infile)
     lapply(bin_files, close)
 
-    close(infile)
+    lapply(bin_file_names, sortbin
+           , sortcolumn = sortcolumn, outfile = outfile, nchunks = nchunks)
+    close(outfile)
 }
 
 
@@ -107,6 +112,11 @@ cutbin = function(x, breaks, bin_names)
 }
 
 
+# Signals the end of file / input
+#SENTINEL = NULL
+#test_sentinel = function(x) is.null(x)
+
+
 #' Place Chunk Into Bins
 #'
 #' Intermediate step in disksort. 
@@ -115,8 +125,14 @@ cutbin = function(x, breaks, bin_names)
 #' @param bin_files list of files opened in binary append mode
 #' @param breaks defines the bins
 #' @param sortcolumn column determining the bin
-bin_chunk = function(chunk, bin_names, bin_files, breaks, sortcolumn)
+bin_chunk = function(chunk, bin_names, bin_files, breaks, sortcolumn
+                     #, last = FALSE
+                     )
 {
+    # if(last){
+    #     lapply(bin_files, function(f) serialize(SENTINEL, f))
+    #     return()
+    # }
 
     bins = cutbin(chunk[, sortcolumn], breaks, bin_names)
 
@@ -126,4 +142,23 @@ bin_chunk = function(chunk, bin_names, bin_files, breaks, sortcolumn)
                serialize(binchunk, file)
     }
     , binned_chunks, bin_files)
+}
+
+
+#' Sort Bin And Write To Outfile
+#'
+#' Last step of disksort
+#'
+#' @param fname name of an intermediate file
+#' @param sortcolumn See \code{\link{disksort}}
+#' @param outfile See \code{\link{disksort}}. 
+#' @param nchunks total number of chunks expected
+sortbin = function(fname, sortcolumn, outfile, nchunks)
+{
+    f = file(fname)
+    open(f, "rb")
+    chunks = replicate(nchunks, unserialize(f))
+    unsorted = do.call(rbind, chunks)
+    sorted = unsorted[order(unsorted[, sortcolumn]), ]
+    write.table(sorted, outfile, row.names = FALSE, col.names = FALSE)
 }
