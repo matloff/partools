@@ -165,7 +165,7 @@ sortbin = function(fname, sortcolumn, outfile, nchunks)
 {
     f = file(fname)
     open(f, "rb")
-    chunks = replicate(nchunks, unserialize(f))
+    chunks = replicate(nchunks, unserialize(f), simplify = FALSE)
     unsorted = do.call(rbind, chunks)
     myorder = order(unsorted[, sortcolumn])
     sorted = unsorted[myorder, ]

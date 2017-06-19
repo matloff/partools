@@ -36,6 +36,9 @@ unlink(fname_unsorted)
 library(partools)
 fname = "iris.txt"
 
+options(stringsAsFactors = FALSE)
+options("stringsAsFactors") 
+
 write.table(iris, fname, col.names = FALSE, row.names = FALSE)
 
-disksort(fname, breaks = c(5, 6))
+disksort(fname, breaks = c(5, 6), cleanup = TRUE)
