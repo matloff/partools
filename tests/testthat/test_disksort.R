@@ -15,6 +15,10 @@ lines_sorted = "1 one
 
 writeChar(lines_unsorted, fname_unsorted)
 
+unsorted_iris_file = "iris.txt"
+write.table(iris, unsorted_iris_file, col.names = FALSE, row.names = FALSE)
+iris_sorted = iris[order(iris[, 1]), ]
+
 
 test_that("all defaults", {
 
@@ -28,16 +32,18 @@ test_that("all defaults", {
 })
 
 
+test_that("iris data", {
+
+    sorted_iris_file = "sorted_iris.txt"
+    #options(stringsAsFactors = FALSE)
+    #options("stringsAsFactors") 
+    disksort(unsorted_iris_file, breaks = c(5, 6), cleanup = TRUE)
+    actual = read.table(sorted_iris_file)
+    expect_equal(iris_sorted, actual)
+    unlink(sorted_iris_file)
+
+})
+
+
 unlink(fname_unsorted)
-
-
-# Interactive testing
-
-library(partools)
-fname = "iris.txt"
-options(stringsAsFactors = FALSE)
-options("stringsAsFactors") 
-
-write.table(iris, fname, col.names = FALSE, row.names = FALSE)
-
-disksort(fname, breaks = c(5, 6), cleanup = TRUE)
+unlink(unsorted_iris_file)
