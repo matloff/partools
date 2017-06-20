@@ -2,10 +2,15 @@
 % Please edit documentation in R/filesort.R
 \name{disksort}
 \alias{disksort}
+\alias{streambin}
 \title{Sort File On Disk}
 \usage{
-disksort(infile, outfile = NULL, sortcolumn = 1L, nrows = NULL,
-  read.table.args = NULL, write.table.args = NULL)
+disksort(infile, outfile = NULL, sortcolumn = 1L, breaks = NULL,
+  nrows = 1000L, nbins = 10L, read.table.args = NULL,
+  write.table.args = NULL, cleanup = FALSE)
+
+streambin(infile, firstchunk, sortcolumn = 1L, breaks = NULL,
+  nrows = 1000L, read.table.args = NULL)
 }
 \arguments{
 \item{infile}{unsorted file to read from. See \code{\link[utils]{read.table}}.}
@@ -16,14 +21,29 @@ then the default prepends "sorted_" to this name.}
 
 \item{sortcolumn}{which column of the data frame to sort on}
 
+\item{breaks}{vector giving points to split data for binning}
+
 \item{nrows}{number of rows in the data.frame held in memory}
+
+\item{nbins}{number of bins for bin sort. Ignored if \code{breaks} is
+specified.}
 
 \item{read.table.args}{named list of extra arguments to read.table}
 
 \item{write.table.args}{named list of extra arguments to write.table.
 Defaults to using read.table.args to preserve the original formatting.}
+
+\item{cleanup}{remove intermediate files?}
 }
 \description{
 This function was designed to handle files larger than memory. At most
-\code{nrows} will be present in memory at once.
+\code{nrows} will be present in memory at once. It is not parallel.
 }
+\section{Functions}{
+\itemize{
+\item \code{streambin}: Stream File Into Bins
+
+Read a data frame from a file, split it into bins, and write to those
+bins on disk.
+}}
+
