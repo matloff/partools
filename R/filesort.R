@@ -1,9 +1,11 @@
 #' Sort File On Disk
 #'
-#' This function was designed to handle files larger than memory. At most
+#' This function is designed to handle files larger than memory. At most
 #' \code{nrows} will be present in memory at once. It is not parallel.
+#' For this to work efficiently it's necessary that the data between
+#' \code{breaks} fits into memory.
 #'
-#' @param infile unsorted file to read from. See \code{\link[utils]{read.table}}.
+#' @param infile unsorted file like object to read from. See \code{\link[utils]{read.table}}.
 #' @param outfile where to write the sorted file. See
 #' \code{\link[utils]{write.table}}. If \code{infile} is the name of a file
 #' then the default prepends "sorted_" to this name.
@@ -28,14 +30,19 @@ disksort = function(infile
                     , cleanup = FALSE
                     )
 {
+    # Prepare input / output connections
+
     if(is.character(infile)){
         if(is.null(outfile))
             outfile = paste0("sorted_", infile)
         infile = file(infile)
     }
 
-    if(is.character(outfile))
+    if(is.character(outfile)){
+        if(file.exists(outfile))
+            stop(outfile, " already exists.")
         outfile = file(outfile)
+    }
 
     if(!isOpen(infile))
         open(infile, "rt")
@@ -43,10 +50,11 @@ disksort = function(infile
     if(!isOpen(outfile))
         open(outfile, "at")
 
-    firstchunk = read.table(infile, nrows = nrows)
-
     # It would be more robust to sample from the whole file.
     # But it's not possible to seek on a more general connection.
+
+    firstchunk = read.table(infile, nrows = nrows)
+
     if(is.null(breaks)){
         samp = sort(firstchunk[, sortcolumn])
         per_bin = round(nrows / nbins)
@@ -68,17 +76,18 @@ disksort = function(infile
            , outfile = outfile
            , nchunks = binresult[["nchunks"]]
            )
-    close(outfile)
 
+    # All done
+    close(outfile)
     if(cleanup){
-        unlink(bindir, recursive = TRUE)
+        unlink(binresult[["bindir"]], recursive = TRUE)
     }
 }
 
 
 #' @describeIn disksort Stream File Into Bins
 #'
-#' Read a data frame from a file, split it into bins, and write to those
+#' Read a data frame, split it into bins, and write to those
 #' bins on disk.
 streambin = function(infile
                     , firstchunk
@@ -102,8 +111,11 @@ streambin = function(infile
         f
     })
 
+    # Initialize before the loop
     nchunks = 0L
     moreinput = TRUE
+    chunk = firstchunk
+
     while(moreinput){
         nchunks = nchunks + 1L
         writechunk(chunk, bin_file_names, bin_files, breaks, sortcolumn)
@@ -116,7 +128,10 @@ streambin = function(infile
     close(infile)
     lapply(bin_files, close)
 
-    list(bin_file_names = bin_file_names, nchunks = nchunks)
+    list(bin_file_names = bin_file_names
+         , nchunks = nchunks
+         , bindir = bindir
+         )
 }
 
 
@@ -142,7 +157,7 @@ cutbin = function(x, breaks, bin_names)
 }
 
 
-# Signals the end of file / input
+# Signals the last element
 #SENTINEL = NULL
 #test_sentinel = function(x) is.null(x)
 
@@ -165,13 +180,9 @@ writechunk = function(chunk, bin_names, bin_files, breaks, sortcolumn
     # }
 
     bins = cutbin(chunk[, sortcolumn], breaks, bin_names)
-
-    binned_chunks = split(chunk, bins)
-
-    mapply(function(binchunk, file){
-               serialize(binchunk, file)
-    }
-    , binned_chunks, bin_files)
+    # SENTINEL value can be added in here later if it's needed.
+    binned_chunk = split(chunk, bins)
+    mapply(serialize, binned_chunk, bin_files)
 }
 
 
@@ -192,4 +203,5 @@ sortbin = function(fname, sortcolumn, outfile, nchunks)
     myorder = order(unsorted[, sortcolumn])
     sorted = unsorted[myorder, ]
     write.table(sorted, outfile, row.names = FALSE, col.names = FALSE)
+    close(f)
 }
