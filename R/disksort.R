@@ -27,7 +27,7 @@ disksort = function(infile
                     , nbins = 10L #TODO: This breaks if too few unique values
                     , read.table.args = NULL
                     , write.table.args = NULL
-                    , cleanup = FALSE
+                    , cleanup = TRUE
                     )
 {
     # Prepare input / output connections
@@ -52,12 +52,14 @@ disksort = function(infile
 
     # It would be more robust to sample from the whole file.
     # But it's not possible to seek on a more general connection.
-
     firstchunk = read.table(infile, nrows = nrows)
+
+    # firstchunk may be the whole file
+    nrows = nrow(firstchunk)
 
     if(is.null(breaks)){
         samp = sort(firstchunk[, sortcolumn])
-        per_bin = round(nrows / nbins)
+        per_bin = ceiling(nrows / nbins)
         breaks = samp[per_bin * (1:(nbins-1))]
     }
 

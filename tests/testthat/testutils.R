@@ -1,8 +1,5 @@
 context("Utilities in SnowUtils")
 
-cls <- makeCluster(2)
-setclsinfo(cls)
-
 az <- data.frame(letter = letters, number = seq_along(letters))
 azaz <- rbind(az, az)
 
