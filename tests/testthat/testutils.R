@@ -76,3 +76,5 @@ test_that("Other arguments for read and write table", {
 #    In file(infile, "r") : cannot open file 'az.1': No such file or directory
 
 })
+
+unlink("../az*")

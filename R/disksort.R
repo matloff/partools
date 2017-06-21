@@ -24,7 +24,7 @@ disksort = function(infile
                     , sortcolumn = 1L
                     , breaks = NULL
                     , nrows = 1000L
-                    , nbins = 10L #TODO: This breaks if too few unique values
+                    , nbins = 10L
                     , read.table.args = NULL
                     , write.table.args = NULL
                     , cleanup = TRUE
@@ -91,6 +91,8 @@ disksort = function(infile
 #'
 #' Read a data frame, split it into bins, and write to those
 #' bins on disk.
+#'
+#' @param firstchunk first rows from \code{infile}
 streambin = function(infile
                     , firstchunk
                     , sortcolumn = 1L
@@ -169,6 +171,7 @@ cutbin = function(x, breaks, bin_names)
 #' Intermediate step in disksort. 
 #'
 #' @param chunk \code{data.frame} to be binned
+#' @param bin_names names for each bin. Useful for debugging
 #' @param bin_files list of files opened in binary append mode
 #' @param breaks defines the bins
 #' @param sortcolumn column determining the bin

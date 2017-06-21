@@ -16,7 +16,7 @@ test_that("all defaults", {
 })
 
 
-test_that("iris data", {
+test_that("passing in options", {
 
     disksort(unsorted_iris_file, breaks = c(5, 6), cleanup = TRUE)
     actual = read.table(sorted_iris_file)
