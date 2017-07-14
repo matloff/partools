@@ -697,3 +697,9 @@ ipstrcat <- function (str1 = stop("str1 not supplied"), ..., outersep = "",
     eval(tmp, parent.frame())
 }
 
+# try to load the package specified in pkgname
+tryloadpkg <- function(pkgname) {
+   cmd <- paste('require(',pkgname,')',sep='')
+   docmd(cmd)
+}
+

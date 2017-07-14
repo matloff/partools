@@ -270,7 +270,8 @@ cameans <- function(cls,cols,na.rm=FALSE) {
    cabase(cls,ovf,estf)
 }
 
-# finds the quantiles of the vector defined in the string vec
+# finds estimates of the population quantiles corresponding to the
+# vector defined in the string vec
 caquantile <- function(cls,vec,probs=c(0.25,0.50,0.75),na.rm=FALSE) {
    ovf <- function(u) {
       probs <- paste(probs,collapse=",")
@@ -288,4 +289,37 @@ caquantile <- function(cls,vec,probs=c(0.25,0.50,0.75),na.rm=FALSE) {
 # groups, applying FUN to each, then averaging across the cluster
 caagg <- function(cls,ynames,xnames,dataname,FUN) {
    distribagg(cls,ynames,xnames,dataname,FUN,"mean")
+} 
+
+# Software Alchemy version of rq() in the quantreg package
+#
+# example of use (quantreg must be installed!):
+#
+# cls <- makeCluster(2)
+# setclsinfo(cls)
+# 
+# set.seed(73129)
+# 
+# n <- 10000
+# p <- 50
+# true_coefs <- 1:p
+# randomdata <- matrix(rnorm(n * p), nrow = n)
+# response <- data.frame(y = randomdata %*% true_coefs + rnorm(n))
+# d <- cbind(response, randomdata)
+# distribsplit(cls,'d')
+# 
+# library(quantreg)
+# fit <- rq(y ~ ., data = d)
+# fit2 <- carq(cls, 'y ~ ., data = d')
+
+# fit and fit2 should be very close
+#
+carq <- function(cls,rqargs) {
+   clusterEvalQ(cls,tryloadpkg('quantreg'))
+   ovf <- function(u) {
+      tmp <- paste("rq(",rqargs,")",collapse="")
+      docmd(tmp)
+   }
+   cabase(cls,ovf,coef)$thts
 }
+

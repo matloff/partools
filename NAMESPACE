@@ -9,12 +9,12 @@ export(writemgrscreen,writewrkrscreens,killdebug,
       readnscramble,getnumdigs,filesave,fileread,filesplitrand,fileagg,
       dfileagg,filegetrows,dfilegetrows,fileshuffle,
    distribsplit,distribcat,distribagg,distribrange,
-      distribcounts,distribgetrows,docmd,geteltis,distribmeans,
+      distribcounts,distribgetrows,geteltis,distribmeans,
       distribisdt,doclscmd,caknn,dwhich.min,dwhich.max,
-   ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,
+   ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,carq,
    caclassfit,caclasspred,vote,re_code,
    setclsinfo,filechunkname,exportlibpaths,filesplit,
    parpdist,
-   ipstrcat,disksort
+   ipstrcat,disksort,docmd,tryloadpkg
    )
  

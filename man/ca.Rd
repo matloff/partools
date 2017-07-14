@@ -1,4 +1,4 @@
-\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,caknn}
+\name{ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,caknn,carq}
 \alias{ca}
 \alias{cabase}
 \alias{calm}
@@ -9,6 +9,7 @@
 \alias{caquantile}
 \alias{caagg}
 \alias{caknn}
+\alias{carq}
 
 \title{Software Alchemy: Turning Complex Statistical Computations into
 Embarrassingly-Parallel Ones}
@@ -28,6 +29,7 @@ cameans(cls,cols,na.rm=FALSE)
 caquantile(cls,vec, probs = c(0.25, 0.5, 0.75),na.rm=FALSE) 
 caagg(cls,ynames,xnames,dataname,FUN)
 caknn(cls, yname, k, xname='')
+carq(cls,rqargs) 
 }
 
 \arguments{
@@ -45,6 +47,8 @@ caknn(cls, yname, k, xname='')
   \item{glmargs}{Quoted string representing arguments to \code{glm},
      e.g. R formula, \code{data} specification, and \code{family}
      argument.}
+  \item{rqargs}{Quoted string representing arguments to \code{rq}
+     in the \code{quantreg} package,}
   \item{prcompargs}{Quoted string representing arguments to 
      \code{prcomp}.}
   \item{p}{Number of columns in data}
