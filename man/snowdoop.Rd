@@ -15,6 +15,7 @@
 \alias{dfileagg}
 \alias{filegetrows}
 \alias{dfilegetrows}
+\alias{dTopKVals}
 
 \title{
 Snowdoop.
@@ -42,6 +43,7 @@ fileagg(fnames,ynames,xnames,header=FALSE,sep= " ",FUN,FUN1=FUN)
 dfileagg(cls,fnames,ynames,xnames,header=FALSE,sep=" ",FUN,FUN1=FUN) 
 filegetrows(fnames,tmpdataexpr,header=FALSE,sep=" ") 
 dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ") 
+dTopKVals(cls,vecname,k)
 }
 
 \arguments{
@@ -85,6 +87,8 @@ dfilegetrows(cls,fnames,tmpdataexpr,header=FALSE,sep=" ")
   \item{outbasename}{basename of the output files}
   \item{nout}{number of output files}
   \item{...}{Additional arguments to \code{read.table, write.table}}
+  \item{vecname}{Quoted name of a distributed vector.}
+  \item{k}{Number of top/bottom values to fetch.}
 }
 
 \details{
@@ -171,6 +175,10 @@ for the others:
    
    }
 
+The function \code{dTopKVals} returns the \code{k} most extreme values
+in the distributed vector specified by \code{vecname}.  If \code{k} is
+positive, this will be the top \code{k} values; for negative \code{k},
+it will be the bottom \code{abs(k)} values.
 }
 
 \examples{
@@ -266,8 +274,16 @@ dfilegetrows(cls,c('ctm.1','ctm.2'),cmd,header=TRUE,sep=',')
 # check
 mtc[mtc$cyl == 4 & mtc$gear == 4,]
 
-stopCluster(cls)
+x <- sample(1:3,10,replace=TRUE)
+y <- sample(0:1,10,replace=TRUE)
+u <- runif(10)
+v <- runif(10)
+d <- data.frame(x,y,u,v)
+distribsplit(cls,"d")
+dTopKVals(cls,'d$u',2)  # 0.985, 0.858
+dTopKVals(cls,'d$u',-2)  # 0.066, 0.326
 
+stopCluster(cls)
 
 }
 
