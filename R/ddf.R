@@ -11,7 +11,7 @@ distribgetrows <- function(cls,cmd) {
 }
 
 # execute the command cmd at each cluster node, typically select(), then
-# collect using rbind() at the caller
+# collect using rbind() at the caller on non-empty responses
 distribgetrowsnn <- function(cls,cmd) {
   clusterExport(cls,'cmd',envir=environment())
   res <- clusterEvalQ(cls,docmd(cmd))
@@ -109,25 +109,18 @@ col3 <- seq(13, nrows*10 + 3, by = 10)
 col4 <- seq(14, nrows*10 + 4, by = 10)
 d <- data.frame(col1,col2,col3,col4)
 rownames(d) <- c(nrows:1) # should have no effect
-
-# TO WORK AS EXPECTED, THE FOLLOWING ARE REQUIRED:
-# 1) cls must be defined
-# 2) the distributed variable must have a local definition
-# 3) the local definition must have ddf as its first class
-# There is a problem with single variables such as d[2,3] returning any of the following three:
-# 1) [1] 23
-# 2) init 
-#      23
-# 3) <0 x 0 matrix>
-# Warning message:
-# In f(init, x[[i]]) :
-#   number of columns of result is not a multiple of vector length (arg 2)
-
+# distribute d to the workers
 distribsplit(cl, "d", scramble = FALSE)
 print(clusterEvalQ(cl, { print(d) }))
 dd <- d
 rm(d)
-d <- 123
+
+# TO WORK AS EXPECTED, THE FOLLOWING ARE REQUIRED:
+# 1) the distributed variable must have a local definition
+# 2) the local definition must have ddf as its first class
+# 3) the local definition must have the attribute 'cluster' set to the cluster
+
+d <- 123 # can be set to anything
 class(d) <- append("ddf", class(d))
 attr(d,'cluster') <- cl
 print("********** d **********")
