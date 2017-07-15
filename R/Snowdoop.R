@@ -482,3 +482,17 @@ dfilegetrows <- function(cls,fnames,tmpdataexpr,
       header=header,sep=sep) 
    Reduce(rbind,rowslist)
 }
+
+# dtopk():
+#
+# finds the top k values in d, returning them in order at the
+# manager node; for the bottom k values, use negative k
+#
+dTopKVals <- function(cls,vecname,k) {
+   down <- (k > 0)
+   cmd <- paste0('sort(',vecname,',decreasing=',down,')')
+   tmp <- doclscmd(cls,cmd)
+   tmp <- sort(unlist(tmp),decreasing=down)
+   tmp[1:abs(k)]
+}
+
