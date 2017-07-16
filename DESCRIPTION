@@ -1,9 +1,10 @@
 Package: partools
 Version: 1.1.6
 Author: Norm Matloff <normmatloff@gmail.com> [cre,aut], 
-   Clark Fitzgerald <clarkfitzg@gmail.com> [aut], with
-   contributions by Alex Rumbaugh <aprumbaugh@ucdavis.edu> and
-   Hadley Wickham <h.wickham@gmail.com>
+   Clark Fitzgerald <clarkfitzg@gmail.com> [aut], 
+   Reed Davis <rdavis2468@gmail.com> [ctb],
+   Alex Rumbaugh <aprumbaugh@ucdavis.edu> [ctb], 
+   Hadley Wickham <h.wickham@gmail.com> [ctb]
 Maintainer: Norm Matloff <normmatloff@gmail.com>
 Title: Tools for the 'Parallel' Package
 Description: Miscellaneous utilities for parallelizing large
