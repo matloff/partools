@@ -76,7 +76,8 @@ makemysortedchunk <- function(mybds,infilenm,ndigs,colnum,outdfnm,
       # this node reads all chunks of`the distributed file, 
       # and grabs the records belonging to its bin
       for (i in 1:ncls) {
-         tmp <- myfread(filechunkname(infilenm,ndigs,i),header=header,sep=sep, ...)
+         tmp <- 
+            myfread(filechunkname(infilenm,ndigs,i),header=header,sep=sep, ...)
          tmp <- getmypart(tmp,colnum,myhi,mylo)
          mychunk <- if (i == 1) tmp else rbind(mychunk,tmp)
       }

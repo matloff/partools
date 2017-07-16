@@ -1,19 +1,10 @@
 
 # execute the command cmd at each cluster node, typically select(), then
 # collect using rbind() at the caller
-distribgetrows1 <- function(cls,cmd) {
-  clusterExport(cls,'cmd',envir=environment())
-  res <- clusterEvalQ(cls,docmd(cmd))
-  tmp <- Reduce(rbind,res)
-  notallna <- function(row) any(!is.na(row))
-  tmp[apply(tmp,1,notallna),]
-}
-
-# execute the command cmd at each cluster node, typically select(), then
-# collect using rbind() at the caller
-distribgetrows2 <- function(cls,cmd) {
-  clusterExport(cls,'cmd',envir=environment())
-  res <- clusterEvalQ(cls,docmd(cmd))
+distribgetrows2 <- function(cls,cmd,who=NULL) {
+  # clusterExport(cls,'cmd',envir=environment())
+  # res <- clusterEvalQ(cls,docmd(cmd))
+  res <- doclscmd(cls,cmd,who)
   res <- res[lapply(res,length)>0] # delete elements of length 0
   tmp <- Reduce(rbind,res)
   if (length(tmp) > 1){ # do only if more than 1 element
@@ -27,6 +18,7 @@ numstr <- function(j){
   if (length(j) == 1){
     str <- as.character(j)
   } else {
+    clusterEvalQ(cls, dotoexec())
     str <- paste("c(", paste(j, sep="", collapse = ","), ")")
   }
 }
@@ -47,6 +39,17 @@ findrow <- function(cls, i, objname){
   c(irow, iwrk)
 }
 
+# make object of class 'ddf', representing the distributed data frame
+# named 'dname' on cluster 'cls'
+makeddf <- function(dname,cls) {
+   tmp <- 0
+   class(tmp) <- 'ddf'
+   attr(tmp,'dname') <- dname
+   attr(tmp,'cluster') <- cls
+   eval(parse(text =
+      paste0('assign("',dname,'",tmp,envir=.GlobalEnv)')))
+}
+
 "[.ddf" <- function(obj, i=NULL, j=NULL){
   objname <- deparse(substitute(obj))
   cls <- attr(d,'cluster')
@@ -62,20 +65,23 @@ findrow <- function(cls, i, objname){
       dr <- distribgetrows2(cls, cmd)[,1]
     } else {
       cmd  <- paste0(objname, "[,", numstr(j), "]")
-      dr <- distribgetrows2(cls, cmd)
+      # dr <- distribgetrows2(cls, cmd)
+      dr <- distribgetrows(cls, cmd,irow[2])
     }
   }
   else if (is.null(j)){
     if (length(i) == 1){ # could be done in else loop
       irow <- findrow(cls, i, objname)
       cmd <- paste0(objname, "[", irow[1], ",]")
-      dr <- distribgetrows2(cls, cmd)[irow[2],]
+      # dr <- distribgetrows2(cls, cmd)[irow[2],]
+      dr <- distribgetrows(cls, cmd,irow[2])
     } else {
       dr <- NULL
       for (k in 1:length(i)){
         irow <- findrow(cls, i[k], objname)
         cmd <- paste0(objname, "[", irow[1], ",]")
-        dr1 <- distribgetrows2(cls, cmd)[irow[2],]
+        # dr1 <- distribgetrows2(cls, cmd)[irow[2],]
+        dr1 <- distribgetrows(cls, cmd,irow[2])
         dr <- rbind(dr, dr1)
       }
     }
@@ -84,13 +90,15 @@ findrow <- function(cls, i, objname){
     if (length(i) == 1){
       irow <- findrow(cls, i, objname)
       cmd <- paste0(objname, "[", irow[1], ",", numstr(j), "]")
-      dr <- distribgetrows2(cls, cmd)[irow[2]]
+      # dr <- distribgetrows2(cls, cmd)[irow[2]]
+      dr <- distribgetrows(cls, cmd,irow[2])
     } else {
       dr <- NULL
       for (k in 1:length(i)){
         irow <- findrow(cls, i[k], objname)
         cmd <- paste0(objname, "[", irow[1], ",", numstr(j), "]")
-        dr1 <- distribgetrows2(cls, cmd)[irow[2],]
+        # dr1 <- distribgetrows(cls, cmd,irow[2])
+        dr1 <- distribgetrows(cls, cmd,irow[2])
         dr <- rbind(dr, dr1)
       }
     }
