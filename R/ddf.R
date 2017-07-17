@@ -1,32 +1,37 @@
 
 # execute the command cmd at each cluster node, typically select(), then
 # collect using rbind() at the caller
-distribgetrows2 <- function(cls,cmd,who=NULL) {
-  # clusterExport(cls,'cmd',envir=environment())
-  # res <- clusterEvalQ(cls,docmd(cmd))
-  res <- doclscmd(cls,cmd,who)
-  res <- res[lapply(res,length)>0] # delete elements of length 0
-  tmp <- Reduce(rbind,res)
-  if (length(tmp) > 1){ # do only if more than 1 element
-    notallna <- function(row) any(!is.na(row))
-    tmp[apply(tmp,1,notallna),]
-  }
-  tmp
-}
+##  distribgetrows2 <- function(cls,cmd,who=NULL) {
+##    # clusterExport(cls,'cmd',envir=environment())
+##    # res <- clusterEvalQ(cls,docmd(cmd))
+##    res <- doclscmd(cls,cmd,who)
+##    res <- res[lapply(res,length)>0] # delete elements of length 0
+##    tmp <- Reduce(rbind,res)
+##    if (length(tmp) > 1){ # do only if more than 1 element
+##      notallna <- function(row) any(!is.na(row))
+##      tmp[apply(tmp,1,notallna),]
+##    }
+##    tmp
+##  }
 
+# convert vector, e.g. c(1,3), to string form
 numstr <- function(j){
   if (length(j) == 1){
-    str <- as.character(j)
+    strr <- as.character(j)
   } else {
-    clusterEvalQ(cls, dotoexec())
-    str <- paste("c(", paste(j, sep="", collapse = ","), ")")
+    ### clusterEvalQ(cls, dotoexec())
+    strr <- paste("c(", paste(j, sep="", collapse = ","), ")")
   }
 }
 
+# determine where virtual row i is in the distributed data frame
+# objname; 2-tuple is returned, consisting of the row number within
+# worker, and the worker number 
 findrow <- function(cls, i, objname){
   # get number of rows per worker
   cmd <- paste0("dim(", objname, ")[1]")
-  nr <- distribgetrows2(cls, cmd) #DEBUG
+  # nr <- distribgetrows2(cls, cmd) #DEBUG
+  nr <- doclscmd(cls, cmd) 
   last <- cumsum(nr)
   frst <- c(0, last[1:length(last)-1]) + 1
   here <- i >= frst & i <= last
@@ -61,12 +66,14 @@ makeddf <- function(dname,cls) {
     if (length(j) == 1){
       #cmd  <- paste0(objname, "[,", j, "]")
       #dr <- distribgetcols(cls, cmd)
-      cmd  <- paste0(objname, "[,c(", j, ",", j, ")]")
-      dr <- distribgetrows2(cls, cmd)[,1]
+      # cmd  <- paste0(objname, "[,c(", j, ",", j, ")]")
+      # dr <- distribgetrows2(cls, cmd)[,1]
+      cmd  <- paste0(objname, "[,", j, ",drop=FALSE]")
+      dr <- distribgetrows(cls, cmd)
     } else {
       cmd  <- paste0(objname, "[,", numstr(j), "]")
       # dr <- distribgetrows2(cls, cmd)
-      dr <- distribgetrows(cls, cmd,irow[2])
+      dr <- distribgetrows(cls, cmd)
     }
   }
   else if (is.null(j)){
@@ -141,6 +148,7 @@ makeddf <- function(dname,cls) {
 ### d <- 123
 ### class(d) <- append("ddf", class(d))
 ### attr(d,'cluster') <- cl
+### attr(d,'dname') <- 'd'
 ### print("********** d **********")
 ### d
 ### print("********** d[,] **********")
