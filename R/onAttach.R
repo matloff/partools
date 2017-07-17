@@ -1,5 +1,6 @@
 
 .onAttach <- function(libname, pkgname) {
-   packageStartupMessage('Latest version of partools at GitHub.com/matloff')
+   packageStartupMessage(
+      '\n**************\n\nLatest version of partools at GitHub.com/matloff')
 }
 
