@@ -1,4 +1,10 @@
 
+# code to allow queries at the manager node of the form, e.g. d[,c(2,4)]
+# for a distributed data frame d; needs a fake object of the same name,
+# e.g. d, at the manager node, of class 'ddf'; one can construct such an
+# object via makeddf()
+
+
 # execute the command cmd at each cluster node, typically select(), then
 # collect using rbind() at the caller
 ##  distribgetrows2 <- function(cls,cmd,who=NULL) {
