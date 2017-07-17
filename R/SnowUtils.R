@@ -73,8 +73,8 @@ setclsinfo <- function(cls) {
    clusterExport(cls,"tmpvar",envir=environment())
    clusterEvalQ(cls,partoolsenv$ncls <- tmpvar)
    exportlibpaths(cls)
-   # clusterEvalQ(cls,library(partools))
-   doclscmd(cls,'library(partools)')
+   clusterEvalQ(cls,library(partools))
+   # doclscmd(cls,'library(partools)')
 }
 
 # returns a pointer to partoolsenv
