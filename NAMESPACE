@@ -3,6 +3,8 @@ import(parallel,stats,utils,data.table,pdist,regtools)
 
 importFrom("methods", "new")
 
+S3method('[',ddf)
+
 export(writemgrscreen,writewrkrscreens,killdebug,
           dbs,dbsmsgstart,dbsmsg,dbsdump,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,linecount,
@@ -14,7 +16,7 @@ export(writemgrscreen,writewrkrscreens,killdebug,
    ca,cabase,calm,caglm,caprcomp,cakm,cameans,caquantile,caagg,carq,
    caclassfit,caclasspred,vote,re_code,
    setclsinfo,filechunkname,exportlibpaths,filesplit,
-   parpdist,
-   ipstrcat,disksort,docmd,tryloadpkg
+   parpdist, ipstrcat,disksort,docmd,tryloadpkg,
+   findrow,makeddf
    )
  
