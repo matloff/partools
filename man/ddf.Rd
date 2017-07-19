@@ -1,6 +1,6 @@
 \name{findrow,makedff,'['}
 \alias{findrow}
-\alias{makedff}
+\alias{makeddf}
 \alias{'['}
 
 \title{Virtual Data Structures}
@@ -16,7 +16,7 @@ makeddf(dname,cls)
 
 \arguments{
   \item{cls}{A cluster run under the \pkg{parallel} package.}
-  \item{i}{A row number in a distributed data frame or similar object.}} 
+  \item{i}{A row number in a distributed data frame or similar object.}
   \item{objname}{Name of such an object.}
   \item{dname}{Name of such an object.}
 }
@@ -42,15 +42,15 @@ number within node, and the node number.
 \examples{
 cls <- makeCluster(2)
 setclsinfo(cls)
-clusterEvalQ(cls,d <- data.frame(x=sample(1:10,5),y=sample(1:10,5)))
-makeddf('d',cls) 
-d[2,2]  # 9
-d[6,2]  # 2
-d[6,1]  # 10
-d[,1]  # 3  9  8  4  6 10  1  8  4  6
-d[8,]  # 8 6
-d[,]  # the entire 10x2 data frame
-findrow(cls,8,'d')  # 3 2; row 8 in the virtual df is row 3 of d in node 2
+clusterEvalQ(cls,m <- data.frame(rbind(1:2,3:4)+partoolsenv$myid))
+makeddf('m',cls) 
+m[2,2]  # 5
+m[3,2]  # 4
+m[3,1]  # 3
+m[,1]  # 2 4 3 5
+m[4,]  # 5 6
+m[,]  # the entire 2x2 data frame
+findrow(cls,3,'m')  # 1 2; row 3 in the virtual df is row 1 of m in node 2
 }
 
 \author{
