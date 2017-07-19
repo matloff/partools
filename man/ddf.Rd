@@ -1,7 +1,7 @@
-\name{findrow,makedff,'['}
+\name{findrow,makedff,[}
 \alias{findrow}
 \alias{makeddf}
-\alias{'['}
+\alias{[}
 
 \title{Virtual Data Structures}
 
