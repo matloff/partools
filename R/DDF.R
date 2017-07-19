@@ -63,7 +63,7 @@ makeddf <- function(dname,cls) {
 
 "[.ddf" <- function(obj, i=NULL, j=NULL){
   objname <- deparse(substitute(obj))
-  cls <- attr(d,'cluster')
+  cls <- attr(obj,'cluster')
   # e.g. user called d[,]
   if (is.null(i) & is.null(j)){
     dr <- distribcat(cls, objname)
