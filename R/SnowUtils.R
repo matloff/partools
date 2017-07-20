@@ -347,7 +347,7 @@ distribgetrows <- function(cls,cmd,who=NULL) {
    # clusterExport(cls,'cmd',envir=environment())
    # res <- clusterEvalQ(cls,docmd(cmd))
    res <- doclscmd(cls,cmd,who)
-   tmp <- Reduce(rbind,res)
+   tmp <- Reduce(rbind,res,init = NULL)
    notallna <- function(row) any(!is.na(row))
    tmp[apply(tmp,1,notallna),]
 }
