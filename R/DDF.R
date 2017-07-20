@@ -4,22 +4,6 @@
 # e.g. d, at the manager node, of class 'ddf'; one can construct such an
 # object via makeddf()
 
-
-# execute the command cmd at each cluster node, typically select(), then
-# collect using rbind() at the caller
-##  distribgetrows2 <- function(cls,cmd,who=NULL) {
-##    # clusterExport(cls,'cmd',envir=environment())
-##    # res <- clusterEvalQ(cls,docmd(cmd))
-##    res <- doclscmd(cls,cmd,who)
-##    res <- res[lapply(res,length)>0] # delete elements of length 0
-##    tmp <- Reduce(rbind,res)
-##    if (length(tmp) > 1){ # do only if more than 1 element
-##      notallna <- function(row) any(!is.na(row))
-##      tmp[apply(tmp,1,notallna),]
-##    }
-##    tmp
-##  }
-
 # convert vector, e.g. c(1,3), to string form
 numstr <- function(j){
   if (length(j) == 1){
