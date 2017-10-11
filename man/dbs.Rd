@@ -1,4 +1,4 @@
-\name{dbs,killdebug,dbsmsg,dbsdump,dbsmsgstart}
+\name{dbs,killdebug,dbsmsg,dbsdump,dbsmsgstart,writemgrscreen,writewrkrscreens}
 \alias{dbs}
 \alias{writemgrscreen}
 \alias{writewrkrscreens}
