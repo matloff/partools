@@ -23,9 +23,12 @@ Aids in debugging of code written for the cluster operations in the
 dbs(nwrkrs,xterm=NULL,src=NULL,ftn=NULL)
 writemgrscreen(cmd)
 killdebug()
-dbsmsgstart(cls)
-dbsmsg(msg)
-dbsdump()
+dbqmsgstart(cls)
+dbqmsg(msg)
+dbqview(cls,wrkrNum)
+dbqsave(obj)
+dbqload(cls,wrkrNum)
+dbqdump()
 }
 
 \arguments{
@@ -35,6 +38,8 @@ dbsdump()
   \item{src}{Name of the source file to be debugged.}
   \item{ftn}{Name of the function to be debugged.}
   \item{cmd}{R command to be executed in manager screen.}
+  \item{wrkrNum}{ID of a worker node.}
+  \item{obj}{An R object.}
   \item{msg}{A message to write to the debugging record file. Can be
      either a character string or any expression that is printable by
      \code{cat}.}
