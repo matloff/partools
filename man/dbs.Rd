@@ -1,11 +1,14 @@
-\name{dbs,killdebug,dbsmsg,dbsdump,dbsmsgstart,writemgrscreen,writewrkrscreens}
+\name{dbs,killdebug,dbqmsg,dbqdump,dbqmsgstart,writemgrscreen,writewrkrscreens,dbqview,dbqsave,dbqload}
 \alias{dbs}
 \alias{writemgrscreen}
 \alias{writewrkrscreens}
 \alias{killdebug}
-\alias{dbsmsg}
-\alias{dbsdump}
-\alias{dbsmsgstart}
+\alias{dbqmsg}
+\alias{dbqdump}
+\alias{dbqmsgstart}
+\alias{dbqview}
+\alias{dbqsave}
+\alias{dbqload}
 
 \title{
 Debugging aid for \pkg{parallel} cluster code.
