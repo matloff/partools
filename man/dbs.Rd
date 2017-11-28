@@ -1,4 +1,4 @@
-\name{dbs,killdebug,dbqmsg,dbqdump,dbqmsgstart,writemgrscreen,writewrkrscreens,dbqview,dbqsave,dbqload}
+\name{dbs,killdebug,dbqmsg,dbqdump,dbqmsgstart,writemgrscreen,writewrkrscreens,dbqview,dbqsave,dbqload,pEnv}
 \alias{dbs}
 \alias{writemgrscreen}
 \alias{writewrkrscreens}
@@ -9,6 +9,7 @@
 \alias{dbqview}
 \alias{dbqsave}
 \alias{dbqload}
+\alias{pEnv}
 
 \title{
 Debugging aid for \pkg{parallel} cluster code.
@@ -29,6 +30,7 @@ dbqview(cls,wrkrNum)
 dbqsave(obj)
 dbqload(cls,wrkrNum)
 dbqdump()
+pEnv(cls)
 }
 
 \arguments{
@@ -53,16 +55,21 @@ debugging information to disk files, and the other for more
 sophisticated work that deals with the terminal restriction.  For both
 methods, make sure \code{setclsinfo} has been called.
 
-For ``quick and dirty'' debugging, there is \code{dbsmsg}, which prints
+For ``quick and dirty'' debugging, there is \code{dbqmsg}, which prints
 messages to files, invoked from within code running at the cluster
 nodes.  There is one file for each member of the cluster, e.g.
-\code{dbs.001}, \code{dbs.002} and so on, and \code{dbsmsg} writes to
+\code{dbq.001}, \code{dbq.002} and so on, and \code{dbqmsg} writes to
 the file associated with the worker invoking it.  Initialize via
-\code{dbsmsgstart}.  
+\code{dbqmsgstart}.  The messages can be viewed via \code{dbqview}.
 
-Another quick approach is to call \code{dbsdump}, which will call R's
+Also, R objects can be saved and reloaded via \code{dbqsave} and
+\code{dbqload}, again with a different one for each worker.
+
+Another quick approach is to call \code{dbqdump}, which will call R's
 \code{dump.frames}, making a separate output file for each cluster node.
 These can then be input to \code{debugger} to examine stack frames.
+
+Finally, the current \code{partoolsenv} can be viewed using \code{pEnv}.
 
 The more elaborate debugging tool, \code{dbs}, is the only one in this
 \pkg{partools} package requiring a Unix-family system (Linux, Mac).  To
