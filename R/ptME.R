@@ -70,7 +70,7 @@ ptMEinitCons<- function(srvr) {
      }
   } else if (myID < srvr) {  
       # make connections with higher-ID server, ID srvr
-      Sys.sleep(2)  # make sure server acts before clients
+      Sys.sleep(2*myID)  # make sure server acts before clients
       con <- socketConnection(host=host, port=port, blocking=TRUE,
          server=FALSE, open="w+b")
       serialize(myID,con)  # notify server of my ID
