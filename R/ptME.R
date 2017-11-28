@@ -10,10 +10,12 @@ ptMEinit <- function(cls) {
    # send workers all the client IPs
    ncls <- length(cls)
    wrkrIPs <- unlist(Map(function(i) cls[i][[1]]$host, 1:ncls))
-   # clusterCall(cls,function(IPs)
-   #    partoolsenv$wrkrIPs <- IPs,wrkrIPs)
-   clusterExport(cls,'wrkrIPs',envir=environment())
-   clusterEvalQ(cls,partoolsenv$wrkrIPs <- wrkrIPs)
+   clusterCall(cls,
+      function(IPs) {
+         partoolsenv <- getpte()
+         partoolsenv$wrkrIPs <- IPs
+      },
+      wrkrIPs)
    # myServers is a vector at each worker, which will list connections
    # to all workers with IDs above the worker
    clusterEvalQ(cls,partoolsenv$myServers <- 
@@ -23,9 +25,11 @@ ptMEinit <- function(cls) {
    # have each worker initialize and set up a server socket (NA for ID 1)
    portnums <- unlist(clusterEvalQ(cls,ptMEinitSrvrs()))
    # make all workers aware of the various server port numbers
-   clusterExport(cls,'portnums',envir=environment())
-   clusterEvalQ(cls,partoolsenv$portnums <<- portnums)
-   # clusterCall(cls,function(ports) partoolsenv$portnums <<- ports,portnums)
+   clusterCall(cls,
+      function(ports) {
+         partoolsenv <- getpte()
+         partoolsenv$portnums <- ports
+      },portnums)
    # set up the connections
    for (srvr in 2:ncls) {
       clusterCall(cls,ptMEinitCons,srvr)
@@ -35,14 +39,13 @@ ptMEinit <- function(cls) {
 
 # servers initialize, and choose a port
 ptMEinitSrvrs <- function() {
-  # myID <- partoolsenv$myid
-  pte <- getpte()
-  myID <- pte$myid
+  partoolsenv <- getpte()
+  myID <- partoolsenv$myid
   # my role as a server:
   if (myID > 1) {
      # prepare for a client connection from all workers
      # with lower IDs than mine
-     partoolsenv$myClients <<- vector('list',length=myID-1)
+     partoolsenv$myClients <- vector('list',length=myID-1)
      # TODO: have code make repeated attempts in order to find a port
      port <- 5000 + myID + sample(1:100,1)
   } else port <- NA
@@ -51,10 +54,10 @@ ptMEinitSrvrs <- function() {
 
 # set up the connections
 ptMEinitCons<- function(srvr) {
-  pte <- getpte()
-  myID <- pte$myid
-  host <- pte$wrkrIPs[srvr]
-  port <- pte$portnums[srvr]
+  partoolsenv <- getpte()
+  myID <- partoolsenv$myid
+  host <- partoolsenv$wrkrIPs[srvr]
+  port <- partoolsenv$portnums[srvr]
   if (myID == srvr) {  
      # make connections with lower-ID workers; note that among those
      # workers, they will not necessarily contact this server in the
@@ -63,7 +66,7 @@ ptMEinitCons<- function(srvr) {
         con <- socketConnection(host=host,port=port, 
                 blocking=TRUE, server=TRUE, open="w+b")
         clientnum <- unserialize(con)
-        partoolsenv$myClients[[clientnum]] <<- con
+        partoolsenv$myClients[[clientnum]] <- con
      }
   } else if (myID < srvr) {  
       # make connections with higher-ID server, ID srvr
@@ -71,12 +74,13 @@ ptMEinitCons<- function(srvr) {
       con <- socketConnection(host=host, port=port, blocking=TRUE,
          server=FALSE, open="w+b")
       serialize(myID,con)  # notify server of my ID
-      pte$myServers[[srvr]] <<- con
+      partoolsenv$myServers[[srvr]] <- con
   }
 }
 
 # wrapper
 ptMEsend <- function(obj,dest) {
+   partoolsenv <- getpte()
    myID <- partoolsenv$myid
    con <- if (myID < dest) partoolsenv$myServers[[dest]] else
       partoolsenv$myClients[[dest]]
@@ -85,6 +89,7 @@ ptMEsend <- function(obj,dest) {
 
 # wrapper
 ptMErecv <- function(src) {
+   partoolsenv <- getpte()
    myID <- partoolsenv$myid
    con <- if (myID < src) partoolsenv$myServers[[src]] else
       partoolsenv$myClients[[src]]
@@ -92,12 +97,14 @@ ptMErecv <- function(src) {
 }
 
 ptMEclose <- function() {
+   partoolsenv <- getpte()
    myID <- partoolsenv$myid
    for (con in partoolsenv$myServers[[src]]) close(con)
    for (con in partoolsenv$myClients[[src]]) close(con)
 }
 
-ptMEtest <- function(cls) {
+ptMEtestWrkr <- function() {
+   partoolsenv <- getpte()
    myID <- partoolsenv$myid
    ncls <- partoolsenv$ncls
    myLeft <- if (myID > 1) myID-1 else ncls
@@ -105,5 +112,10 @@ ptMEtest <- function(cls) {
    ptMEsend(myID,myRight)
    ptMErecv(myLeft)
 }
+
+ptMEtest <- function(cls) {
+   clusterEvalQ(cls,ptMEtestWrkr())
+}
+
   
 
