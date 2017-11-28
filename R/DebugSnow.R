@@ -70,6 +70,9 @@ dbqdump <- function() {
    eval(parse(text=cmd))
 }
 
+# print partoolsenv of all workers
+pEnv <- function(cls) clusterEvalQ(cls,as.list(getpte()))
+
 #################### dbs debugging facility ######################
 
 # Requires Unix (Mac, Linux or Cygwin), for the 'screen' facility.
