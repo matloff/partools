@@ -17,7 +17,7 @@ export(writemgrscreen,writewrkrscreens,killdebug,
    caclassfit,caclasspred,vote,re_code,
    setclsinfo,filechunkname,exportlibpaths,filesplit,
    parpdist, ipstrcat,disksort,docmd,tryloadpkg,
-   findrow,makeddf,
+   findrow,makeddf,getPE,
    ptMEinit,ptMEinitSrvrs,ptMEinitCons,ptMEsend,ptMErecv,ptMEclose,
       ptMEtest,ptMEtestWrkr
    )
