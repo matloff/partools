@@ -15,8 +15,8 @@ Description: Miscellaneous utilities for parallelizing large
    "Software Alchemy" method for parallelizing most statistical methods,
    presented in N. Matloff, Parallel Computation for Data Science,
    Chapman and Hall, 2015.  Includes a debugging aid.
-Depends: regtools,parallel,stats,utils,data.table,pdist,methods
-Suggests: rpart,e1071,testthat
+Depends: parallel,stats,utils,data.table,pdist,methods
+Suggests: rpart,e1071,testthat, regtools
 ByteCompile: yes
 NeedsCompilation: no
 License: GPL (>= 2)
