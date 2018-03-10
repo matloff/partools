@@ -3,7 +3,9 @@
 
 # prgeng data
 
-getPE <- function() 
+# better version in regtools package
+
+getPE1 <- function() 
 {
    data(prgeng)
    pe <- prgeng[,c(1,3,7:9)]
