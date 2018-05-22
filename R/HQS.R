@@ -9,21 +9,27 @@
 # arguments:
 #
 #    cls: 'parallel' cluster
-#    xname: non-distributed data frame
+#    xname: data frame argument; if NULL, there is already a
+#           distributed data frame with name 'xname' on the 
+#           cluster; otherwise one will be created
 # 
 # value:
 #
-#    R list, consisting of the sorted data, distributed among nodes
+#    none; a distributed data frame named 'yname' will containt the
+#          sorted list
 
-hqs<-function(cls,xname){
-  distribsplit(cls,"xname",scramble=FALSE)
-  setclsinfo(cls)
+hqs <- function(cls,xname=NULL){
+
+  # get everything ready
+  if (is.null(xname) distribsplit(cls,"xname",scramble=FALSE)
   ptMEinit(cls)
 
+  # this function, to be executed by each worker node, does the main
+  # work
   hqsWorker <-function(){
-    myID <- partoolsenv$myid
-    groupSize <- partoolsenv$ncls
-    chunk<-as.vector(t(xname))
+    # myID <- partoolsenv$myid
+    # groupSize <- partoolsenv$ncls
+    chunk <- as.vector(t(xname))
     #ptm <- proc.time()
     
     while (groupSize > 1){
