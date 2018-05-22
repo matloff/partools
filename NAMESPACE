@@ -18,6 +18,7 @@ export(writemgrscreen,writewrkrscreens,killdebug,
    setclsinfo,filechunkname,exportlibpaths,filesplit,
    parpdist, ipstrcat,disksort,docmd,tryloadpkg,
    findrow,makeddf,getPE1,
+   testhqs,hqs,
    ptMEinit,ptMEinitSrvrs,ptMEinitCons,ptMEsend,ptMErecv,ptMEclose,
       ptMEtest,ptMEtestWrkr
    )

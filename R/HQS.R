@@ -21,12 +21,18 @@
 hqs <- function(cls,xname=NULL){
 
   # get everything ready
-  if (is.null(xname) distribsplit(cls,"xname",scramble=FALSE)
+  if (is.null(xname)) distribsplit(cls,"xname",scramble=FALSE)
   ptMEinit(cls)
+
+  # clusterCall(cls, hqsWorker)
+  clusterExport(cls,'hqsWorker')
+  clusterEvalQ(cls,hqsWorker())
+
+}
 
   # this function, to be executed by each worker node, does the main
   # work
-  hqsWorker <-function() {
+hqsWorker <-function() {
     myID <- partoolsenv$myid
     groupSize <- partoolsenv$ncls
     chunk <- as.vector(xname[,1])
@@ -60,14 +66,10 @@ hqs <- function(cls,xname=NULL){
     }
     
     chunk <- sort(chunk)
-    chunk
+    assign(paste0(xname,'sorted'),chunk,envir = .GlobalEnv)
     #time<-proc.time() - ptm
     #time
-    
-  }
-
-  clusterCall(cls, hqsWorker)
-
+    return(0)
 }
 
 
@@ -77,6 +79,7 @@ testhqs <- function()
 {
    hostpcs <- c(rep("localhost",4))
    cls <- makeCluster(hostpcs)
+   setclsinfo(cls)
    # enter test data
    data <- data.frame(sample(1:50, 1000, replace = TRUE))
    hqs(cls,data)
