@@ -81,7 +81,7 @@ testhqs <- function()
    cls <- makeCluster(hostpcs)
    setclsinfo(cls)
    # enter test data
-   dta <- data.frame(sample(1:50, 1000, replace = TRUE))
+   dta <<- data.frame(sample(1:50, 25, replace = TRUE))
    hqs(cls,'dta')
 }
 
