@@ -9,9 +9,9 @@
 # arguments:
 #
 #    cls: 'parallel' cluster
-#    xname: data frame argument; if NULL, there is already a
-#           1-column distributed data frame with name 'xname' on 
-#           the cluster; otherwise one will be created
+#    xname: name of vector to be sorted; if xdistr is TRUE, the
+#           vector is already distributed under the name xname;
+#           otherwise the code here will distributed it
 # 
 # value:
 #
@@ -20,8 +20,15 @@
 
 hqs <- function(cls,xname,xdistr=FALSE){
 
+browser()
   # get everything ready
-  if (!xdistr) distribsplit(cls,xname,scramble=FALSE)
+  if (!xdistr) {
+     distribsplit(cls,xname,scramble=FALSE)
+     # cmd <- paste0(xname,' <- as.numeric(',xname,'[,1])')
+     # clusterExport(cls,'cmd', envir=environment())
+     # clusterEvalQ(cls,eval(parse(text=cmd)))
+  }
+  
   ptMEinit(cls)
 
   # clusterCall(cls, hqsWorker)
@@ -35,7 +42,7 @@ hqs <- function(cls,xname,xdistr=FALSE){
 hqsWorker <-function(xname) {
     myID <- partoolsenv$myid
     groupSize <- partoolsenv$ncls
-    chunk <- as.vector(xname[,1])
+    ### chunk <- as.vector(xname[,1])
     #ptm <- proc.time()
     
     while (groupSize > 1){
