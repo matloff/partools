@@ -18,21 +18,21 @@
 #    none; a distributed data frame named 'yname' will containt the
 #          sorted list
 
-hqs <- function(cls,xname=NULL){
+hqs <- function(cls,xname,xdistr=FALSE){
 
   # get everything ready
-  if (is.null(xname)) distribsplit(cls,"xname",scramble=FALSE)
+  if (!xdistr) distribsplit(cls,xname,scramble=FALSE)
   ptMEinit(cls)
 
   # clusterCall(cls, hqsWorker)
   clusterExport(cls,'hqsWorker')
-  clusterEvalQ(cls,hqsWorker())
+  clusterEvalQ(cls,hqsWorker(xname))
 
 }
 
   # this function, to be executed by each worker node, does the main
   # work
-hqsWorker <-function() {
+hqsWorker <-function(xname) {
     myID <- partoolsenv$myid
     groupSize <- partoolsenv$ncls
     chunk <- as.vector(xname[,1])
@@ -77,11 +77,11 @@ hqsWorker <-function() {
 # with pc names,IP addresses, or run on "localhost"
 testhqs <- function() 
 {
-   hostpcs <- c(rep("localhost",4))
+   hostpcs <- c(rep("localhost",2))
    cls <- makeCluster(hostpcs)
    setclsinfo(cls)
    # enter test data
-   data <- data.frame(sample(1:50, 1000, replace = TRUE))
-   hqs(cls,data)
+   dta <- data.frame(sample(1:50, 1000, replace = TRUE))
+   hqs(cls,'dta')
 }
 
