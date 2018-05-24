@@ -106,12 +106,12 @@ various \code{screen} processes.
 cls <- makeCluster(2) 
 setclsinfo(cls)
 # define 'buggy' function
-g <- function(x,y) {u<-x+y; v<-x-y; dbsmsg(c(u,v)); u^2+v^2} 
+g <- function(x,y) {u<-x+y; v<-x-y; dbqmsg(c(u,v)); u^2+v^2} 
 clusterExport(cls,"g") 
 # set x and y at cluster nodes
 clusterEvalQ(cls,{x <- runif(1); y <- runif(1)}) 
 # start debugging session
-dbsmsgstart(cls) 
+dbqmsgstart(cls) 
 # run
 clusterEvalQ(cls,g(x,y)) 
 # files dbs.1 and dbs.2 created, each reporting u,v values

@@ -21,6 +21,8 @@
 hqs <- function(cls,xname,xdistr=FALSE){
 
 browser()
+dbqmsgstart(cls)
+
   # get everything ready
   if (!xdistr) {
      distribsplit(cls,xname,scramble=FALSE)
@@ -49,6 +51,7 @@ hqsWorker <-function(xname) {
 
       # this node's ID with respect to current subcube
       myrank <- (myID %% groupSize)
+dbqmsg(myrank)
       if (myrank == 0){
         pivot <- median(chunk)
         for (i in 1:(groupSize-1)){
@@ -73,7 +76,7 @@ hqsWorker <-function(xname) {
     }
     
     chunk <- sort(chunk)
-    assign(paste0(xname,'sorted'),chunk,envir = .GlobalEnv)
+    assign(paste0(xname,'.sorted'),chunk,envir = .GlobalEnv)
     #time<-proc.time() - ptm
     #time
     return(0)
@@ -90,5 +93,6 @@ testhqs <- function()
    # enter test data
    dta <<- data.frame(sample(1:50, 25, replace = TRUE))
    hqs(cls,'dta')
+   clusterEvalQ(cls,dta.sorted)
 }
 
