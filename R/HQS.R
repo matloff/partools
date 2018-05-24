@@ -58,21 +58,22 @@ dbqmsg(myrank)
           ptMEsend(pivot,myID-i)}
       }
       else{
-        pivot<-ptMErecv(myID+(groupSize-myrank))
+        pivot <- ptMErecv(myID+(groupSize-myrank))
       }
-      lower<- chunk[chunk < pivot]
-      upper<- chunk[chunk >= pivot]
+      lower <- chunk[chunk < pivot]
+      upper <- chunk[chunk >= pivot]
       if (myrank <= (groupSize/2) && myrank > 0) {
         ptMEsend(upper,myID+(groupSize/2) )
-        newUpper<-ptMErecv(myID+(groupSize/2))
-        chunk<-c(lower, newUpper)
+        newUpper <- ptMErecv(myID+(groupSize/2))
+        chunk <- c(lower, newUpper)
       }
       else {
-        newLower<-ptMErecv(myID-(groupSize/2))
+        newLower <- ptMErecv(myID-(groupSize/2))
         ptMEsend(lower,myID-(groupSize/2))
-        chunk<-c(newLower,upper)
+        chunk <- c(newLower,upper)
       }
-      groupSize<-groupSize/2
+dbqmsg(chunk)
+      groupSize <- groupSize/2
     }
     
     chunk <- sort(chunk)
@@ -90,7 +91,8 @@ testhqs <- function()
    hostpcs <- c(rep("localhost",2))
    cls <- makeCluster(hostpcs)
    setclsinfo(cls)
-   # enter test data
+   # generate test data
+   set.seed(9999)
    dta <<- data.frame(sample(1:50, 25, replace = TRUE))
    hqs(cls,'dta')
    clusterEvalQ(cls,dta.sorted)
