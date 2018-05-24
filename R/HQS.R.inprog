@@ -20,9 +20,8 @@
 
 hqs <- function(cls,xname,xdistr=FALSE){
 
-browser()
 dbqmsgstart(cls)
-
+browser()
   # get everything ready
   if (!xdistr) {
      distribsplit(cls,xname,scramble=FALSE)
@@ -34,17 +33,26 @@ dbqmsgstart(cls)
   ptMEinit(cls)
 
   # clusterCall(cls, hqsWorker)
-  clusterExport(cls,'hqsWorker')
-  clusterEvalQ(cls,hqsWorker(xname))
+  cmd <- paste0('clusterEvalQ(cls,hqsWorker(', xname, '))' )
+  ### clusterExport(cls,c('doCmd','cmd'),envir=environment())
+  doCmd(cmd)
 
 }
 
+doCmd <- function(cmd) eval(parse(text=cmd))
+
   # this function, to be executed by each worker node, does the main
   # work
-hqsWorker <-function(xname) {
+## hqsWorker <-function(xname) {
+### hqsWorker <-function(x) {
+hqsWorker <-function() {
+dbqmsg('started')
+dbqmsg(x)
+    getpte()
     myID <- partoolsenv$myid
     groupSize <- partoolsenv$ncls
-    ### chunk <- as.vector(xname[,1])
+    ## chunk <- get(xname,envir=.GlobalEnv)
+    chunk <- x
     #ptm <- proc.time()
     
     while (groupSize > 1){
@@ -54,11 +62,13 @@ hqsWorker <-function(xname) {
 dbqmsg(myrank)
       if (myrank == 0){
         pivot <- median(chunk)
+dbqmsg(pivot)
         for (i in 1:(groupSize-1)){
           ptMEsend(pivot,myID-i)}
       }
       else{
         pivot <- ptMErecv(myID+(groupSize-myrank))
+dbqmsg(pivot)
       }
       lower <- chunk[chunk < pivot]
       upper <- chunk[chunk >= pivot]
@@ -86,14 +96,15 @@ dbqmsg(chunk)
 
 # enter host pcs (a power of 2 nodes) name as list of strings, 
 # with pc names,IP addresses, or run on "localhost"
-testhqs <- function() 
+testhqs <- function(cls) 
 {
-   hostpcs <- c(rep("localhost",2))
-   cls <- makeCluster(hostpcs)
-   setclsinfo(cls)
+   ## hostpcs <- c(rep("localhost",2))
+   ## cls <- makeCluster(hostpcs)
+   ## setclsinfo(cls)
    # generate test data
    set.seed(9999)
-   dta <<- data.frame(sample(1:50, 25, replace = TRUE))
+   ### dta <<- data.frame(sample(1:50, 25, replace = TRUE))
+   dta <<- sample(1:50, 25, replace = TRUE)
    hqs(cls,'dta')
    clusterEvalQ(cls,dta.sorted)
 }
