@@ -9,11 +9,16 @@ library(partools)
 # arguments:
 #
 #    cls: 'parallel' cluster (must be power of 2 nodes)
-#    x: name of distributed dataframe/vector/matrix
+#    xname: name of distributed dataframe/vector/matrix
 # 
 # value:
 #
-#    R list, consisting of the sorted data, distributed among nodes
+#    none, just a placeholder 0 to avoid the communication cost 
+#    of returning the sorted chunks; note that under the "Leave It
+#    There" philosophy, we do not want to return those chunks to the
+#    caller
+
+R list, consisting of the sorted data, distributed among nodes
 
 # note: user must have called setclsinfo() and ptMEinit prior to
 # calling hqs() (distribsplit() can also be used to split data if not
