@@ -5,7 +5,8 @@ importFrom("methods", "new")
 
 S3method('[',ddf)
 
-export(writemgrscreen,writewrkrscreens,killdebug,
+export(
+   writemgrscreen,writewrkrscreens,killdebug,
           dbs,dbqmsgstart,dbqmsg,dbqdump,dbqview,dbqsave,dbqload,pEnv,
    formrowchunks,matrixtolist,addlists,getpte,filesort,filecat,linecount,
       readnscramble,getnumdigs,filesave,fileread,filesplitrand,fileagg,
@@ -18,8 +19,8 @@ export(writemgrscreen,writewrkrscreens,killdebug,
    setclsinfo,filechunkname,exportlibpaths,filesplit,
    parpdist, ipstrcat,disksort,docmd,tryloadpkg,
    findrow,makeddf,getPE1,
-   testhqs,hqs,hqsWorker,
+   hqs,hqsTest,
    ptMEinit,ptMEinitSrvrs,ptMEinitCons,ptMEsend,ptMErecv,ptMEclose,
       ptMEtest,ptMEtestWrkr
-   )
+)
  

@@ -1,5 +1,3 @@
-library(parallel)
-library(partools)
 
 # hyperquicksort uses ptME message passing to keep data 
 # distributed while sorting entire data set among nodes 
@@ -17,8 +15,6 @@ library(partools)
 #    of returning the sorted chunks; note that under the "Leave It
 #    There" philosophy, we do not want to return those chunks to the
 #    caller
-
-R list, consisting of the sorted data, distributed among nodes
 
 # note: user must have called setclsinfo() and ptMEinit prior to
 # calling hqs() (distribsplit() can also be used to split data if not
