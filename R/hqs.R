@@ -19,38 +19,38 @@ library(partools)
 # calling hqs() (distribsplit() can also be used to split data if not
 # already distributed)
 
-hqs<-function(cls,x){
+hqs <- function(cls,x){
   if (exists("partoolsenv$myServers")==FALSE)
     {ptMEinit(cls)}
   clusterEvalQ(cls,assign("chunk",x))
-  hqsWorker <-function(){
-    myID <- partoolsenv$myid
-    groupSize <- partoolsenv$ncls
+  hqsWorker  <- function(){
+    myID  <-  partoolsenv$myid
+    groupSize  <-  partoolsenv$ncls
     while (groupSize > 1){
-      myrank <- (myID %% groupSize)
+      myrank  <-  (myID %% groupSize)
       if (myrank==0){
-        pivot <- median(chunk)
+        pivot  <-  median(chunk)
         for (i in 1:(groupSize-1)){
           ptMEsend(pivot,myID-i)}
       }
       else{
-        pivot<-ptMErecv(myID+(groupSize-myrank))
+        pivot <- ptMErecv(myID+(groupSize-myrank))
       }
-      lower<- chunk[chunk < pivot]
-      upper<- chunk[chunk >= pivot]
+      lower <-  chunk[chunk < pivot]
+      upper <-  chunk[chunk >= pivot]
       if (myrank <= (groupSize/2) && myrank > 0) {
         ptMEsend(upper,myID+(groupSize/2) )
-        newUpper<-ptMErecv(myID+(groupSize/2))
-        chunk<-c(lower, newUpper)
+        newUpper <- ptMErecv(myID+(groupSize/2))
+        chunk <- c(lower, newUpper)
       }
       else {
-        newLower<-ptMErecv(myID-(groupSize/2))
+        newLower <- ptMErecv(myID-(groupSize/2))
         ptMEsend(lower,myID-(groupSize/2))
-        chunk<-c(newLower,upper)
+        chunk <- c(newLower,upper)
       }
-      groupSize<-groupSize/2
+      groupSize <- groupSize/2
     }
-    chunk<-sort(chunk)
+    chunk <- sort(chunk)
     chunk
   }
   clusterCall(cls, hqsWorker)
@@ -59,31 +59,32 @@ hqs<-function(cls,x){
 # to be comparable to hqs(), with the "leave it there" philosophy, must
 # gather the distributed vector to the manager, do a serial sort there,
 # then distribute back to the workers
-serialqs <- function(cls,y) {
-  temp<-unlist(clusterEvalQ(cls,y))
-  y<-sort(temp)
+serialqs  <-  function(cls,y) {
+  temp <- unlist(clusterEvalQ(cls,y))
+  y <- sort(temp)
   distribsplit(cls,'y')
-  chunks<-clusterEvalQ(cls, y)
+  chunks <- clusterEvalQ(cls, y)
   chunks
 }
 
 # vlength: test vector length
 # clength: test cluster length
-hqsTest <- function(vlength,clength){
-  cls <- makeCluster(clength)
+hqsTest  <-  function(vlength,clength){
+  cls  <-  makeCluster(clength)
   setclsinfo(cls)
-  x <- sample(1:50, vlength, replace = TRUE)
+  set.seed(9999)
+  x  <-  sample(1:50, vlength, replace = TRUE)
   distribsplit(cls,"x",scramble=FALSE)
-  #ptm <- proc.time()
+  #ptm  <-  proc.time()
   ptMEinit(cls)
-  ptm <- proc.time()
-  chunks <- hqs(cls,x)
+  ptm  <-  proc.time()
+  chunks  <-  hqs(cls,x)
   print(proc.time() - ptm)
   if (vlength < 100) print(chunks)
-  y <- sample(1:50, vlength, replace = TRUE)
+  y  <-  sample(1:50, vlength, replace = TRUE)
   distribsplit(cls,'y')
-  ptm <- proc.time()
-  chunks<-serialqs(cls,y)
+  ptm  <-  proc.time()
+  chunks <- serialqs(cls,y)
   print(proc.time() - ptm)
   if (vlength < 100) print(chunks)
 }
