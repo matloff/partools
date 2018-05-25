@@ -19,10 +19,12 @@ library(partools)
 # calling hqs() (distribsplit() can also be used to split data if not
 # already distributed)
 
-hqs <- function(cls,x){
+hqs <- function(cls,xname){
   if (exists("partoolsenv$myServers")==FALSE)
     {ptMEinit(cls)}
-  clusterEvalQ(cls,assign("chunk",x))
+  # clusterEvalQ(cls,assign("chunk",x))
+  cmd <- paste0('clusterEvalQ(cls,chunk <<- ',xname,')')
+  eval(parse(text = cmd))
   hqsWorker  <- function(){
     myID  <-  partoolsenv$myid
     groupSize  <-  partoolsenv$ncls
@@ -50,8 +52,10 @@ hqs <- function(cls,x){
       }
       groupSize <- groupSize/2
     }
-    chunk <- sort(chunk)
-    chunk
+    # chunk <- sort(chunk)
+    chunk <<- sort(chunk)
+    # chunk
+    return(0)
   }
   clusterCall(cls, hqsWorker)
 }
