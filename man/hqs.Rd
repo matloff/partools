@@ -1,18 +1,10 @@
-\name{ptMEinit,ptMEinitSrvrs,ptMEinitCons,ptMEsend,ptMErecv,ptMEclose, ptMEtest,ptMEtestWrkr}
-\alias{ptMEinit}
-\alias{ptMEinitSrvrs}
-\alias{ptMEinitCons}
-\alias{ptMEsend}
-\alias{ptMErecv}
-\alias{ptMEclose}
-\alias{ptMEtest}
-\alias{ptMEtestWrkr}
+\name{hqs,hqsTest)
+\alias{hqs}
+\alias{hqsTest)
 
-\title{
-Message-passing utilities.
-}
+\title{Distributed Sort}
 
-\description{Simple MPI-like functions.}
+\description{Sort a distributed vector.}
 
 \usage{
 ptMEinit(cls)
