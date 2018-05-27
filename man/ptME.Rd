@@ -61,6 +61,14 @@ Functions:
 
 }
 
+\value{
+
+The function \code{ptMErecv()} returns the received value.  The
+intermediate function \code{ptMEinitSrvrs} returns a randomly chosen
+server port number.
+
+}
+
 \examples{
 }
 
