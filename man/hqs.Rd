@@ -21,10 +21,10 @@ hqsTest(vlength,clength)
 \details{ 
 
 In \code{hqs}, the distributed vector is sorted using the Hyperquicksort
-algorithm.  In keeping with partools' Leave It There philosophy,
+algorithm.  In keeping with \pkg{partools}' Leave It There philosophy,
 both input and output are distributed; the sorted vector is
 NOT returned to the caller.  The name of the sorted distributed vector
-will be 'chunk'.  If the caller needs the sorted vector, this
+will be \code{chunk}.  If the caller needs the sorted vector, this
 can be obtained via \code{distribcat}.
 
 }

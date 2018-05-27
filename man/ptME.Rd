@@ -19,6 +19,7 @@ ptMEinit(cls)
 ptMEinitSrvrs()
 ptMEinitCons(srvr)
 ptMEsend(obj,dest)
+ptMErecv(dest)
 }
 
 \arguments{
