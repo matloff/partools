@@ -29,6 +29,7 @@ hqs <- function(cls,xname){
   cmd <- paste0('clusterEvalQ(cls,chunk <<- ',xname,')')
   eval(parse(text = cmd))
   hqsWorker  <- function(){
+    getpte()
     myID  <-  partoolsenv$myid
     groupSize  <-  partoolsenv$ncls
     while (groupSize > 1){
@@ -56,9 +57,9 @@ hqs <- function(cls,xname){
       groupSize <- groupSize/2
     }
   
-    chunks <- sort(chunk)
+    chunks <<- sort(chunk)
 
-    #return(0)
+    return(0)
   }
   clusterExport(cls,'hqsWorker',envir=environment())
   chunks <-clusterCall(cls, hqsWorker)
