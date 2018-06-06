@@ -24,7 +24,7 @@
 
 hqs <- function(cls,xname){
   if (exists("partoolsenv$myServers")==FALSE)
-  {ptMEinit(cls)}
+     {ptMEinit(cls)}
   #clusterEvalQ(cls,assign("chunk",xname))
   cmd <- paste0('clusterEvalQ(cls,chunk <<- ',xname,')')
   eval(parse(text = cmd))
@@ -60,6 +60,7 @@ hqs <- function(cls,xname){
 
     #return(0)
   }
+  clusterExport(cls,'hqsWorker',envir=environment())
   chunks <-clusterCall(cls, hqsWorker)
 
 }
