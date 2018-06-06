@@ -7,7 +7,7 @@
 # arguments:
 #
 #    cls: 'parallel' cluster (must be power of 2 nodes)
-#    xname: name of distributed dataframe/vector/matrix
+#    'xname': name of distributed dataframe/vector/matrix (character string in '')
 # 
 # value:
 #
@@ -16,14 +16,16 @@
 #    There" philosophy, we do not want to return those chunks to the
 #    caller
 
+#R list, consisting of the sorted data, distributed among nodes
+
 # note: user must have called setclsinfo() and ptMEinit prior to
 # calling hqs() (distribsplit() can also be used to split data if not
 # already distributed)
 
 hqs <- function(cls,xname){
   if (exists("partoolsenv$myServers")==FALSE)
-    {ptMEinit(cls)}
-  # clusterEvalQ(cls,assign("chunk",x))
+  {ptMEinit(cls)}
+  #clusterEvalQ(cls,assign("chunk",xname))
   cmd <- paste0('clusterEvalQ(cls,chunk <<- ',xname,')')
   eval(parse(text = cmd))
   hqsWorker  <- function(){
@@ -53,12 +55,13 @@ hqs <- function(cls,xname){
       }
       groupSize <- groupSize/2
     }
-    # chunk <- sort(chunk)
-    chunk <<- sort(chunk)
-    # chunk
-    return(0)
+  
+    chunks <- sort(chunk)
+
+    #return(0)
   }
-  clusterCall(cls, hqsWorker)
+  chunks <-clusterCall(cls, hqsWorker)
+
 }
 
 # to be comparable to hqs(), with the "leave it there" philosophy, must
@@ -80,17 +83,16 @@ hqsTest  <-  function(vlength,clength){
   set.seed(9999)
   x  <-  sample(1:50, vlength, replace = TRUE)
   distribsplit(cls,"x",scramble=FALSE)
+  #ptm  <-  proc.time()
   ptMEinit(cls)
   ptm  <-  proc.time()
-  hqs(cls,'x')
+  chunks <- hqs(cls,'x')
   print(proc.time() - ptm)
-  if (vlength < 100) print(clusterEvalQ(cls,chunk))
-  # y  <-  sample(1:50, vlength, replace = TRUE)
-  y <- x
+  if (vlength < 100)  print(chunks)#it was still printing "chunks" as if it was back at the master
+  y  <-  sample(1:50, vlength, replace = TRUE)
   distribsplit(cls,'y')
   ptm  <-  proc.time()
   chunks <- serialqs(cls,y)
   print(proc.time() - ptm)
   if (vlength < 100) print(chunks)
 }
-
