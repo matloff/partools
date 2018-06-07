@@ -58,8 +58,7 @@ hqs <- function(cls,xname){
     }
   
     chunks <<- sort(chunk)
-
-    return(0)
+    return(0)  # avoid expensive return of last computed item
   }
   clusterExport(cls,'hqsWorker',envir=environment())
   chunks <-clusterCall(cls, hqsWorker)
@@ -70,11 +69,14 @@ hqs <- function(cls,xname){
 # gather the distributed vector to the manager, do a serial sort there,
 # then distribute back to the workers
 serialqs  <-  function(cls,y) {
+  distribsplit(cls,'y')
+  ptm  <-  proc.time()
   temp <- unlist(clusterEvalQ(cls,y))
   y <- sort(temp)
   distribsplit(cls,'y')
-  chunks <- clusterEvalQ(cls, y)
-  chunks
+  print(proc.time() - ptm)
+  chunks <<- clusterEvalQ(cls, y)
+  return(0)
 }
 
 # vlength: test vector length
