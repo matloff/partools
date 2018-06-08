@@ -1,8 +1,9 @@
 #' Sort File On Disk
 #'
-#' This function is designed to handle files larger than memory. At most
-#' \code{nrows} will be present in memory at once. It is not parallel.
-#' For this to work efficiently it's necessary that the data between
+#' This function is designed to sort large streams, including files larger
+#' than memory. At most \code{nrows} will be present in memory at once. The
+#' bottleneck comes from reading the stream, so this is not parallel. For
+#' this to work efficiently it's necessary that the data between
 #' \code{breaks} fits into memory.
 #'
 #' @param infile unsorted file like object to read from. See \code{\link[utils]{read.table}}.
