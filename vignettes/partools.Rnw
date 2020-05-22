@@ -102,6 +102,9 @@ issue, one can provide it externally, say with the XtreemFS system.
 
 \subsection{Software Alchemy}
 
+Some of the package's functions perform an operation I call Software
+Alchemy (SA).
+
 Consider a large linear regression application.  We might consider
 dividing the data into chunks, calling {\bf lm()} on each chunk, then
 simply average the estimated coeficient vector over chunks.  It can be
@@ -110,12 +113,10 @@ producing estimators with the same asymptotic variance as that of the
 original estimator.  
 
 This technique was developed independently by a number of researchers.
-I call it Software Alchemy (SA), as it turns non-embarassingly parallel
+I call it Software Alchemy, as it turns non-embarassingly parallel
 problems into embarassingly parallel ones.\footnote{ Software Alchemy:
 Turning Complex Statistical Computations into Embarrassingly-Parallel
 Ones, Norman Matloff, {\it Journal of Statistical Software}, 71 (2016).}
-
-The {\bf partools} package contains a number of functions using SA.
 
 \section{Where Is the Magic?}
 
@@ -127,12 +128,8 @@ of the package stems from just two simple sources:
 
 \item [(a)] The package follows a Keep It Distributed philosophy:  Form
 distributed objects {\it and keep using them in distributed form
-throughout one's R session, accessing them repeatedly for one's various
-desired operations --- and avoiding, to the extent possible, operations
-that collect data from the worker nodes to the manager node.}  By
-keeping things distributed in this way, whatever cost there was to
-distributing the data originally eventually yields a net performance
-gain.
+throughout one's R session, avoiding wherever possible time-consuming
+transfer of data between the workers and the manager.} 
 
 \item [(b)] The package consists of a number of utility functions that
 greatly facilitate creating and storing and distributed
@@ -163,9 +160,13 @@ distributed manner, with a common name.  For example, the data frame
 
 \subsection{Platforms}
 
-Through the use of the R 'parallel' package, these tools can be used
-either on multicore machines or clusters, such as in the cloud.  With
-the latter, a very high degree of parallelism is potentially possible.
+Through the use of virtual clusters in the R 'parallel' package, these
+tools can be used either on multicore machines or physical clusters,
+such as in the cloud.  With the latter, a very high degree of
+parallelism is potentially possible.
+
+We will speak of a 'parallel' cluster has having a \textit{manager},
+sends work to and receives work from the \textit{worker nodes}.
 
 \subsection{Package Structure}
 
@@ -391,7 +392,7 @@ a local data frame {\bf yr2008}.
 Our data is now distributed across the memories of cluster nodes.  Of
 course, if we did not need permanent distributed file storage, we could
 have just read in the original file into a large data frame at the
-manager node, then distributed it to the nodes via
+manager node, then distributed the data frame to the nodes via
 \textbf{distribsplit()}.
 
 \subsection{Distributed Aggregation of Summary Statistics}
@@ -453,8 +454,8 @@ aggregate()}, but did so more than 15 times faster!
 Remember, the Keep It Distributed  philosophy of {\bf partools} is to
 create distributed objects and then keep using them repeatedly in
 distributed form.  However, in some cases, we may wish to collect a
-distributed result into a monolithic object, especially if the result is
-small.  This is done in the next example:
+distributed result into a monolithic object.  This is done in the next
+example:
 
 Say we wish to do a filter operation, extracting the data on all the
 Sunday evening flights, and collect it into one place.   Here is the
