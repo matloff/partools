@@ -156,10 +156,16 @@ files {\bf x.01}, {\bf x.02} etc.
 
 \item Data frames and matrices are stored in memory at the nodes in a
 distributed manner, with a common name.  For example, the data frame
-{\bf y} is stored in chunks at the cluster nodes, each chunk known as {\bf
-y} at its node.
+{\bf y} is stored in chunks at the cluster nodes, each chunk known as
+{\bf y} at its node.
 
 \end{itemize}
+
+\subsection{Platforms}
+
+Through the use of the R 'parallel' package, these tools can be used
+either on multicore machines or clusters, such as in the cloud.  With
+the latter, a very high degree of parallelism is potentially possible.
 
 \subsection{Package Structure}
 
@@ -196,7 +202,7 @@ The package consists of three main groups of functions:
 
    \item {\bf filesplit():}  Create a distributed file from monolithic one.
 
-   \item {\bf filesplitrand():}  Create a distributed file from monotlithic one,
+   \item {\bf filesplitrand():}  Create a distributed file from monolithic one,
    but randomize the record order.
 
    \item {\bf filecat():}  Create a monotlithic file from distributed one.
@@ -289,11 +295,14 @@ The package consists of three main groups of functions:
    \item {\bf formrowchunks():} Form chunks of rows of a data
    frame/matrix.
 
-   \item {\bf matrixtolist():} Forms a list of the rows or columns of a
-   data frame or matrix.
+   \item {\bf matrixtolist():} Forms an R list of the rows or columns of a
+   data frame or matrix, one row/column per list element.
 
-   \item {\bf addlists():}  ``Add'' two lists, meaning add values of
-   elements of the same name, and copy the others.
+   \item {\bf addlists():}  ``Add'' two R lists, forming a new one.
+   If an element name appears in the two input lists, that name will
+   appear in the new one, with value equal to the "sum" of the two input
+   values, calculated by \textbf{sum()}, \textbf{cat()} or other
+   user-specified function.
 
    \item {\bf dbs(), dbsmsg(), etc.:}  Debugging aids.
 
@@ -350,7 +359,7 @@ To create our cluster {\bf cls}, we ran
 
 \begin{verbatim}
 > cls <- makeCluster(16)  # from 'parallel' library
-> setclsinfo(cls)  # from 'partools'
+> setclsinfo(cls)  # 'partools' initialization function
 \end{verbatim}
 
 \subsection{Distribute the Data}
@@ -377,7 +386,13 @@ The argument 2 here means that the suffixes are 2 digits, specifically
 {\bf filesplit()}.  The call to {\bf fileread()} specifies that cluster
 node 1 will read the file {\bf yr2008r.01}, cluster node 2 will read
 {\bf yr2008r.02} and so on.  Each node will place the data it reads into
-a data frame {\bf yr2008}.
+a local data frame {\bf yr2008}.  
+
+Our data is now distributed across the memories of cluster nodes.  Of
+course, if we did not need permanent distributed file storage, we could
+have just read in the original file into a large data frame at the
+manager node, then distributed it to the nodes via
+\textbf{distribsplit()}.
 
 \subsection{Distributed Aggregation of Summary Statistics}
 
