@@ -27,9 +27,19 @@ University of California, Davis}
 
 The {\bf partools} package is a general framework for parallel
 processing of large data sets and/or highly-computational algorithms.
-It is the ``un-MapReduce,'' avoiding that paradigm while retaining the
+It can be viewed on two levels:
+
+\begin{itemize}
+
+\item A set of various utilities to increase the usefulness of the R
+built-in package 'parallel'.
+
+\item 
+An ``un-MapReduce'' paradigm, avoiding the drawbaccks while retaining the
 philosophy of highly-distributed memory objects and files of Hadoop and
 Spark.
+
+\end{itemize} 
 
 \section{Motivation}
 
