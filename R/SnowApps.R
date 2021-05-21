@@ -15,7 +15,11 @@
 #    full distance matrix, as pdist object
 
 parpdist <- function(x,y,cls) {
+   if (!is.matrix(x) || nrow(x) < length(cls)) 
+      stop('must have nrow(x) >= length(cls)')
    nx <- nrow(x)
+   ny <- nrow(y)
+   if (nx < ny) warning('more efficient if nrow(x) >= nrow(y)')
    ichunks <- formrowchunks(cls,x,'tmpx')  # write to global at worker
    clusterExport(cls,'y',envir=environment())
    dists <- clusterEvalQ(cls,pdist(tmpx,y)@dist)
