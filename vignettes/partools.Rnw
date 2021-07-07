@@ -331,7 +331,7 @@ for nonparallel is {\it serial}.}
 
 A variant, suitable in many regression and classification algorithms,
 retains the chunk output in the result, rather than performing an
-avereging process.  Consider for instance the use of LASSO for
+averaging process.  Consider for instance the use of LASSO for
 regression.\footnote{Not currently available in the package, but easily
 coded under its framework.} Each chunk may settle on a different subset
 of the predictor variables, so it would not make sense to average the
