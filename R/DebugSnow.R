@@ -148,7 +148,7 @@ dbs <- function(nwrkrs,xterm=NULL,src=NULL,ftn=NULL) {
    rcmd <- paste("R --vanilla --args MASTER=localhost PORT=",port,
       " SNOWLIB=/usr/local/lib/R/library TIMEOUT=2592000 METHODS=TRUE",sep="")
    writewrkrscreens(rcmd)
-   writewrkrscreens("parallel:::.slaveRSOCK()")
+   writewrkrscreens("parallel:::.workRSOCK()")
    # make sure we are all in the same directory
    mydir <- getwd()
    paste('setwd("',mydir,'")',sep='')
@@ -273,7 +273,7 @@ killdebug<- function() {
 #      one window for each worker, and one for the manager
 #   has the manager window run a makeCluster() command 
 #   starts up R processes in the worker windows
-#   writes the string "parallel:::.slaveRSOCK()" to each of the windows,
+#   writes the string "parallel:::.workRSOCK()" to each of the windows,
 #      which means they now loop around looking for commands from the manager,
 #      as in usual Snow; NOTE:  however, while in browser mode, input 
 #       will be directly from the user typing into the worker window (or
