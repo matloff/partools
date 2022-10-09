@@ -149,8 +149,8 @@ dbs <- function(nwrkrs,xterm=NULL,src=NULL,ftn=NULL) {
       " SNOWLIB=/usr/local/lib/R/library TIMEOUT=2592000 METHODS=TRUE",sep="")
    writewrkrscreens(rcmd)
    ## In R (>= 4.1., parallel:::.slaveRSOCK() was renamed .workRSOCK()
-   RSOCKcommand <- tryCatch(parallel:::.slaveRSOCK, error=function(e) parallel:::.workRSOCK)
-   writewrkrscreens(RSOCKcommand)
+   RSOCKfunction <- tryCatch(parallel:::.slaveRSOCK, error=function(e) parallel:::.workRSOCK)
+   writewrkrscreens("RSOCKfunction()")
    # make sure we are all in the same directory
    mydir <- getwd()
    paste('setwd("',mydir,'")',sep='')
