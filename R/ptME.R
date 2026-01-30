@@ -96,7 +96,7 @@ ptMErecv <- function(src) {
    unserialize(con)
 }
 
-ptMEclose <- function() {
+ptMEclose <- function(src) {
    partoolsenv <- getpte()
    myID <- partoolsenv$myid
    for (con in partoolsenv$myServers[[src]]) close(con)

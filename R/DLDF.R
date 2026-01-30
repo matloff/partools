@@ -22,7 +22,7 @@ makedldf <- function(dname,cls) {
   dr <- distribgetrows(cls, cmd)
 }
 
-printdldf <- function(str){
+printdldf <- function(str,mtcsp){
   cat(paste0("##### mtcsp[[", str, "]] #####"))
   print(mtcsp[[str]])
 }
