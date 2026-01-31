@@ -3,6 +3,10 @@ import(parallel,stats,utils,data.table,pdist)
 
 importFrom("methods", "new")
 
+importFrom("datasets", "mtcars")
+importFrom("datasets", "prgeng")
+importFrom("datasets", "newadult")
+
 S3method('[',ddf)
 
 export(

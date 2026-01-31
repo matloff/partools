@@ -69,9 +69,6 @@ server port number.
 
 }
 
-\examples{
-}
-
 \author{
 Robin Yancey, Norm Matloff
 }
