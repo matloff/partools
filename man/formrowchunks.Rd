@@ -43,10 +43,10 @@ distribcounts(cls,xnames,dataname)
 distribmeans(cls,ynames,xnames,dataname,saveni=FALSE)
 dwhich.min(cls,vecname)
 dwhich.max(cls,vecname)
-distribgetrows(cls,cmd)
+distribgetrows(cls,cmd,who=NULL)
 distribisdt(cls,dataname) 
 docmd(toexec) 
-doclscmd(cls,toexec) 
+doclscmd(cls,toexec,who=NULL) 
 geteltis(lst,i)
 ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
 }
@@ -92,6 +92,7 @@ ipstrcat(str1 = stop("str1 not supplied"), ..., outersep = "", innersep = "")
   ...}
   \item{innersep}{Separator, e.g. a comma, within string vectors specified in
   ...}
+  \item{who}{If not NULL, execute command on this node only.}
 }
 
 \details{The \code{setclsinfo} function does initialization needed for
