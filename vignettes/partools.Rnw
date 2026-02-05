@@ -27,19 +27,9 @@ University of California, Davis}
 
 The {\bf partools} package is a general framework for parallel
 processing of large data sets and/or highly-computational algorithms.
-It can be viewed on two levels:
-
-\begin{itemize}
-
-\item A set of various utilities to increase the usefulness of the R
-built-in package 'parallel'.
-
-\item 
-An ``un-MapReduce'' paradigm, avoiding the drawbaccks while retaining the
+It is the ``un-MapReduce,'' avoiding that paradigm while retaining the
 philosophy of highly-distributed memory objects and files of Hadoop and
 Spark.
-
-\end{itemize} 
 
 \section{Motivation}
 
@@ -112,9 +102,6 @@ issue, one can provide it externally, say with the XtreemFS system.
 
 \subsection{Software Alchemy}
 
-Some of the package's functions perform an operation I call Software
-Alchemy (SA).
-
 Consider a large linear regression application.  We might consider
 dividing the data into chunks, calling {\bf lm()} on each chunk, then
 simply average the estimated coeficient vector over chunks.  It can be
@@ -123,10 +110,12 @@ producing estimators with the same asymptotic variance as that of the
 original estimator.  
 
 This technique was developed independently by a number of researchers.
-I call it Software Alchemy, as it turns non-embarassingly parallel
+I call it Software Alchemy (SA), as it turns non-embarassingly parallel
 problems into embarassingly parallel ones.\footnote{ Software Alchemy:
 Turning Complex Statistical Computations into Embarrassingly-Parallel
 Ones, Norman Matloff, {\it Journal of Statistical Software}, 71 (2016).}
+
+The {\bf partools} package contains a number of functions using SA.
 
 \section{Where Is the Magic?}
 
@@ -138,8 +127,12 @@ of the package stems from just two simple sources:
 
 \item [(a)] The package follows a Keep It Distributed philosophy:  Form
 distributed objects {\it and keep using them in distributed form
-throughout one's R session, avoiding wherever possible time-consuming
-transfer of data between the workers and the manager.} 
+throughout one's R session, accessing them repeatedly for one's various
+desired operations --- and avoiding, to the extent possible, operations
+that collect data from the worker nodes to the manager node.}  By
+keeping things distributed in this way, whatever cost there was to
+distributing the data originally eventually yields a net performance
+gain.
 
 \item [(b)] The package consists of a number of utility functions that
 greatly facilitate creating and storing and distributed
@@ -163,20 +156,10 @@ files {\bf x.01}, {\bf x.02} etc.
 
 \item Data frames and matrices are stored in memory at the nodes in a
 distributed manner, with a common name.  For example, the data frame
-{\bf y} is stored in chunks at the cluster nodes, each chunk known as
-{\bf y} at its node.
+{\bf y} is stored in chunks at the cluster nodes, each chunk known as {\bf
+y} at its node.
 
 \end{itemize}
-
-\subsection{Platforms}
-
-Through the use of virtual clusters in the R 'parallel' package, these
-tools can be used either on multicore machines or physical clusters,
-such as in the cloud.  With the latter, a very high degree of
-parallelism is potentially possible.
-
-We will speak of a 'parallel' cluster has having a \textit{manager},
-sends work to and receives work from the \textit{worker nodes}.
 
 \subsection{Package Structure}
 
@@ -213,7 +196,7 @@ The package consists of three main groups of functions:
 
    \item {\bf filesplit():}  Create a distributed file from monolithic one.
 
-   \item {\bf filesplitrand():}  Create a distributed file from monolithic one,
+   \item {\bf filesplitrand():}  Create a distributed file from monotlithic one,
    but randomize the record order.
 
    \item {\bf filecat():}  Create a monotlithic file from distributed one.
@@ -306,14 +289,11 @@ The package consists of three main groups of functions:
    \item {\bf formrowchunks():} Form chunks of rows of a data
    frame/matrix.
 
-   \item {\bf matrixtolist():} Forms an R list of the rows or columns of a
-   data frame or matrix, one row/column per list element.
+   \item {\bf matrixtolist():} Forms a list of the rows or columns of a
+   data frame or matrix.
 
-   \item {\bf addlists():}  ``Add'' two R lists, forming a new one.
-   If an element name appears in the two input lists, that name will
-   appear in the new one, with value equal to the "sum" of the two input
-   values, calculated by \textbf{sum()}, \textbf{cat()} or other
-   user-specified function.
+   \item {\bf addlists():}  ``Add'' two lists, meaning add values of
+   elements of the same name, and copy the others.
 
    \item {\bf dbs(), dbsmsg(), etc.:}  Debugging aids.
 
@@ -370,17 +350,17 @@ To create our cluster {\bf cls}, we ran
 
 \begin{verbatim}
 > cls <- makeCluster(16)  # from 'parallel' library
-> setclsinfo(cls)  # 'partools' initialization function
+> setclsinfo(cls)  # from 'partools'
 \end{verbatim}
 
 \subsection{Distribute the Data}
 
-The file, {\bf 2008.csv}, was first split into a distributed file, stored
+The file, {\bf yr2008}, was first split into a distributed file, stored
 in {\bf yr2008r.01},...,{\bf yr2008r.16}, using {\bf filesplitrand()}, and
 then read into memory at the 16 cluster nodes using {\bf fileread()}:
 
 \begin{verbatim}
-> filesplitrand(cls,'2008.csv','yr2008r',2,header=TRUE,sep=",")
+> filesplitrand(cls,'yr2008','yr2008r',2,header=TRUE,sep=",")
 > fileread(cls,'yr2008r','yr2008',2,header=TRUE, sep=",")
 \end{verbatim}
 
@@ -397,13 +377,7 @@ The argument 2 here means that the suffixes are 2 digits, specifically
 {\bf filesplit()}.  The call to {\bf fileread()} specifies that cluster
 node 1 will read the file {\bf yr2008r.01}, cluster node 2 will read
 {\bf yr2008r.02} and so on.  Each node will place the data it reads into
-a local data frame {\bf yr2008}.  
-
-Our data is now distributed across the memories of cluster nodes.  Of
-course, if we did not need permanent distributed file storage, we could
-have just read in the original file into a large data frame at the
-manager node, then distributed the data frame to the nodes via
-\textbf{distribsplit()}.
+a data frame {\bf yr2008}.
 
 \subsection{Distributed Aggregation of Summary Statistics}
 
@@ -464,8 +438,8 @@ aggregate()}, but did so more than 15 times faster!
 Remember, the Keep It Distributed  philosophy of {\bf partools} is to
 create distributed objects and then keep using them repeatedly in
 distributed form.  However, in some cases, we may wish to collect a
-distributed result into a monolithic object.  This is done in the next
-example:
+distributed result into a monolithic object, especially if the result is
+small.  This is done in the next example:
 
 Say we wish to do a filter operation, extracting the data on all the
 Sunday evening flights, and collect it into one place.   Here is the
@@ -491,64 +465,6 @@ caller via R's {\bf rbind()}.  The user sets the second argument, a
 quoted string, to whatever she would have done on a serial basis.  A
 simple concept, yet quite versatile.
 
-\subsection{Integration with parallel}
-
-{\bf partools} uses the {\bf parallel} package, so one can leverage the
-functions in {\bf parallel} to compute on objects created through {\bf
-partools}. {\bf clusterEvalQ()} evaluates expressions on each of the
-workers, and is useful for interacting with existing distributed objects.
-Below are a few examples.
-
-{\bf object.size()} estimates the size of the objects in memory.
-\begin{verbatim}
-> clusterEvalQ(cls, {
-+     object.size(yr2008)
-+ })
-[[1]]
-406905480 bytes
-
-[[2]]
-406905592 bytes
-\end{verbatim}
-This code ran on a two node local cluster. Each of the two distributed
-objects occupies around 400 MB.
-
-We can create a new column in {\bf yr2008} by calculating the minute of
-arrival or departure. One way to do this is to write and test a function locally, use
-{\bf clusterExport()} to send it to the cluster, and finally evaluate it
-with {\bf clusterEvalQ()}.
-
-\begin{verbatim}
-minute <- function(x){
-    x <- as.character(x)
-    # Necessary to preserve NA values
-    x[is.na(x)] <- ""
-    matches <- regexpr(".?.?$", x)
-    two_right_digits <- regmatches(x, matches)
-    as.integer(two_right_digits)
-}
-
-# Verify locally that code behaves as expected
-minute(c(NA, 1L, 20L, 329L, 1900L))
-# [1] NA  1 20 29  0
-
-# Send the function to the data
-clusterExport(cls, "minute")
-
-# Evaluate this expression on each worker node
-clusterEvalQ(cls, {
-    yr2008$ArrMinute <- minute(yr2008$ArrTime)
-    yr2008$DepMinute <- minute(yr2008$DepTime)
-    NULL  # Keeps It Distributed
-})
-\end{verbatim}
-
-The {\bf NULL } at the end of the {\bf clusterEvalQ } here is quite
-important, since otherwise data will be unnecessarily transferred to the
-manager. An alternative to the above approach is to write a function to do
-global assignment within the workers using {\bf <<- }, but this is more
-difficult to verify correct behavior.
-
 \subsection{Distributed NA Processing}
 
 As another example, say we are investigating data completeness.  We may
@@ -565,7 +481,8 @@ our flight delay data:
 268.463   0.773 269.542
 \end{verbatim}
 
-But it is of course much faster on a distributed basis:
+But it is of course much faster on a distributed basis, using the {\bf
+parallel} package function {\bf clusterEvalQ()}:
 
 \begin{verbatim}
 > clusterExport(cls,"sumna",envir=environment())
@@ -607,7 +524,7 @@ multicore machine, but it still takes time.  If the number of records
 satisfying the filtering condition had been smaller than the 136246 we
 had here, the speedup factor would have been greater.
 
-\section{SA: Software Alchemy}
+\subsection{SA: Linear Regression}
 
 Now let's turn to statistical operations, starting of course with linear
 regression.  As noted, some {\bf partools} functions make use of
@@ -620,8 +537,6 @@ digit, it is just as accurate statistically; neither estimate is
 
 The SA function names begin with 'ca', for ``chunk averaging.''  The SA
 version of {\bf lm()}, for instance, is {\bf calm()}.
-
-\subsection{SA: Linear Regression}
 
 In the flight data, we predicted the arrival delay from the departure
 delay and distance, comparing the distributed and serial versions, 

@@ -1,0 +1,322 @@
+\documentclass[11pt]{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+\setlength{\topmargin}{-0.25in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9.25in}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{2mm} 
+
+% \usepackage{times}
+\usepackage{graphicx}
+
+% library(knitr)
+%\VignetteIndexEntry{Partools}
+
+\title{{\bf Debugging the partools and parallel Packages}}
+
+\author{Norm Matloff \\
+University of California, Davis}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\maketitle
+
+I place huge importance on debugging, and indeed, once wrote a book on
+the topic ({\it The Art of Debugging with GDB, DDD, and Eclipse}, N.
+Matloff and P. Salzman, NSP, 2008). Accordingly, {\bf partools} includes
+some debugging tools, which by the way apply not only to {\bf partools}
+but to the {\bf parallel} package in general.  This vignette will
+introduce the usage of those tools.
+
+\section{Running Example}
+
+We'll use this simple file, {\bf fg.R} as our example:
+
+\begin{verbatim}
+f <- function(x) {
+   x <- x + 1
+   y <- g(x)
+   x^2 + y^2
+}
+
+g <- function(t) {
+   if (t > 0) return(5)
+   6
+}
+\end{verbatim}
+
+\section{The Fundamental Principle of Debugging}
+
+Pete Salzman and I make this statement, early in our book on debugging:
+
+\begin{quote}
+Fixing a buggy program is a process of confirming, one by one, that the
+many things you {\it believe} to be true about the code actually {\it
+are} true.  When you find that one of your assumptions is {\it not}
+true, you have found a clue to the location (if not the exact nature) of
+a bug.
+\end{quote} 
+In our code above, after executing
+
+\begin{verbatim}
+y <- g(x)
+\end{verbatim}
+
+we may believe that {\bf y} should be 5. But we should check that it
+really is 5. Eventually, we will find a case where our belief is wrong,
+and thus have a clue about the bug.
+
+\section{Quick and Dirty Method}
+
+The classic way to do the confirmation discussed in the last section is
+to add code, say that prints out the values of some key variables. This
+is not generally recommended, because the process of inserting such
+check code and later removing it is too distracting, making us lose our
+train of thought.  It's much preferable to use a debugging aid, even a
+primitive one like R's {\bf debug()}, than to insert print statements.
+We'll use {\bf debug()} in the next section.
+
+But even adding print statements, which we will do in this section, is
+not so easy as it sounds, because in {\bf parallel} operations, we don't
+have terminal windows.  A statement such as
+
+\begin{verbatim}
+cls <- makeCluster(2)
+\end{verbatim}
+
+sets up 2 instantiations of R, but they are not attached to terminal
+windows, so we can't invoke {\bf debug()}!
+
+What we can do instead, of course, is insert code that writes
+confirmation messages to a file rather than to the sccreen.  Even that
+is not so easy, because if all our cluster nodes write to the same file,
+we have chaos.
+
+Instead, {\bf partools} includes a function {\bf dbsmsg()} that does
+print to a file, but with the file name having a suffix corresponding to
+the cluster node number.  With a 2-node cluster, the file names would be
+{\bf dbs.1} and {\bf dbs.2}.  We run the code, then check the files.
+
+In the little example above, say, we add the call to {\bf dbsmsg()} and
+get the code to the cluster nodes:
+
+\begin{verbatim}
+> source('fg.R')
+> f
+function(x) {
+   x <- x + 1
+   y <- g(x)
+   dbsmsg(y)
+   x^2 + y^2
+}
+> clusterExport(cls,c('f','g'))
+\end{verbatim}
+
+Then run:
+
+\begin{verbatim}
+> clusterEvalQ(cls,f(8))
+\end{verbatim}
+
+We then check the files {\bf dbs.1} and {\bf dbs.2} to see the value of
+{\bf y} (both 5 in this simple example).
+
+A similar, but somewhat more sophisticated method involves the function
+{\bf dbsdump()}.  We add the call to, say, {\bf g()}, then run:
+
+\begin{verbatim}
+
+
+
+
+
+
+
+> clusterExport(cls,'g')
+> clusterEvalQ(cls,f(8))
+\end{verbatim}
+
+This creates one output file for each node.  Let's use the one from node
+2:
+
+\begin{verbatim}
+> load('last.dump.2.rda')
+> debugger(last.dump.2)
+Message:  Available environments had calls:
+1: parallel:::.slaveRSOCK()
+2: slaveLoop(makeSOCKmaster(master, port, timeout, useXDR))
+3: tryCatch({
+    msg <- recvData(master)
+    if (msg$type == "DONE") {
+        c
+4: tryCatchList(expr, classes, parentenv, handlers)
+5: tryCatchOne(expr, names, parentenv, handlers[[1]])
+6: doTryCatch(return(expr), name, parentenv, handler)
+7: tryCatch(do.call(msg$data$fun, msg$data$args, quote = TRUE), error = handle
+8: tryCatchList(expr, classes, parentenv, handlers)
+9: tryCatchOne(expr, names, parentenv, handlers[[1]])
+10: doTryCatch(return(expr), name, parentenv, handler)
+11: do.call(msg$data$fun, msg$data$args, quote = TRUE)
+12: (function (expr, envir = parent.frame(), enclos = if (is.list(envir) || is.
+13: eval(expr, envir, enclos)
+14: f(8)
+15: <tmp>#4: dbsdump()
+16: eval(parse(text = cmd))
+17: eval(expr, envir, enclos)
+
+Enter an environment number, or 0 to exit  Selection: 14
+Browsing in the environment with call:
+   f(8)
+Called from: debugger.look(ind)
+Browse[1]> x
+[1] 9
+Browse[1]> y
+[1] 5
+Browse[1]> debug(g)
+Browse[1]> g(x)
+debugging in: g(x)
+debug at <tmp>#1: {
+    if (t > 0) 
+        return(5)
+    6
+}
+Browse[4]> t
+[1] 9
+\end{verbatim}
+
+We checked the values of {\bf x} and {\bf y} in {\bf f()}, and then even
+made a call to {\bf g()}, checking things out there.
+
+Again, this is an exceedingly simple example, but applying these ideas
+in a more realistic setting would involve the same actions.
+
+\section{Advanced Method}
+
+This method is suitable for more detailed debugging that requires
+single-stepping through code and so on. It is somewhat more involved,
+but actually very easy to use after doing it once.  It requires a
+Unix-family system, such as a Mac or a Linux box, or Cygwin on Windows,
+because it make use of the {\bf screen} utility.  It allows you to debug
+your code with the ordinary R {\bf debug()} facility, with one
+instantiation of the latter for each of your cluster nodes.
+
+So, here is our initial screen setting:
+
+% \begin{figure}
+\includegraphics[width=6.5in]{dbs1.png}
+% \end{figure}
+
+In preparation for running {\bf debug()} on two cluster nodes, we have
+the two windows on the left.  To run the ``manager'' node, from which
+{\bf parallel} functions will be called such as
+
+\begin{verbatim}
+> clusterEvalQ(cls,f(8))
+\end{verbatim}
+
+we have another window on the top right. {\bf Under Linux, the
+creation of these windows can be done automatically.}
+
+We launch the debugging from the partially hidden window:
+
+% \begin{figure}
+\includegraphics[width=4.5in]{dbs2.png}
+% \end{figure}
+
+The call to {\bf dbs()} sets up a {\bf parallel} cluster {\bf cls} with
+2 nodes, and instructs those nodes to do {\bf source('fg.R')} and {\bf
+debug(f)}.  It also instructs us, the user, to run {\bf screen} in the
+manager window and in each cluster window, and it starts up R for us in
+the manager window:
+
+\includegraphics[width=6.5in]{dbs3.png}
+
+Finally, {\bf dbs()} runs R in the two cluster windows.  Those
+instantiations of R are now waiting for commands. 
+
+\includegraphics[width=6.5in]{dbs4.png}
+
+We can now run our {\bf parallel} code normally.
+So, at the manager window, we type
+
+\begin{verbatim}
+> clusterEvalQ(cls,f(8))
+\end{verbatim}
+
+And {\it voila!}, we are in debug mode in the two cluster node windows,
+with the familiar
+
+\begin{verbatim}
+Browse[]
+\end{verbatim}
+
+prompt:
+
+\includegraphics[width=6.5in]{dbs5.png}
+
+Again, we can then single-step etc. normally, say in the first cluster
+node window:
+
+\includegraphics[width=6.5in]{dbs6.png}
+
+Last, when we are done with this debugging sequence, we can kill the
+{\bf screen} invocations and so on, by calling {\bf killdebug()}:
+
+\includegraphics[width=6.5in]{dbs7.png}
+
+\end{document}
+
+

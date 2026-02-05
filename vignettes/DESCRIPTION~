@@ -1,0 +1,24 @@
+Package: partools
+Version: 1.1.6
+Author: Norm Matloff <normmatloff@gmail.com> [cre,aut], 
+   Clark Fitzgerald <clarkfitzg@gmail.com> [aut], with
+   contributions by Alex Rumbaugh <aprumbaugh@ucdavis.edu> and
+   Hadley Wickham <h.wickham@gmail.com>
+Maintainer: Norm Matloff <normmatloff@gmail.com>
+Title: Tools for the 'Parallel' Package
+Description: Miscellaneous utilities for parallelizing large
+   computations.  Alternative to MapReduce.
+   File splitting and distributed operations such as sort and aggregate.
+   "Software Alchemy" method for parallelizing most statistical methods,
+   presented in N. Matloff, Parallel Computation for Data Science,
+   Chapman and Hall, 2015.  Includes a debugging aid.
+Depends: regtools,parallel,stats,utils,data.table,pdist,methods
+Suggests: rpart,e1071,testthat
+ByteCompile: yes
+NeedsCompilation: no
+License: GPL (>= 2)
+URL: https://github.com/matloff/partools
+BugReports: https://github.com/matloff/partools/issues
+Packaged: 2017-04-10 05:17:39 UTC; nm
+Repository: CRAN
+Date/Publication: 2017-04-10 09:16:20 UTC

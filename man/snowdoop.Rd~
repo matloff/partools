@@ -173,9 +173,6 @@ for the others:
 }
 
 \examples{
-
-\dontrun{
-
 cls <- makeCluster(2)
 setclsinfo(cls)
 
@@ -270,7 +267,7 @@ mtc[mtc$cyl == 4 & mtc$gear == 4,]
 
 stopCluster(cls)
 
-}
+
 }
 
 \author{
